@@ -1,0 +1,347 @@
+import type { ComponentType } from "react";
+import type { LucideIcon } from "lucide-react";
+import type { UserRole } from "./store/authStore";
+import {
+  Home,
+  Info,
+  DollarSign,
+  Stethoscope,
+  BookOpen,
+  Phone,
+  LogIn,
+  Users,
+  Calculator,
+} from "lucide-react";
+import {
+  HomePage,
+  LoginPage,
+  RegisterPage,
+  NotFoundPage,
+  AboutPage,
+  PricingPage,
+  ServicesPage,
+  KnowledgePage,
+  ContactPage,
+  ProfilePage,
+} from "@/pages";
+import {
+  AdminUserManagementPage,
+  AdminDoctorManagementPage,
+  AdminAppointmentManagementPage,
+  AdminPatientRecordsPage,
+  AdminARVProtocolPage,
+  AdminReportsPage,
+  AdminSettingsPage,
+} from "@/pages/admin";
+import DashboardPage from "./pages/admin/dashboad/DashboardPage";
+
+// Route definition interface
+export interface RouteConfig {
+  path: string;
+  component: ComponentType;
+  title: string;
+  description?: string;
+  protected?: boolean; // Require authentication
+  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH"; // Layout type
+  icon?: LucideIcon; // Icon for navigation
+  showInNav?: boolean; // Show in main navigation
+  allowedRoles?: UserRole[]; // Allowed user roles
+}
+
+// Main application routes
+export const routes: RouteConfig[] = [
+  {
+    path: "/",
+    component: HomePage,
+    title: "Trang chủ",
+    description: "Trang chủ HIV Care Hub",
+    layout: "PATIENT", // Use PATIENT layout for home
+    icon: Home,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/about",
+    component: AboutPage,
+    title: "Giới thiệu",
+    description: "Thông tin về HIV Care Hub",
+    layout: "PATIENT",
+    icon: Info,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/pricing",
+    component: PricingPage,
+    title: "Bảng giá",
+    description: "Bảng giá dịch vụ chăm sóc sức khỏe",
+    layout: "PATIENT",
+    icon: DollarSign,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/services",
+    component: ServicesPage,
+    title: "Dịch vụ",
+    description: "Các dịch vụ chăm sóc sức khỏe",
+    layout: "PATIENT",
+    icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/knowledge",
+    component: KnowledgePage,
+    title: "Kiến thức",
+    description: "Trung tâm kiến thức về HIV/AIDS",
+    layout: "PATIENT",
+    icon: BookOpen,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/contact",
+    component: ContactPage,
+    title: "Liên hệ",
+    description: "Thông tin liên hệ và hỗ trợ",
+    layout: "PATIENT",
+    icon: Phone,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+];
+
+// Authentication routes
+export const authRoutes: RouteConfig[] = [
+  {
+    path: "/login",
+    component: LoginPage,
+    title: "Dăng nhập",
+    description: "Dăng nhập với tài khoản hệ thống",
+    layout: "AUTH",
+    icon: LogIn,
+    showInNav: false,
+  },
+  {
+    path: "/register",
+    component: RegisterPage,
+    title: "Dăng ký",
+    description: "Dăng ký với tài khoản hệ thống",
+    layout: "AUTH",
+    icon: LogIn,
+    showInNav: false,
+  },
+];
+
+// User routes
+export const userRoutes: RouteConfig[] = [
+  {
+    path: "/user/profile",
+    component: ProfilePage,
+    title: "Hồ sơ cá nhân",
+    description: "Quản lý thông tin cá nhân",
+    protected: true,
+    layout: "PATIENT", // Use PATIENT layout for user profile
+    icon: Users,
+    showInNav: false, // Không hiện trong nav chính, chỉ hiện trong user menu
+    allowedRoles: ["PATIENT"], // Tất cả user đã đăng nhập đều có thể truy cập
+  },
+];
+
+// Admin routes
+export const adminRoutes: RouteConfig[] = [
+  {
+    path: "/admin/dashboard",
+    component: DashboardPage,
+    title: "Dashboard",
+    description: "Admin Dashboard",
+    protected: true,
+    layout: "ADMIN",
+    icon: Home,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/users",
+    component: AdminUserManagementPage,
+    title: "Quản lý người dùng",
+    description: "Quản lý người dùng hệ thống",
+    protected: true,
+    layout: "ADMIN",
+    icon: Users,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/doctors",
+    component: AdminDoctorManagementPage,
+    title: "Quản lý bác sĩ",
+    description: "Quản lý thông tin bác sĩ",
+    protected: true,
+    layout: "ADMIN",
+    icon: Users,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/appointments",
+    component: AdminAppointmentManagementPage,
+    title: "Quản lý lịch hẹn",
+    description: "Quản lý lịch hẹn của bệnh nhân",
+    protected: true,
+    layout: "ADMIN",
+    icon: Calculator,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/patients",
+    component: AdminPatientRecordsPage,
+    title: "Hồ sơ bệnh nhân",
+    description: "Quản lý hồ sơ và lịch sử điều trị",
+    protected: true,
+    layout: "ADMIN",
+    icon: Users,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/arv-protocols",
+    component: AdminARVProtocolPage,
+    title: "Quản lý phác đồ ARV",
+    description: "Quản lý các phác đồ điều trị ARV",
+    protected: true,
+    layout: "ADMIN",
+    icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/reports",
+    component: AdminReportsPage,
+    title: "Báo cáo",
+    description: "Xem các báo cáo thống kê hệ thống",
+    protected: true,
+    layout: "ADMIN",
+    icon: Calculator,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/settings",
+    component: AdminSettingsPage,
+    title: "Cài đặt hệ thống",
+    description: "Cài đặt và cấu hình hệ thống",
+    protected: true,
+    layout: "ADMIN",
+    icon: Calculator,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+];
+
+// Combine all routes
+export const allRoutes = [
+  ...routes,
+  ...authRoutes,
+  ...userRoutes,
+  ...adminRoutes,
+];
+
+// 404 Not Found route
+export const notFoundRoute: RouteConfig = {
+  path: "*",
+  component: NotFoundPage,
+  title: "Không tìm thấy trang",
+  description: "Trang bạn tìm kiếm không tồn tại",
+  layout: "PATIENT",
+};
+
+// Navigation items for header (filtered from routes)
+export const navigationRoutes = routes.filter((route) => route.showInNav);
+
+// Protected routes that require authentication
+export const protectedRoutes = allRoutes.filter((route) => route.protected);
+
+// Public routes that don't require authentication
+export const publicRoutes = allRoutes.filter((route) => !route.protected);
+
+// Route path constants for type-safe navigation
+export const ROUTES = {
+  HOME: "/",
+  ABOUT: "/about",
+  PRICING: "/pricing",
+  SERVICES: "/services",
+  KNOWLEDGE: "/knowledge",
+  CONTACT: "/contact",
+  USERS: "/users",
+  COUNTER: "/counter",
+
+  // Authentication routes
+  LOGIN: "/login",
+  REGISTER: "/register",
+
+  //user routes
+  PROFILE: "/user/profile",
+  // Admin routes
+  ADMIN_DASHBOARD: "/admin",
+  ADMIN_USERS: "/admin/users",
+  ADMIN_DOCTORS: "/admin/doctors",
+  ADMIN_APPOINTMENTS: "/admin/appointments",
+  ADMIN_PATIENTS: "/admin/patients",
+  ADMIN_ARV_PROTOCOLS: "/admin/arv-protocols",
+  ADMIN_REPORTS: "/admin/reports",
+  ADMIN_SETTINGS: "/admin/settings",
+} as const;
+
+// Helper function to get route config by path
+export const getRouteConfig = (path: string): RouteConfig | undefined => {
+  return (
+    allRoutes.find((route) => route.path === path) ||
+    (path === "*" ? notFoundRoute : undefined)
+  );
+};
+
+// Helper function to check if route is protected
+export const isProtectedRoute = (path: string): boolean => {
+  const route = getRouteConfig(path);
+  return route?.protected || false;
+};
+
+// Helper function to check if user has access to route
+export const hasAccessToRoute = (
+  path: string,
+  userRole?: UserRole
+): boolean => {
+  const route = getRouteConfig(path);
+
+  if (!route) return false;
+
+  // If route is protected but user is not authenticated
+  if (route.protected && !userRole) {
+    return false;
+  }
+
+  // If route has allowedRoles, check if user's role is included
+  if (route.allowedRoles && userRole) {
+    return route.allowedRoles.includes(userRole);
+  }
+
+  // If no allowedRoles specified, allow access
+  return true;
+};
+
+// Get default route for user role
+export const getDefaultRouteForRole = (role: UserRole): string => {
+  switch (role) {
+    case "ADMIN":
+      return ROUTES.ADMIN_DASHBOARD;
+    case "DOCTOR":
+      return ROUTES.HOME; // Doctors use user layout for now
+    case "PATIENT":
+      return ROUTES.HOME;
+    default:
+      return ROUTES.HOME;
+  }
+};

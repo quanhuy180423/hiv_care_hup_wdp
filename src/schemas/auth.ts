@@ -18,6 +18,10 @@ export const registerSchema = z
       .min(1, "Tên là bắt buộc")
       .min(2, "Tên phải có ít nhất 2 ký tự"),
     email: z.string().min(1, "Email là bắt buộc").email("Email không hợp lệ"),
+    phoneNumber: z
+      .string()
+      .min(1, "Số điện thoại là bắt buộc")
+      .regex(/^[0-9]{10,11}$/, "Số điện thoại không hợp lệ"),
     password: z
       .string()
       .min(1, "Mật khẩu là bắt buộc")
