@@ -1,0 +1,50 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { roleService } from "@/services/roleService";
+import type { RoleFormValues } from "@/types/role";
+
+export const useRoles = (search?: string) => {
+  return useQuery({
+    queryKey: ["roles", { search }],
+    queryFn: () => roleService.getRoles({ limit: 100, search }),
+    select: (res) => res.data.data,
+  });
+};
+
+export const useRole = (id: number) => {
+  return useQuery({
+    queryKey: ["role", id],
+    queryFn: () => roleService.getRoleById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: RoleFormValues) => roleService.createRole(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+};
+
+export const useUpdateRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: RoleFormValues }) =>
+      roleService.updateRole(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+};
+
+export const useDeleteRole = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => roleService.deleteRole(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+};

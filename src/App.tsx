@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { allRoutes, notFoundRoute } from "@/routes";
-import { RouteGuard } from "@/components/RouteGuard";
+// import { RouteGuard } from "@/components/RouteGuard";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Toaster } from "react-hot-toast";

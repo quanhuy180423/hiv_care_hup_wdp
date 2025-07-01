@@ -11,6 +11,8 @@ import {
   LogIn,
   Users,
   Calculator,
+  UserCog,
+  UserLock,
 } from "lucide-react";
 import {
   HomePage,
@@ -34,6 +36,8 @@ import {
   AdminSettingsPage,
 } from "@/pages/admin";
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
+import RoleManagement from "./pages/admin/roles";
+import PermissionManagement from "./pages/admin/permissions";
 
 // Route definition interface
 export interface RouteConfig {
@@ -117,8 +121,8 @@ export const authRoutes: RouteConfig[] = [
   {
     path: "/login",
     component: LoginPage,
-    title: "Dăng nhập",
-    description: "Dăng nhập với tài khoản hệ thống",
+    title: "Đăng nhập",
+    description: "Đăng nhập với tài khoản hệ thống",
     layout: "AUTH",
     icon: LogIn,
     showInNav: false,
@@ -159,6 +163,28 @@ export const adminRoutes: RouteConfig[] = [
     protected: true,
     layout: "ADMIN",
     icon: Home,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/roles",
+    component: RoleManagement,
+    title: "Quản lý vai trò",
+    description: "Quản lý vai trò hệ thống",
+    protected: true,
+    layout: "ADMIN",
+    icon: UserCog,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "admin/permissions",
+    component: PermissionManagement,
+    title: "Quản lý quyền hạn",
+    description: "Quản lý quyền hạn hệ thống",
+    protected: true,
+    layout: "ADMIN",
+    icon: UserLock,
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
@@ -286,6 +312,8 @@ export const ROUTES = {
   PROFILE: "/user/profile",
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
+  ADMIN_ROLES_MANAGEMENT: "/admin/roles",
+  ADMIN_PERMISSIONS_MANAGEMENT: "/admin/permissions",
   ADMIN_USERS: "/admin/users",
   ADMIN_DOCTORS: "/admin/doctors",
   ADMIN_APPOINTMENTS: "/admin/appointments",
