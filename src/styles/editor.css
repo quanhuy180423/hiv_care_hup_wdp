@@ -1,0 +1,181 @@
+/* editor.css */
+
+/* Main container styling */
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+/* Editor toolbar */
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem 0.5rem 0 0;
+    background: hsl(var(--muted));
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Editor content area */
+.editor-content {
+    flex: 1;
+    min-height: 0;
+    border: 1px solid hsl(var(--border));
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    overflow-y: auto;
+}
+
+/* ProseMirror core styling */
+.ProseMirror {
+    min-height: 300px;
+    padding: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    height: auto;
+}
+
+.ProseMirror:focus {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 2px hsl(var(--ring)/0.2);
+}
+
+/* Placeholder styling */
+.ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Typography styles */
+.ProseMirror h1 {
+    font-size: 2rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+    margin: 1rem 0;
+}
+
+.ProseMirror h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+    margin: 0.75rem 0;
+}
+
+.ProseMirror h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.ProseMirror p {
+    margin: 0.5rem 0;
+    line-height: 1.625;
+}
+
+/* List styles */
+.ProseMirror ul,
+.ProseMirror ol {
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+/* Blockquote styling */
+.ProseMirror blockquote {
+    padding-left: 1rem;
+    border-left: 3px solid hsl(var(--border));
+    margin: 0.5rem 0;
+    color: hsl(var(--muted-foreground));
+}
+
+/* Code blocks */
+.ProseMirror pre {
+    background: hsl(var(--muted));
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+}
+
+.ProseMirror code {
+    background: hsl(var(--muted));
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+}
+
+/* Media elements */
+.ProseMirror img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+.ProseMirror iframe {
+    width: 100%;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+    min-height: 400px;
+}
+
+/* Table styling */
+.ProseMirror table {
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+    border: 1px solid hsl(var(--border));
+    padding: 0.5rem;
+}
+
+.ProseMirror th {
+    background-color: hsl(var(--muted));
+}
+
+/* Horizontal rule */
+.ProseMirror hr {
+    border: none;
+    border-top: 2px solid hsl(var(--border));
+    margin: 1rem 0;
+}
+
+/* Bubble menu styling */
+.tippy-box {
+    background-color: transparent !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ProseMirror {
+        padding: 0.75rem;
+    }
+
+    .ProseMirror h1 {
+        font-size: 1.75rem;
+        line-height: 2.25rem;
+    }
+
+    .ProseMirror h2 {
+        font-size: 1.35rem;
+        line-height: 1.85rem;
+    }
+
+    .editor-toolbar {
+        gap: 0.15rem;
+        padding: 0.35rem;
+    } }

@@ -40,6 +40,7 @@ export const LoginPage = () => {
         if (res.data.user.role === "PATIENT") navigate("/");
         else if (res.data.user.role === "DOCTOR") navigate("/doctor/dashboard");
         else if (res.data.user.role === "ADMIN") navigate("/admin/dashboard");
+        else if (res.data.user.role === "STAFF") navigate("/staff/appointments");
       } else {
         toast.error(
           res.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."

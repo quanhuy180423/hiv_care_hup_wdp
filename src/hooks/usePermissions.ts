@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { permissionService } from "@/services/permissionService";
 import type { Permission } from "@/types/permission";
+import toast from "react-hot-toast";
 
 export const usePermissions = (params?: { search?: string }) => {
   return useQuery({
@@ -26,6 +27,10 @@ export const useCreatePermission = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["permissions"] });
     },
+    onError: (error: Error) => {
+      toast.error(error.message || "Lỗi khi tạo quyền!");
+      return error;
+    },
   });
 };
 
@@ -38,6 +43,10 @@ export const useUpdatePermission = () => {
       queryClient.invalidateQueries({ queryKey: ["permissions"] });
       queryClient.invalidateQueries({ queryKey: ["permission"] });
     },
+    onError: (error: Error) => {
+      toast.error(error.message || "Lỗi khi cập nhật quyền!");
+      return error;
+    },
   });
 };
 
@@ -47,6 +56,10 @@ export const useDeletePermission = () => {
     mutationFn: (id: number) => permissionService.deletePermission(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["permissions"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Lỗi khi xóa quyền!");
+      return error;
     },
   });
 };

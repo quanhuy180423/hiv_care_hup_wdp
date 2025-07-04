@@ -13,6 +13,9 @@ import {
   Calculator,
   UserCog,
   UserLock,
+  Calendar,
+  FileHeart,
+  FileText,
 } from "lucide-react";
 import {
   HomePage,
@@ -38,6 +41,9 @@ import {
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
 import RoleManagement from "./pages/admin/roles";
 import PermissionManagement from "./pages/admin/permissions";
+import AppointmentsManagement from "./pages/staff/appointments";
+import BlogsManagement from "./pages/staff/blogs";
+import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 
 // Route definition interface
 export interface RouteConfig {
@@ -267,12 +273,49 @@ export const adminRoutes: RouteConfig[] = [
   },
 ];
 
+export const staffRoutes: RouteConfig[] = [
+  {
+    path: "/staff/appointments",
+    component: AppointmentsManagement,
+    title: "Lịch hẹn",
+    description: "Quản lý lịch hẹn",
+    protected: true,
+    layout: "STAFF",
+    icon: Calendar,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
+  {
+    path: "/staff/blog",
+    component: BlogsManagement,
+    title: "Tin tức",
+    description: "Quản lý tin tức",
+    protected: true,
+    layout: "STAFF",
+    icon: FileHeart,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
+  {
+    path: "/staff/blog-categories",
+    component: CategoryBlogManagement,
+    title: "Danh mục tin tức",
+    description: "Quản lý danh mục tin tức",
+    protected: true,
+    layout: "STAFF",
+    icon: FileText,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
+];
+
 // Combine all routes
 export const allRoutes = [
   ...routes,
   ...authRoutes,
   ...userRoutes,
   ...adminRoutes,
+  ...staffRoutes,
 ];
 
 // 404 Not Found route
