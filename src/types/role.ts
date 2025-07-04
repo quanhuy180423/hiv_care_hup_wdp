@@ -15,6 +15,8 @@ export interface RoleFormValues {
   name: string;
   description: string;
   isActive: boolean;
+  // createdById?: number;
+  // updatedById?: number;
   permissions: number[];
 }
 

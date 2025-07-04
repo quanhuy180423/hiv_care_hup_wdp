@@ -1,37 +1,40 @@
-import type { Blog, BlogFormValues, BlogListResponse } from "@/types/blog";
+import type {
+  Blog,
+  BlogFormValues,
+  BlogListResponse,
+  BlogQueryParams,
+  BlogResponse,
+} from "@/types/blog";
 import { apiClient } from "./apiClient";
 
 export const blogService = {
-  getAllBlogs: async (params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    sortBy?: string;
-    orderBy?: string;
-  }) => {
+  getAllBlogs: async (params?: BlogQueryParams): Promise<BlogListResponse> => {
     const res = await apiClient.get<BlogListResponse>("/blogs", {
       params,
     });
     return res.data;
   },
 
-  getBlogById: async (id: number) => {
-    const res = await apiClient.get<{ data: Blog }>(`/blogs/${id}`);
+  getBlogById: async (id: number): Promise<BlogResponse> => {
+    const res = await apiClient.get<BlogResponse>(`/blogs/${id}`);
     return res.data;
   },
 
-  getBlogBySlug: async (slug: string) => {
-    const res = await apiClient.get<{ data: Blog }>(`/blogs/slug/${slug}`);
+  getBlogBySlug: async (slug: string): Promise<BlogResponse> => {
+    const res = await apiClient.get<BlogResponse>(`/blogs/slug/${slug}`);
     return res.data;
   },
 
-  createBlog: async (payload: BlogFormValues) => {
-    const res = await apiClient.post<{ data: Blog }>("/blogs", payload);
+  createBlog: async (payload: BlogFormValues): Promise<BlogResponse> => {
+    const res = await apiClient.post<BlogResponse>("/blogs", payload);
     return res.data;
   },
 
-  updateBlog: async (id: number, payload: BlogFormValues) => {
-    const res = await apiClient.patch<{ data: Blog }>(`/blogs/${id}`, payload);
+  updateBlog: async (
+    id: number,
+    payload: BlogFormValues
+  ): Promise<BlogResponse> => {
+    const res = await apiClient.patch<BlogResponse>(`/blogs/${id}`, payload);
     return res.data;
   },
 

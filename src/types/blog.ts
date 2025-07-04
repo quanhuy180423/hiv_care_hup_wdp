@@ -51,3 +51,11 @@ export interface BlogListResponse {
   statusCode: number;
   message: string;
 }
+
+export type BlogQueryParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  orderBy?: string;
+};

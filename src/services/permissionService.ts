@@ -6,32 +6,37 @@ export const permissionService = {
     page?: number;
     limit?: number;
     search?: string;
-  }) => {
+  }): Promise<PermissionsResponse> => {
     const res = await apiClient.get<PermissionsResponse>("/permissions", {
       params,
     });
     return res.data;
   },
 
-  getPermissionById: async (id: number) => {
-    const res = await apiClient.get<{ data: Permission }>(`/permissions/${id}`);
-    return res.data.data;
+  getPermissionById: async (id: number): Promise<PermissionsResponse> => {
+    const res = await apiClient.get<PermissionsResponse>(`/permissions/${id}`);
+    return res.data;
   },
 
-  createPermission: async (payload: Partial<Permission>) => {
-    const res = await apiClient.post<{ data: Permission }>(
+  createPermission: async (
+    payload: Partial<Permission>
+  ): Promise<PermissionsResponse> => {
+    const res = await apiClient.post<PermissionsResponse>(
       "/permissions",
       payload
     );
-    return res.data.data;
+    return res.data;
   },
 
-  updatePermission: async (id: number, payload: Partial<Permission>) => {
-    const res = await apiClient.put<{ data: Permission }>(
+  updatePermission: async (
+    id: number,
+    payload: Partial<Permission>
+  ): Promise<PermissionsResponse> => {
+    const res = await apiClient.put<PermissionsResponse>(
       `/permissions/${id}`,
       payload
     );
-    return res.data.data;
+    return res.data;
   },
 
   deletePermission: async (id: number) => {

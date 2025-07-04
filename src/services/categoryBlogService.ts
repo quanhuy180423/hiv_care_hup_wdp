@@ -1,41 +1,41 @@
 import type {
-  CategoryBlog,
   CategoryBlogListResponse,
+  CategoryBlogResponse,
 } from "@/types/categoryBlog";
 import { apiClient } from "./apiClient";
 import type { CategoryBlogFormValues } from "@/schemas/categoryBlog";
+import type { BlogQueryParams } from "@/types/blog";
 
 export const categoryBlogService = {
-  getAllCategoryBlogs: async (params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    sortBy?: string;
-    orderBy?: string;
-  }) => {
+  getAllCategoryBlogs: async (
+    params?: BlogQueryParams
+  ): Promise<CategoryBlogListResponse> => {
     const res = await apiClient.get<CategoryBlogListResponse>("/cate-blogs", {
       params,
     });
     return res.data;
   },
 
-  getCategoryBlogById: async (id: number) => {
-    const res = await apiClient.get<{ data: CategoryBlog }>(
-      `/cate-blogs/${id}`
-    );
+  getCategoryBlogById: async (id: number): Promise<CategoryBlogResponse> => {
+    const res = await apiClient.get<CategoryBlogResponse>(`/cate-blogs/${id}`);
     return res.data;
   },
 
-  createCategoryBlog: async (payload: CategoryBlogFormValues) => {
-    const res = await apiClient.post<{ data: CategoryBlog }>(
+  createCategoryBlog: async (
+    payload: CategoryBlogFormValues
+  ): Promise<CategoryBlogResponse> => {
+    const res = await apiClient.post<CategoryBlogResponse>(
       "/cate-blogs",
       payload
     );
     return res.data;
   },
 
-  updateCategoryBlog: async (id: number, payload: CategoryBlogFormValues) => {
-    const res = await apiClient.patch<{ data: CategoryBlog }>(
+  updateCategoryBlog: async (
+    id: number,
+    payload: CategoryBlogFormValues
+  ): Promise<CategoryBlogResponse> => {
+    const res = await apiClient.patch<CategoryBlogResponse>(
       `/cate-blogs/${id}`,
       payload
     );
@@ -50,7 +50,7 @@ export const categoryBlogService = {
     id: number,
     paload: { isPublished: boolean }
   ) => {
-    const res = await apiClient.patch<{ data: CategoryBlog }>(
+    const res = await apiClient.patch<CategoryBlogResponse>(
       `/cate-blogs/${id}/change-status`,
       paload
     );
