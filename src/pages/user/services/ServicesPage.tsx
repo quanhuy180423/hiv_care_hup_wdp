@@ -1,3 +1,4 @@
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,133 +7,88 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Stethoscope,
-  Heart,
-  Shield,
-  Users,
-  Phone,
-  Video,
-  FileText,
-  Brain,
-  Pill,
-  Activity,
-  MessageCircle,
-} from "lucide-react";
+import { useServices } from "@/hooks/useServices";
+import type { Service } from "@/types/service";
+
+import { Heart, Shield, Stethoscope } from "lucide-react";
+import { Link } from "react-router";
+
+const mainServices = [
+  {
+    icon: Stethoscope,
+    title: "Tư vấn y tế chuyên khoa",
+    description:
+      "Tư vấn trực tuyến với đội ngũ bác sĩ chuyên khoa HIV/AIDS có kinh nghiệm",
+    features: [
+      "Tư vấn 1-1 với bác sĩ chuyên khoa",
+      "Đánh giá tình trạng sức khỏe",
+      "Lập kế hoạch điều trị cá nhân",
+      "Theo dõi tiến triển bệnh",
+    ],
+  },
+  {
+    icon: Heart,
+    title: "Chăm sóc sức khỏe toàn diện",
+    description:
+      "Dịch vụ chăm sóc sức khỏe tổng thể, không chỉ tập trung vào HIV",
+    features: [
+      "Kiểm tra sức khỏe định kỳ",
+      "Tầm soát các bệnh đi kèm",
+      "Chăm sóc sức khỏe tâm thần",
+      "Dinh dưỡng và lối sống lành mạnh",
+    ],
+  },
+  {
+    icon: Shield,
+    title: "Hỗ trợ tâm lý và xã hội",
+    description: "Hỗ trợ tâm lý chuyên nghiệp và kết nối cộng đồng",
+    features: [
+      "Tư vấn tâm lý cá nhân",
+      "Nhóm hỗ trợ cộng đồng",
+      "Giảm kỳ thị xã hội",
+      "Hỗ trợ gia đình",
+    ],
+  },
+];
+
+const process = [
+  {
+    step: "01",
+    title: "Đăng ký tài khoản",
+    description: "Tạo tài khoản và hoàn thành thông tin cá nhân",
+  },
+  {
+    step: "02",
+    title: "Đánh giá ban đầu",
+    description: "Bác sĩ đánh giá tình trạng và lập kế hoạch",
+  },
+  {
+    step: "03",
+    title: "Bắt đầu điều trị",
+    description: "Triển khai kế hoạch chăm sóc cá nhân hóa",
+  },
+  {
+    step: "04",
+    title: "Theo dõi liên tục",
+    description: "Giám sát và điều chỉnh kế hoạch điều trị",
+  },
+];
 
 export function ServicesPage() {
-  const mainServices = [
-    {
-      icon: Stethoscope,
-      title: "Tư vấn y tế chuyên khoa",
-      description:
-        "Tư vấn trực tuyến với đội ngũ bác sĩ chuyên khoa HIV/AIDS có kinh nghiệm",
-      features: [
-        "Tư vấn 1-1 với bác sĩ chuyên khoa",
-        "Đánh giá tình trạng sức khỏe",
-        "Lập kế hoạch điều trị cá nhân",
-        "Theo dõi tiến triển bệnh",
-      ],
-    },
-    {
-      icon: Heart,
-      title: "Chăm sóc sức khỏe toàn diện",
-      description:
-        "Dịch vụ chăm sóc sức khỏe tổng thể, không chỉ tập trung vào HIV",
-      features: [
-        "Kiểm tra sức khỏe định kỳ",
-        "Tầm soát các bệnh đi kèm",
-        "Chăm sóc sức khỏe tâm thần",
-        "Dinh dưỡng và lối sống lành mạnh",
-      ],
-    },
-    {
-      icon: Shield,
-      title: "Hỗ trợ tâm lý và xã hội",
-      description: "Hỗ trợ tâm lý chuyên nghiệp và kết nối cộng đồng",
-      features: [
-        "Tư vấn tâm lý cá nhân",
-        "Nhóm hỗ trợ cộng đồng",
-        "Giảm kỳ thị xã hội",
-        "Hỗ trợ gia đình",
-      ],
-    },
-  ];
+  const { services, isServicesLoading, servicesError } = useServices(1, 10);
 
-  const additionalServices = [
-    {
-      icon: Video,
-      title: "Tele-health",
-      description: "Khám bệnh từ xa qua video call",
-    },
-    {
-      icon: Phone,
-      title: "Hotline 24/7",
-      description: "Hỗ trợ khẩn cấp mọi lúc",
-    },
-    {
-      icon: FileText,
-      title: "Hồ sơ điện tử",
-      description: "Quản lý hồ sơ bệnh án số hóa",
-    },
-    {
-      icon: Brain,
-      title: "AI Phân tích",
-      description: "Phân tích dữ liệu bằng AI",
-    },
-    {
-      icon: Pill,
-      title: "Quản lý thuốc",
-      description: "Nhắc nhở và theo dõi thuốc",
-    },
-    {
-      icon: Activity,
-      title: "Theo dõi sinh hiệu",
-      description: "Giám sát các chỉ số sức khỏe",
-    },
-    {
-      icon: MessageCircle,
-      title: "Chat hỗ trợ",
-      description: "Trò chuyện trực tiếp với chuyên gia",
-    },
-    {
-      icon: Users,
-      title: "Cộng đồng",
-      description: "Kết nối với cộng đồng người cùng cảnh ngộ",
-    },
-  ];
+  if (isServicesLoading) {
+    return <LoadingSpinner />;
+  }
 
-  const process = [
-    {
-      step: "01",
-      title: "Đăng ký tài khoản",
-      description: "Tạo tài khoản và hoàn thành thông tin cá nhân",
-    },
-    {
-      step: "02",
-      title: "Đánh giá ban đầu",
-      description: "Bác sĩ đánh giá tình trạng và lập kế hoạch",
-    },
-    {
-      step: "03",
-      title: "Bắt đầu điều trị",
-      description: "Triển khai kế hoạch chăm sóc cá nhân hóa",
-    },
-    {
-      step: "04",
-      title: "Theo dõi liên tục",
-      description: "Giám sát và điều chỉnh kế hoạch điều trị",
-    },
-  ];
+  if (servicesError) {
+    return <div>Error loading services: {servicesError.message}</div>;
+  }
 
   return (
     <div className="space-y-12">
       {/* Header Section */}
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-          <Stethoscope className="h-4 w-4" />
-          Dịch vụ chăm sóc
-        </div>
         <h1 className="text-4xl font-bold tracking-tight">
           Dịch vụ chăm sóc sức khỏe toàn diện
         </h1>
@@ -178,29 +134,27 @@ export function ServicesPage() {
       {/* Additional Services Grid */}
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Dịch vụ bổ sung</h2>
+          <h2 className="text-3xl font-bold mb-4">Dịch vụ</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Các dịch vụ hỗ trợ khác giúp nâng cao chất lượng chăm sóc và trải
             nghiệm của bạn
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {additionalServices.map((service, index) => {
-            const IconComponent = service.icon;
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {services?.data?.data.map((service: Service, index: number) => {
             return (
-              <Card
-                key={index}
-                className="text-center p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="mx-auto w-12 h-12 bg-secondary/20 rounded-lg flex items-center justify-center mb-4">
-                  <IconComponent className="h-6 w-6 text-secondary-foreground" />
-                </div>
-                <h3 className="font-semibold mb-2">{service.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {service.description}
-                </p>
-              </Card>
+              <Link key={index} to={service.slug} className="no-underline">
+                <Card
+                  key={index}
+                  className="text-center p-6 hover:shadow-md transition-shadow"
+                >
+                  <h3 className="font-semibold mb-2">{service.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {service.description}
+                  </p>
+                </Card>
+              </Link>
             );
           })}
         </div>
@@ -239,32 +193,6 @@ export function ServicesPage() {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid md:grid-cols-4 gap-8 text-center">
-        <div>
-          <div className="text-3xl font-bold text-primary mb-2">10,000+</div>
-          <div className="text-sm text-muted-foreground">
-            Bệnh nhân tin tưởng
-          </div>
-        </div>
-        <div>
-          <div className="text-3xl font-bold text-primary mb-2">50+</div>
-          <div className="text-sm text-muted-foreground">
-            Bác sĩ chuyên khoa
-          </div>
-        </div>
-        <div>
-          <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-          <div className="text-sm text-muted-foreground">
-            Hỗ trợ không ngừng
-          </div>
-        </div>
-        <div>
-          <div className="text-3xl font-bold text-primary mb-2">98%</div>
-          <div className="text-sm text-muted-foreground">Hài lòng dịch vụ</div>
-        </div>
-      </div>
-
       {/* CTA Section */}
       <div className="text-center space-y-6 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-8">
         <h2 className="text-3xl font-bold">Sẵn sàng bắt đầu?</h2>
@@ -273,10 +201,14 @@ export function ServicesPage() {
           của chúng tôi
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg">Đăng ký tư vấn miễn phí</Button>
-          <Button variant="outline" size="lg">
-            Tìm hiểu thêm
-          </Button>
+          <Link to="/services/appointment/register" className="no-underline">
+            <Button size="lg">Đăng ký tư vấn miễn phí</Button>
+          </Link>
+          <Link to="/services" className="no-underline">
+            <Button variant="outline" size="lg">
+              Tìm hiểu thêm
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

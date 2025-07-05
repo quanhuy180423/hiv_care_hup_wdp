@@ -1,9 +1,9 @@
 import type { Appointment } from "@/types/appointment";
-import { formatUtcDateManually } from "@/utils/dates/formatDate";
-import { formatCurrency } from "@/utils/numbers/formatCurrency";
+import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
+import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type { ColumnDef } from "@tanstack/react-table";
 import AppointmentActionsCell from "./components/AppointmentActionsCell";
-import { translateStatus } from "@/utils/status/translateStatus";
+import { translateStatus } from "@/lib/utils/status/translateStatus";
 
 export const columns: ColumnDef<Appointment>[] = [
   {
@@ -25,7 +25,7 @@ export const columns: ColumnDef<Appointment>[] = [
     accessorKey: "appointmentTime",
     header: "Thời gian khám",
     cell: ({ row }) =>
-        formatUtcDateManually(row.original.appointmentTime, "dd/MM/yyyy HH:mm"),
+      formatUtcDateManually(row.original.appointmentTime, "dd/MM/yyyy HH:mm"),
   },
   {
     accessorKey: "doctor.user.name",
@@ -57,5 +57,5 @@ export const columns: ColumnDef<Appointment>[] = [
     id: "actions",
     header: "Hành động",
     cell: ({ row }) => <AppointmentActionsCell appointment={row.original} />,
-  }
+  },
 ];

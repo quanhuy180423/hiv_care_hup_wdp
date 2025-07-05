@@ -1,25 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Heart, Target, Award } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Heart, Target, Award } from "lucide-react";
 
 export function AboutPage() {
-  const navigate = useNavigate();
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Back button */}
-      <Button onClick={() => navigate("/")} variant="outline" className="mb-4">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Về trang chủ
-      </Button>
-
+    <div className="max-w-6xl mx-auto py-5">
       {/* Page title */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-4">Giới thiệu về HIV Care Hub</h1>
@@ -92,37 +76,6 @@ export function AboutPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Tech info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Công nghệ hiện đại</CardTitle>
-          <CardDescription>
-            Nền tảng được xây dựng với các công nghệ tiên tiến nhất
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              "React 18",
-              "TypeScript",
-              "Vite",
-              "Zustand",
-              "React Query",
-              "Shadcn UI",
-              "Tailwind CSS",
-              "React Router",
-            ].map((tech) => (
-              <div
-                key={tech}
-                className="text-center p-3 bg-primary/5 rounded-lg"
-              >
-                <span className="text-sm font-medium">{tech}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

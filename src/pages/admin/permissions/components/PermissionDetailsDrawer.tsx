@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Key, Pencil } from "lucide-react";
 import type { Permission } from "@/types/permission";
-import { formatDate } from "@/utils/dates/formatDate";
+import { formatDate } from "@/lib/utils/dates/formatDate";
 
 interface PermissionDetailsDrawerProps {
   isOpen: boolean;
@@ -70,8 +70,13 @@ export function PermissionDetailsDrawer({
               </code>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-600">Phương thức HTTP:</span>
-              <Badge variant="outline" className={getMethodColor(permission.method)}>
+              <span className="font-medium text-gray-600">
+                Phương thức HTTP:
+              </span>
+              <Badge
+                variant="outline"
+                className={getMethodColor(permission.method)}
+              >
                 {permission.method}
               </Badge>
             </div>
@@ -99,14 +104,20 @@ export function PermissionDetailsDrawer({
 
           {permission.updatedAt && (
             <div>
-              <h3 className="text-gray-500 font-medium mb-1">Cập nhật lần cuối</h3>
+              <h3 className="text-gray-500 font-medium mb-1">
+                Cập nhật lần cuối
+              </h3>
               <p>{formatDate(permission.updatedAt, "dd/mm/yyyy")}</p>
             </div>
           )}
         </div>
 
         <div className="p-4 border-t flex justify-end">
-          <Button onClick={onEdit} className="gap-2 cursor-pointer" variant="outline">
+          <Button
+            onClick={onEdit}
+            className="gap-2 cursor-pointer"
+            variant="outline"
+          >
             <Pencil className="h-4 w-4" />
             Chỉnh sửa quyền
           </Button>
