@@ -45,6 +45,8 @@ import AppointmentsManagement from "./pages/staff/appointments";
 import BlogsManagement from "./pages/staff/blogs";
 import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
+import DoctorSchedule from "./pages/doctor/schedule";
+import DoctorAppointments from "./pages/doctor/appointments";
 
 // Route definition interface
 export interface RouteConfig {
@@ -320,6 +322,31 @@ export const staffRoutes: RouteConfig[] = [
   },
 ];
 
+export const doctorRoutes: RouteConfig[] = [
+  {
+    path: "/doctor/appointments",
+    component: DoctorAppointments,
+    title: "Lịch hẹn",
+    description: "Quản lý lịch hẹn",
+    protected: true,
+    layout: "DOCTOR",
+    icon: Calendar,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/schedule",
+    component: DoctorSchedule,
+    title: "Lịch làm việc",
+    description: "Quản lý lịch làm việc",
+    protected: true,
+    layout: "DOCTOR",
+    icon: Calendar,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+];
+
 // Combine all routes
 export const allRoutes = [
   ...routes,
@@ -327,6 +354,7 @@ export const allRoutes = [
   ...userRoutes,
   ...adminRoutes,
   ...staffRoutes,
+  ...doctorRoutes,
 ];
 
 // 404 Not Found route
@@ -375,6 +403,15 @@ export const ROUTES = {
   ADMIN_ARV_PROTOCOLS: "/admin/arv-protocols",
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_SETTINGS: "/admin/settings",
+
+  // Staff routes
+  STAFF_APPOINTMENTS: "/staff/appointments",
+  STAFF_BLOG: "/staff/blog",
+  STAFF_BLOG_CATEGORIES: "/staff/blog-categories",
+
+  // Doctor routes
+  DOCTOR_APPOINTMENTS: "/doctor/appointments",
+  DOCTOR_SCHEDULE: "/doctor/schedule",
 } as const;
 
 // Helper function to get route config by path
@@ -420,7 +457,9 @@ export const getDefaultRouteForRole = (role: UserRole): string => {
     case "ADMIN":
       return ROUTES.ADMIN_DASHBOARD;
     case "DOCTOR":
-      return ROUTES.HOME; // Doctors use user layout for now
+      return ROUTES.DOCTOR_APPOINTMENTS;
+    case "STAFF":
+      return ROUTES.STAFF_APPOINTMENTS;
     case "PATIENT":
       return ROUTES.HOME;
     default:

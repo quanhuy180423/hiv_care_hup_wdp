@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchDoctor } from "../services/apiDoctor";
+import { fetchDoctor } from "../services/doctorService";
 import type { Doctor } from "../types/doctor";
 
 export const useDoctor = () => {
