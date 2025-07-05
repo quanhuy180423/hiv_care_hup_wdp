@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/authStore";
 import { authService } from "@/services/authService";
 import type {
   LoginRequest,
-  // RegisterRequest,
+  RegisterRequest,
   ChangePasswordRequest,
   UpdateProfileRequest,
 } from "@/services/authService";
@@ -17,6 +17,7 @@ export const useAuth = () => {
     setAuthenticated,
     setLoading,
     reset,
+    setTokens,
   } = useAuthStore();
 
   // Login function
@@ -25,18 +26,23 @@ export const useAuth = () => {
       try {
         setLoading(true);
         const response = await authService.login(credentials);
-        setUser(response.data.user);
+        const { user, accessToken, refreshToken } = response.data;
+
+        setUser(user);
+        setTokens({ accessToken, refreshToken });
         setAuthenticated(true);
+
         return response;
       } catch (error) {
         setUser(null);
+        setTokens(null);
         setAuthenticated(false);
         throw error;
       } finally {
         setLoading(false);
       }
     },
-    [setUser, setAuthenticated, setLoading]
+    [setUser, setTokens, setAuthenticated, setLoading]
   );
 
   // Register function
@@ -45,18 +51,23 @@ export const useAuth = () => {
       try {
         setLoading(true);
         const response = await authService.register(userData);
-        setUser(response.data);
+        const { user, accessToken, refreshToken } = response.data;
+
+        setUser(user);
+        setTokens({ accessToken, refreshToken });
         setAuthenticated(true);
+
         return response;
       } catch (error) {
         setUser(null);
+        setTokens(null);
         setAuthenticated(false);
         throw error;
       } finally {
         setLoading(false);
       }
     },
-    [setUser, setAuthenticated, setLoading]
+    [setUser, setTokens, setAuthenticated, setLoading]
   );
 
   // Update profile function
@@ -86,6 +97,17 @@ export const useAuth = () => {
     },
     [setLoading]
   );
+
+  //logout function
+  const logout = useCallback(async () => {
+    try {
+      setLoading(true);
+      await authService.logout();
+      reset();
+    } finally {
+      setLoading(false);
+    }
+  }, [reset, setLoading]);
 
   // Check auth status and sync with store
   const checkAuth = useCallback(async () => {
@@ -146,8 +168,9 @@ export const useAuth = () => {
 
     // Actions
     login,
-    // register,
+    register,
     updateProfile,
+    logout,
     changePassword,
     checkAuth,
     refreshAuth,

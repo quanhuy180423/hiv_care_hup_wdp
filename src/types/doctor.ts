@@ -1,17 +1,16 @@
-export interface Service {
+export interface Doctor {
   id: number;
+  userId: number;
   name: string;
-  slug: string;
-  description: string;
-  type: "CONSULT" | "TEST" | "TREATMENT";
-  price: string;
-  startTime: string;
-  endTime: string;
-  content: string;
-  imageUrl: string;
+  email: string;
+  phone: string;
+  specialization: string;
+  maxShiftsPerDay: number;
   isActive: boolean;
-  duration: number;
+  createdAt: string;
+  updatedAt: string;
 }
+
 export interface meta {
   total: 3;
   page: 2;
@@ -21,10 +20,10 @@ export interface meta {
   hasPreviousPage: true;
 }
 export interface dataresponse {
-  data: Service[];
+  data: Doctor[];
   meta: meta;
 }
-export interface ServiceListResponse {
+export interface DoctorListResponse {
   data: dataresponse;
   statusCode: number;
   message?: string;

@@ -44,6 +44,7 @@ import PermissionManagement from "./pages/admin/permissions";
 import AppointmentsManagement from "./pages/staff/appointments";
 import BlogsManagement from "./pages/staff/blogs";
 import CategoryBlogManagement from "./pages/staff/categoriesBlog";
+import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 
 // Route definition interface
 export interface RouteConfig {
@@ -97,6 +98,16 @@ export const routes: RouteConfig[] = [
     description: "Các dịch vụ chăm sóc sức khỏe",
     layout: "PATIENT",
     icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/services/appointment/register",
+    component: RegisterAppointment,
+    title: "Đăng ký lịch hẹn",
+    description: "Đăng ký lịch hẹn khám bệnh",
+    layout: "PATIENT",
+    icon: Calendar,
     showInNav: true,
     allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
   },

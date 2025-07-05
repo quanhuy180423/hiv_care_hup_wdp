@@ -11,8 +11,8 @@ import {
   useAppointmentDrawerStore,
   useAppointmentModalStore,
 } from "@/store/appointmentStore";
-import { formatDate } from "@/utils/dates/formatDate";
-import { formatCurrency } from "@/utils/numbers/formatCurrency";
+import { formatDate } from "@/lib/utils/dates/formatDate";
+import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -204,7 +204,11 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
         <Separator />
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} className="cursor-pointer">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="cursor-pointer"
+          >
             Đóng
           </Button>
           <Button

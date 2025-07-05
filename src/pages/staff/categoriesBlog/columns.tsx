@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import type { CategoryBlog } from "@/types/categoryBlog";
 import type { ColumnDef } from "@tanstack/react-table";
 import CateBlogActionsCell from "./components/CateBlogActionsCell";
-import { formatDate } from "@/utils/dates/formatDate";
+import { formatDate } from "@/lib/utils/dates/formatDate";
 
 export const columns: ColumnDef<CategoryBlog>[] = [
   {

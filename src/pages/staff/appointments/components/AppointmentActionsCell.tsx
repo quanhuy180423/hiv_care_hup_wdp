@@ -16,7 +16,7 @@ import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 import type { Appointment } from "@/types/appointment";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import type { AppointmentStatus } from "@/types/appointment";
-import { translateStatus } from "@/utils/status/translateStatus";
+import { translateStatus } from "@/lib/utils/status/translateStatus";
 
 const STATUS_FLOW: AppointmentStatus[] = [
   "PENDING",
@@ -104,8 +104,9 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
               description="Bạn có chắc chắn muốn hủy cuộc hẹn này không? Hành động này không thể hoàn tác."
               trigger={
                 <DropdownMenuItem
-                onSelect={(e) => e.preventDefault()}
-                className="text-red-500 cursor-pointer">
+                  onSelect={(e) => e.preventDefault()}
+                  className="text-red-500 cursor-pointer"
+                >
                   Hủy cuộc hẹn
                 </DropdownMenuItem>
               }

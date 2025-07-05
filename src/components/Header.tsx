@@ -5,7 +5,7 @@ import { Assets } from "@/assets";
 import { useState } from "react";
 import { navigationRoutes } from "@/routes";
 import { useAuth } from "@/hooks/useAuth";
-import authService from "@/services";
+import toast from "react-hot-toast";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   // Auth state from useAuth hook
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   // Filter navigation items based on user role
   const navItems = navigationRoutes
@@ -44,9 +44,15 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    authService.clearAuth();
-    setIsUserMenuOpen(false);
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   const handleProfile = () => {
@@ -57,7 +63,7 @@ export default function Header() {
   return (
     <>
       {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+      <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo và Title */}
