@@ -1,80 +1,42 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchDoctor } from "../services/doctorService";
-import type { Doctor } from "../types/doctor";
+import { doctorService } from "@/services/doctorService";
+import type { DoctorQueryParams } from "@/types/doctor";
+import { useQuery } from "@tanstack/react-query";
 
-export const useDoctor = () => {
-  const queryClient = useQueryClient();
-
-  // Get all doctors for admin
-  const {
-    data: doctors,
-    isLoading: isDoctorsLoading,
-    error: doctorsError,
-  } = useQuery({
-    queryKey: ["doctors"],
-    queryFn: () => fetchDoctor.getAll(),
+// 📄 Get all doctors
+export const useDoctors = (params?: DoctorQueryParams) => {
+  return useQuery({
+    queryKey: ["doctors", params],
+    queryFn: () => doctorService.getAllDoctors(params || {}),
+    select: (res) => res.data.data,
   });
+};
 
-  // Get doctor by ID
-  const useGetDoctorById = (id: string) =>
-    useQuery({
-      queryKey: ["doctor", id],
-      queryFn: () => fetchDoctor.getById(id),
-    });
-
-  // Get schedule by doctor ID
-  const useGetScheduleByDoctorId = (id: string) =>
-    useQuery({
-      queryKey: ["doctorSchedule", id],
-      queryFn: () => fetchDoctor.getScheduleDoctorAtDay(id),
-    });
-
-  // Get list of doctors at a specific date
-  const useGetListDoctorAtDate = (date: string) =>
-    useQuery({
-      queryKey: ["doctorsByDate", date],
-      queryFn: () => fetchDoctor.getScheduleDoctorAtDay(date),
-    });
-
-  // Create doctor
-  const createDoctor = useMutation({
-    mutationFn: (doctorData: Doctor) => fetchDoctor.create(doctorData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["doctors"] });
-    },
+// 👨‍⚕️ Get doctor by ID
+export const useDoctor = (id: number) => {
+  return useQuery({
+    queryKey: ["doctor", id],
+    queryFn: () => doctorService.getDoctorById(id),
+    enabled: !!id,
+    select: (res) => res.data,
   });
+};
 
-  // Update doctor
-  const updateDoctor = useMutation({
-    mutationFn: ({
-      id,
-      doctorData,
-    }: {
-      id: string;
-      doctorData: Partial<Doctor>;
-    }) => fetchDoctor.update(id, doctorData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["doctors"] });
-    },
+// 📅 Get schedules by doctor ID
+export const useDoctorSchedule = (id: number) => {
+  return useQuery({
+    queryKey: ["doctor", id, "schedule"],
+    queryFn: () => doctorService.getDotorSchedule(id),
+    enabled: !!id,
+    select: (res) => res.data,
   });
+};
 
-  // Delete doctor
-  const deleteDoctor = useMutation({
-    mutationFn: (id: string) => fetchDoctor.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["doctors"] });
-    },
+// 📆 Get all doctors' schedules by date
+export const useDoctorSchedulesByDate = (date: string) => {
+  return useQuery({
+    queryKey: ["doctors", "schedule", "by-date", date],
+    queryFn: () => doctorService.getDoctorScheduleAtDay(date),
+    enabled: !!date,
+    select: (res) => res.data,
   });
-
-  return {
-    doctors,
-    isDoctorsLoading,
-    doctorsError,
-    useGetDoctorById,
-    useGetScheduleByDoctorId,
-    useGetListDoctorAtDate,
-    createDoctor,
-    updateDoctor,
-    deleteDoctor,
-  };
 };

@@ -1,5 +1,5 @@
 import { apiClient } from "./apiClient";
-import type { User } from "@/store/authStore";
+import type { User, UserProfileRes } from "@/store/authStore";
 import axios from "axios";
 
 // Error handler utility
@@ -164,6 +164,22 @@ export const authService = {
   getProfile: async (): Promise<User> => {
     try {
       const response = await apiClient.get<User>(AUTH_ENDPOINTS.PROFILE);
+
+      if (response.data) {
+        return response.data;
+      }
+
+      throw new Error("Không thể lấy thông tin người dùng");
+    } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  },
+
+  getUserProfile: async (): Promise<UserProfileRes> => {
+    try {
+      const response = await apiClient.get<UserProfileRes>(
+        AUTH_ENDPOINTS.PROFILE
+      );
 
       if (response.data) {
         return response.data;

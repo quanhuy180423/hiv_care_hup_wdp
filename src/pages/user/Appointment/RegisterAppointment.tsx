@@ -16,7 +16,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useServices } from "@/hooks/useServices";
-import { useDoctor } from "@/hooks/useDoctor";
+import { useDoctorSchedulesByDate } from "@/hooks/useDoctor";
 import { slots } from "@/lib/utils/slotsAppointment";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,8 +52,7 @@ const RegisterAppointment = () => {
   const [availableSlots, setAvailableSlots] = useState(slots);
 
   const { services } = useServices();
-  const { useGetListDoctorAtDate } = useDoctor();
-  const { data: doctors } = useGetListDoctorAtDate(
+  const { data: doctors } = useDoctorSchedulesByDate(
     selectedDate || new Date().toISOString().split("T")[0]
   );
 
