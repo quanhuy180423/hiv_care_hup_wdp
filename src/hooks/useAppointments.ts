@@ -16,20 +16,27 @@ export const useAppointments = (params: AppointmentQueryParams = {}) => {
 };
 
 // Get appointments by user
-export const useAppointmentsByUser = (userId?: number) => {
+export const useAppointmentsByUser = (
+  userId?: number,
+  params?: AppointmentQueryParams
+) => {
   return useQuery({
-    queryKey: ["appointments-user", userId],
-    queryFn: () => appointmentService.getAppointmentByUserId(userId!),
+    queryKey: ["appointments-user", userId, params],
+    queryFn: () => appointmentService.getAppointmentByUserId(userId!, params),
     enabled: !!userId,
     select: (res) => res.data.data,
   });
 };
 
 // Get appointments by doctor
-export const useAppointmentsByDoctor = (doctorId?: number) => {
+export const useAppointmentsByDoctor = (
+  doctorId?: number,
+  params?: AppointmentQueryParams
+) => {
   return useQuery({
-    queryKey: ["appointments-doctor", doctorId],
-    queryFn: () => appointmentService.getAppointmentByDoctorId(doctorId!),
+    queryKey: ["appointments-doctor", doctorId, params],
+    queryFn: () =>
+      appointmentService.getAppointmentByDoctorId(doctorId!, params),
     enabled: !!doctorId,
     select: (res) => res.data.data,
   });

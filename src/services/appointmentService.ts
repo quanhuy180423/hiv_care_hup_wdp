@@ -22,19 +22,23 @@ export const appointmentService = {
   },
 
   getAppointmentByUserId: async (
-    userId: number
+    userId: number,
+    params?: AppointmentQueryParams
   ): Promise<AppointmentsListResponse> => {
     const res = await apiClient.get<AppointmentsListResponse>(
-      `/appointments/user/${userId}`
+      `/appointments/user/${userId}`,
+      { params }
     );
     return res.data;
   },
 
   getAppointmentByDoctorId: async (
-    doctorId: number
+    doctorId: number,
+    params?: AppointmentQueryParams
   ): Promise<AppointmentsListResponse> => {
     const res = await apiClient.get<AppointmentsListResponse>(
-      `/appointments/doctor/${doctorId}`
+      `/appointments/doctor/${doctorId}`,
+      { params }
     );
     return res.data;
   },

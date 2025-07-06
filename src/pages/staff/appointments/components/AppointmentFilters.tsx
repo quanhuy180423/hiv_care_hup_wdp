@@ -27,12 +27,13 @@ interface Props {
 }
 
 export const AppointmentFilters = ({ onChange }: Props) => {
-  const { register, control, setValue, reset } = useForm<AppointmentQueryParams>({
-    defaultValues: {
-      dateFrom: getToday(),
-      dateTo: getTomorrow(),
-    },
-  });
+  const { register, control, setValue, reset } =
+    useForm<AppointmentQueryParams>({
+      defaultValues: {
+        dateFrom: getToday(),
+        dateTo: getTomorrow(),
+      },
+    });
 
   const status = useWatch({ control, name: "status" });
   const type = useWatch({ control, name: "type" });
@@ -71,7 +72,9 @@ export const AppointmentFilters = ({ onChange }: Props) => {
       <div className="flex flex-col gap-1">
         <Label>Trạng thái</Label>
         <Select
-          onValueChange={(value) => setValue("status", value === "ALL" ? undefined : value)}
+          onValueChange={(value) =>
+            setValue("status", value === "ALL" ? undefined : value)
+          }
           defaultValue="ALL"
         >
           <SelectTrigger className="w-full">
@@ -94,7 +97,9 @@ export const AppointmentFilters = ({ onChange }: Props) => {
       <div className="flex flex-col gap-1">
         <Label>Loại</Label>
         <Select
-          onValueChange={(value) => setValue("type", value === "ALL" ? undefined : value)}
+          onValueChange={(value) =>
+            setValue("type", value === "ALL" ? undefined : value)
+          }
           defaultValue="ALL"
         >
           <SelectTrigger className="w-full">
@@ -112,17 +117,22 @@ export const AppointmentFilters = ({ onChange }: Props) => {
       <div className="flex flex-col gap-1">
         <Label>Ngày</Label>
         <div className="flex gap-2">
-          <Input type="date" {...register("dateFrom")} />
+          <Input
+            type="date"
+            {...register("dateFrom")}
+            className="w-full min-w-[150px]"
+          />
           <Input
             type="date"
             {...register("dateTo")}
             min={dateFrom || getToday()}
+            className="w-full min-w-[150px]"
           />
         </div>
       </div>
 
       {/* Nút */}
-      <div className="flex flex-col gap-1 justify-end w-[40%]">
+      <div className="flex flex-col gap-1 ml-15 w-[40%]">
         <Label className="invisible">Xoá lọc</Label>
         <Button
           type="button"
