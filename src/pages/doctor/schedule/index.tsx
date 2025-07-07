@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DoctorSchedule } from "@/types/doctor";
+import SwapShiftDialog from "./components/SwapShiftDialog";
 
 interface GroupedSchedule {
   [date: string]: {
@@ -113,6 +114,9 @@ export default function DoctorSchedule() {
               />
             </PopoverContent>
           </Popover>
+          <div>
+            <SwapShiftDialog doctorId={doctorId} />
+          </div>
         </div>
       </div>
 

@@ -4,6 +4,8 @@ import type {
   DoctorResponse,
   DoctorScheduleByDateResponse,
   DoctorScheduleResponse,
+  DoctorSwapFromValues,
+  DoctorSwapResponse,
 } from "@/types/doctor";
 import { apiClient } from "./apiClient";
 
@@ -31,6 +33,16 @@ export const doctorService = {
     const res = await apiClient.get<DoctorScheduleByDateResponse>(
       `/doctors/schedule/by-date`,
       { params: { date } }
+    );
+    return res.data;
+  },
+
+  swapShifts: async (
+    payload: DoctorSwapFromValues
+  ): Promise<DoctorSwapResponse> => {
+    const res = await apiClient.post<DoctorSwapResponse>(
+      `/doctors/schedule/swap`,
+      payload
     );
     return res.data;
   },

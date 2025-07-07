@@ -1,3 +1,5 @@
+export type ShiftType = "MORNING" | "AFTERNOON";
+
 export interface Role {
   id: number;
   name: string;
@@ -57,7 +59,7 @@ export interface DoctorSchedule {
   doctorId: number;
   date: string;
   dayOfWeek: string;
-  shift: string;
+  shift: ShiftType;
   isOff: boolean;
   swappedWithId?: number;
   createdAt: string;
@@ -74,12 +76,12 @@ export interface DoctorSwapFromValues {
   doctor1: {
     id: number;
     date: string;
-    shift: string;
+    shift: ShiftType;
   };
   doctor2: {
     id: number;
     date: string;
-    shift: string;
+    shift: ShiftType;
   };
 }
 

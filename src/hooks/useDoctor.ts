@@ -1,6 +1,11 @@
 import { doctorService } from "@/services/doctorService";
-import type { DoctorQueryParams } from "@/types/doctor";
-import { useQuery } from "@tanstack/react-query";
+import type {
+  DoctorQueryParams,
+  DoctorSwapFromValues,
+  DoctorSwapResponse,
+} from "@/types/doctor";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 // 📄 Get all doctors
 export const useDoctors = (params?: DoctorQueryParams) => {
@@ -38,5 +43,23 @@ export const useDoctorSchedulesByDate = (date: string) => {
     queryFn: () => doctorService.getDoctorScheduleAtDay(date),
     enabled: !!date,
     select: (res) => res.data,
+  });
+};
+
+export const useSwapShifts = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DoctorSwapResponse, Error, DoctorSwapFromValues>({
+    mutationFn: (data) => doctorService.swapShifts(data),
+    onSuccess: () => {
+      toast.success("Đổi ca thành công!");
+      // Cập nhật lại dữ liệu lịch nếu cần
+      queryClient.invalidateQueries({ queryKey: ["doctor"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor", "schedule"] });
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error("Đổi ca thất bại!");
+    },
   });
 };
