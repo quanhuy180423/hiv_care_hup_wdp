@@ -1,52 +1,53 @@
-import type { ComponentType } from "react";
-import type { LucideIcon } from "lucide-react";
-import type { UserRole } from "./store/authStore";
 import {
-  Home,
-  Info,
-  DollarSign,
-  Stethoscope,
-  BookOpen,
-  Phone,
-  LogIn,
-  Users,
-  Calculator,
-  UserCog,
-  UserLock,
-  Calendar,
-  FileHeart,
-  FileText,
-} from "lucide-react";
-import {
-  HomePage,
-  LoginPage,
-  RegisterPage,
-  NotFoundPage,
   AboutPage,
-  PricingPage,
-  ServicesPage,
-  KnowledgePage,
   ContactPage,
+  HomePage,
+  KnowledgePage,
+  LoginPage,
+  NotFoundPage,
+  PricingPage,
   ProfilePage,
+  RegisterPage,
+  ServicesPage,
 } from "@/pages";
 import {
-  AdminUserManagementPage,
-  AdminDoctorManagementPage,
   AdminAppointmentManagementPage,
-  AdminPatientRecordsPage,
   AdminARVProtocolPage,
+  AdminDoctorManagementPage,
+  AdminPatientRecordsPage,
   AdminReportsPage,
   AdminSettingsPage,
+  AdminUserManagementPage,
 } from "@/pages/admin";
+import type { LucideIcon } from "lucide-react";
+import {
+  BookOpen,
+  Calculator,
+  Calendar,
+  DollarSign,
+  FileHeart,
+  FileText,
+  Home,
+  Info,
+  LogIn,
+  Phone,
+  Stethoscope,
+  UserCog,
+  UserLock,
+  Users,
+} from "lucide-react";
+import type { ComponentType } from "react";
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
-import RoleManagement from "./pages/admin/roles";
 import PermissionManagement from "./pages/admin/permissions";
+import RoleManagement from "./pages/admin/roles";
+import DoctorAppointments from "./pages/doctor/appointments";
+import DoctorPatientTreatments from "./pages/doctor/patientTreatment/patientTreatments";
+import DoctorSchedule from "./pages/doctor/schedule";
 import AppointmentsManagement from "./pages/staff/appointments";
 import BlogsManagement from "./pages/staff/blogs";
 import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
-import DoctorSchedule from "./pages/doctor/schedule";
-import DoctorAppointments from "./pages/doctor/appointments";
+import type { UserRole } from "./store/authStore";
 
 // Route definition interface
 export interface RouteConfig {
@@ -345,6 +346,17 @@ export const doctorRoutes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["DOCTOR"],
   },
+  {
+    path: "/doctor/patient-treatments",
+    component: DoctorPatientTreatments,
+    title: "Điều trị bệnh nhân",
+    description: "Quản lý điều trị bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    icon: FileHeart,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
 ];
 
 // Combine all routes
@@ -412,6 +424,7 @@ export const ROUTES = {
   // Doctor routes
   DOCTOR_APPOINTMENTS: "/doctor/appointments",
   DOCTOR_SCHEDULE: "/doctor/schedule",
+  DOCTOR_PATIENT_TREATMENTS: "/doctor/patient-treatments",
 } as const;
 
 // Helper function to get route config by path

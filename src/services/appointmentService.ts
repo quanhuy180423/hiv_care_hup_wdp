@@ -91,4 +91,21 @@ export const appointmentService = {
     );
     return res.data;
   },
+
+  /**
+   * Lấy danh sách cuộc hẹn trong ngày cho bác sĩ hiện tại
+   */
+  getTodayAppointments: async (): Promise<
+    import("@/types/appointment").Appointment[]
+  > => {
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10); // yyyy-mm-dd
+    // Giả sử API trả về appointments cho bác sĩ hiện tại, lọc theo ngày
+    const res = await apiClient.get<
+      import("@/types/appointment").AppointmentsListResponse
+    >("/appointments/doctor/me", {
+      params: { dateFrom: dateStr, dateTo: dateStr },
+    });
+    return res.data.data.data;
+  },
 };

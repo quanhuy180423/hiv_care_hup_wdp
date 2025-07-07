@@ -4,14 +4,33 @@ import type {
   AppointmentFormValues,
   AppointmentQueryParams,
 } from "@/types/appointment";
+import type { Appointment } from "@/types/appointment";
 import toast from "react-hot-toast";
+
+// Helper type for API response shape
+interface AppointmentsApiData {
+  data: Appointment[];
+  meta?: unknown;
+}
 
 // Get all appointments (admin view)
 export const useAppointments = (params: AppointmentQueryParams = {}) => {
   return useQuery({
     queryKey: ["appointments", params],
     queryFn: () => appointmentService.getAllAppointments(params),
-    select: (res) => res.data.data,
+    select: (res) => {
+      const data = res?.data?.data;
+      if (Array.isArray(data)) return data;
+      if (
+        data &&
+        typeof data === "object" &&
+        Array.isArray((data as AppointmentsApiData).data)
+      ) {
+        return (data as AppointmentsApiData).data;
+      }
+      // Nếu trả về object lỗi hoặc không đúng, trả về mảng rỗng
+      return [];
+    },
   });
 };
 
