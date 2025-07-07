@@ -20,6 +20,7 @@ import { useDoctorSchedulesByDate } from "@/hooks/useDoctor";
 import { slots } from "@/lib/utils/slotsAppointment";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreateAppointment } from "@/hooks/useAppointments";
 
 const appointmentSchema = z
   .object({
@@ -55,6 +56,7 @@ const RegisterAppointment = () => {
   const { data: doctors } = useDoctorSchedulesByDate(
     selectedDate || new Date().toISOString().split("T")[0]
   );
+  const { mutate: createAppointment } = useCreateAppointment();
 
   const {
     control,
@@ -145,8 +147,18 @@ const RegisterAppointment = () => {
     const [startTime] = data.appointmentTime.split("-"); // "HH:mm"
     const [hours, minutes] = startTime.split(":").map(Number);
     const date = new Date(data.appointmentDate);
-    date.setHours(hours, minutes, 0, 0);
-    const appointmentTimeISO = date.toISOString();
+
+    // Gán giờ theo local time
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    // Tạo ISO string theo local time, không bị lệch múi giờ
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const localISOString = `${date.getFullYear()}-${pad(
+      date.getMonth() + 1
+    )}-${pad(date.getDate())}T${pad(hours)}:${pad(minutes)}:00Z`;
 
     // Check if selected time slot is still valid for today
     const today = new Date();
@@ -165,10 +177,16 @@ const RegisterAppointment = () => {
     }
 
     const submitData = {
-      ...data,
-      appointmentTime: appointmentTimeISO,
+      userId: data.userId,
+      doctorId: data.doctorId,
+      serviceId: data.serviceId,
+      appointmentTime: localISOString,
+      isAnonymous: data.isAnonymous,
+      type: data.type,
+      notes: data.notes,
     };
-    console.log(submitData);
+
+    createAppointment(submitData);
     toast.success("Đặt lịch hẹn thành công!");
   };
 
@@ -310,61 +328,6 @@ const RegisterAppointment = () => {
               )}
             </div>
 
-            {/* Doctor Selection */}
-            <div className="space-y-3">
-              <Label
-                htmlFor="doctorId"
-                className="text-gray-700 font-semibold flex items-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Chọn Bác Sĩ <span className="text-red-500 ml-1">*</span>
-              </Label>
-              <Controller
-                name="doctorId"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value ? String(field.value) : ""}
-                  >
-                    <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                      <SelectValue placeholder="Chọn bác sĩ ưa thích" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {doctors?.data?.data?.map((doctor) => (
-                        <SelectItem
-                          key={doctor.id}
-                          value={doctor.id.toString()}
-                          className="flex items-center bg-white hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ease-in-out"
-                        >
-                          <span className="mr-2">👨‍⚕️</span>
-                          BS. {doctor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.doctorId && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.doctorId.message}
-                </p>
-              )}
-            </div>
-
             {/* Date and Time Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Date Selection */}
@@ -483,6 +446,61 @@ const RegisterAppointment = () => {
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* Doctor Selection */}
+            <div className="space-y-3">
+              <Label
+                htmlFor="doctorId"
+                className="text-gray-700 font-semibold flex items-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Chọn Bác Sĩ <span className="text-red-500 ml-1">*</span>
+              </Label>
+              <Controller
+                name="doctorId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value ? String(field.value) : ""}
+                  >
+                    <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                      <SelectValue placeholder="Chọn bác sĩ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {doctors?.map((doctor) => (
+                        <SelectItem
+                          key={doctor.id}
+                          value={doctor.id.toString()}
+                          className="flex items-center bg-white hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ease-in-out"
+                        >
+                          <span className="mr-2">👨‍⚕️</span>
+                          BS. {doctor.user.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.doctorId && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.doctorId.message}
+                </p>
+              )}
             </div>
 
             {/* Appointment Type */}
