@@ -31,3 +31,16 @@ export type TreatmentProtocolType = {
   createdAt: string;
   updatedAt: string;
 };
+
+// Thêm type cho response chuẩn hóa
+export type TreatmentProtocolsResponse = {
+  data: TreatmentProtocolType[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};

@@ -1,5 +1,8 @@
-import type { TreatmentProtocolType } from "@/types/treatmentProtocol";
 import { apiClient } from "@/services/apiClient";
+import type {
+  TreatmentProtocolsResponse,
+  TreatmentProtocolType,
+} from "@/types/treatmentProtocol";
 
 const API_URL = "/treatment-protocols";
 
@@ -20,7 +23,7 @@ export const treatmentProtocolsService = {
     sortBy?: string;
     sortOrder?: string;
     token: string;
-  }): Promise<TreatmentProtocolType[]> {
+  }): Promise<TreatmentProtocolsResponse> {
     const res = await apiClient.get(API_URL, {
       params: { page, limit, search, targetDisease, sortBy, sortOrder },
       headers: { Authorization: `Bearer ${token}` },
@@ -54,7 +57,6 @@ export const treatmentProtocolsService = {
       description: string;
       targetDisease: string;
       medicines: Array<{
-        id?: number;
         medicineId: number;
         dosage: string;
         duration: string;
@@ -99,7 +101,7 @@ export const treatmentProtocolsService = {
       return {
         userId: patientId,
         doctorId,
-        serviceId: med.medicineId || serviceId || 1,
+        serviceId: med.id || serviceId || 1,
         appointmentTime: revisitDate.toISOString(),
         isAnonymous: false,
         type: "OFFLINE" as const,

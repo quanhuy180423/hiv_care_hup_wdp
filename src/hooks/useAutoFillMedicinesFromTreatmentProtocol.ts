@@ -5,17 +5,13 @@ import { useEffect } from "react";
 type AutoFillMedicinesFromTreatmentProtocol = {
   protocols: TreatmentProtocolType[];
   selectedProtocolId: string | number;
-  medicineFields: CustomMedication[];
-  appendMedicine: (value: CustomMedication) => void;
-  removeMedicine: (index: number) => void;
+  replaceMedicine: (value: CustomMedication[]) => void;
 };
 
 export function useAutoFillMedicinesFromTreatmentProtocol({
   protocols,
   selectedProtocolId,
-  medicineFields,
-  appendMedicine,
-  removeMedicine,
+  replaceMedicine,
 }: AutoFillMedicinesFromTreatmentProtocol) {
   useEffect(() => {
     if (!selectedProtocolId) return;
@@ -27,29 +23,21 @@ export function useAutoFillMedicinesFromTreatmentProtocol({
       Array.isArray(selected.medicines) &&
       selected.medicines.length > 0
     ) {
-      // Reset medicines to protocol's medicines
-      while (medicineFields.length > 0) removeMedicine(0);
-      selected.medicines.forEach((med) => {
-        appendMedicine({
-          id: med.medicine?.id || Date.now(),
-          name: med.medicine?.name || "",
-          unit: med.medicine?.unit || "",
-          dose: med.medicine?.dose || med.dosage || "",
-          price: med.medicine?.price || "",
-          createdAt:
-            med.medicine?.createdAt || new Date().toISOString().slice(0, 16),
-          updatedAt:
-            med.medicine?.updatedAt || new Date().toISOString().slice(0, 16),
-          duration: med.duration || "",
-          notes: med.notes || "",
-        });
-      });
+      // Fill medicines using replace
+      const newMeds: CustomMedication[] = selected.medicines.map((med) => ({
+        id: med.medicine?.id || Date.now(),
+        name: med.medicine?.name || "",
+        unit: med.medicine?.unit || "",
+        dose: med.medicine?.dose || med.dosage || "",
+        price: med.medicine?.price || "",
+        createdAt:
+          med.medicine?.createdAt || new Date().toISOString().slice(0, 16),
+        updatedAt:
+          med.medicine?.updatedAt || new Date().toISOString().slice(0, 16),
+        duration: med.duration || "",
+        notes: med.notes || "",
+      }));
+      replaceMedicine(newMeds);
     }
-  }, [
-    appendMedicine,
-    medicineFields.length,
-    protocols,
-    removeMedicine,
-    selectedProtocolId,
-  ]);
+  }, [protocols, replaceMedicine, selectedProtocolId]);
 }

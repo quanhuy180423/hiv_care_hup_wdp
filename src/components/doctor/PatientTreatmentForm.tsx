@@ -1,6 +1,7 @@
 import { useAutoFillMedicinesFromTreatmentProtocol } from "@/hooks/useAutoFillMedicinesFromTreatmentProtocol";
 import { useTreatmentProtocols } from "@/hooks/useTreatmentProtocols";
 import { patientTreatmentSchema } from "@/schemas/patientTreatment";
+import type { MedicineType } from "@/types/medicine";
 import type {
   CustomMedication,
   PatientTreatmentFormValues,
@@ -17,6 +18,8 @@ export interface PatientTreatmentFormProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (values: PatientTreatmentFormValues) => void;
+  medicines?: MedicineType[];
+  isLoadingMedicines?: boolean;
 }
 
 const defaultMedicine = (): CustomMedication => ({
@@ -35,11 +38,13 @@ export const PatientTreatmentForm = ({
   open,
   onClose,
   onSubmit,
+  medicines: externalMedicines,
 }: PatientTreatmentFormProps) => {
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<PatientTreatmentFormValues>({
@@ -55,6 +60,7 @@ export const PatientTreatmentForm = ({
     fields: medicineFields,
     append: appendMedicine,
     remove: removeMedicine,
+    replace: replaceMedicine,
   } = useFieldArray({
     control,
     name: "medicines",
@@ -80,7 +86,7 @@ export const PatientTreatmentForm = ({
       enabled: open && !!token,
     });
   const protocols = useMemo(
-    () => (Array.isArray(protocolsData) ? protocolsData : []),
+    () => (Array.isArray(protocolsData?.data) ? protocolsData.data : []),
     [protocolsData]
   );
 
@@ -98,9 +104,7 @@ export const PatientTreatmentForm = ({
   useAutoFillMedicinesFromTreatmentProtocol({
     protocols,
     selectedProtocolId,
-    medicineFields,
-    appendMedicine,
-    removeMedicine,
+    replaceMedicine,
   });
 
   return (
@@ -110,9 +114,15 @@ export const PatientTreatmentForm = ({
           <DialogTitle>Tạo điều trị bệnh nhân</DialogTitle>
         </DialogHeader>
         <form
-          onSubmit={handleSubmit((values) =>
-            onSubmit(values as unknown as PatientTreatmentFormValues)
-          )}
+          onSubmit={handleSubmit((values) => {
+            // Đảm bảo mọi giá trị price đều là chuỗi số hợp lệ trước khi gửi
+            const medicines = values.medicines.map((med) => {
+              let price = String(med.price ?? "").replace(/[^\d]/g, "");
+              if (!price || isNaN(Number(price))) price = "0";
+              return { ...med, price };
+            });
+            onSubmit({ ...values, medicines });
+          })}
           className="space-y-4 mt-2"
         >
           <div>
@@ -176,14 +186,23 @@ export const PatientTreatmentForm = ({
             {medicineFields.map((field, idx) => (
               <div
                 key={field.id}
-                className="flex flex-wrap gap-2 mb-2 border-b pb-2 last:border-b-0 last:pb-0"
+                className="flex flex-wrap gap-2 mb-2 border-b pb-2 last:border-b-0 last:pb-0 transition-colors"
               >
                 <Input
                   {...register(`medicines.${idx}.name`)}
                   placeholder="Tên thuốc"
                   className="text-gray-900 placeholder-gray-400 flex-1 min-w-[120px]"
                   aria-label="Tên thuốc"
+                  list={externalMedicines ? "medicine-list" : undefined}
                 />
+                {/* Autocomplete datalist cho tên thuốc */}
+                {externalMedicines && idx === 0 && (
+                  <datalist id="medicine-list">
+                    {externalMedicines.map((med) => (
+                      <option key={med.id} value={med.name} />
+                    ))}
+                  </datalist>
+                )}
                 <Input
                   {...register(`medicines.${idx}.dose`)}
                   placeholder="Liều dùng/Hàm lượng"
@@ -197,11 +216,48 @@ export const PatientTreatmentForm = ({
                   aria-label="Đơn vị"
                 />
                 <Input
-                  {...register(`medicines.${idx}.price`)}
+                  key={`price-input-${field.id}`}
+                  defaultValue={
+                    typeof field.price === "string" && field.price
+                      ? Number(
+                          field.price.replace(/[^\d]/g, "")
+                        ).toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                          maximumFractionDigits: 0,
+                        })
+                      : ""
+                  }
                   placeholder="Giá"
-                  type="number"
+                  type="text"
                   className="text-gray-900 placeholder-gray-400 flex-1 min-w-[80px]"
                   aria-label="Giá"
+                  inputMode="numeric"
+                  onFocus={(e) => {
+                    // Khi focus, hiển thị giá trị gốc (chuỗi số)
+                    const raw = String(field.price ?? "").replace(/[^\d]/g, "");
+                    e.target.value = raw || "";
+                  }}
+                  onBlur={(e) => {
+                    // Khi blur, format lại hiển thị
+                    const value = e.target.value;
+                    const numeric = Number(value.replace(/[^\d]/g, ""));
+                    setValue(
+                      `medicines.${idx}.price`,
+                      numeric ? String(numeric) : "",
+                      { shouldValidate: true, shouldDirty: true }
+                    );
+                    if (value) {
+                      const formatted = numeric.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                        maximumFractionDigits: 0,
+                      });
+                      e.target.value = formatted;
+                    } else {
+                      e.target.value = "";
+                    }
+                  }}
                 />
                 <Input
                   {...register(`medicines.${idx}.createdAt`)}
@@ -223,8 +279,10 @@ export const PatientTreatmentForm = ({
                   size="icon"
                   onClick={() => removeMedicine(idx)}
                   aria-label="Xóa thuốc"
+                  className="ml-1 text-red-600 hover:text-red-800"
+                  title="Xóa thuốc"
                 >
-                  -
+                  <span className="sr-only">Xóa</span>-
                 </Button>
               </div>
             ))}

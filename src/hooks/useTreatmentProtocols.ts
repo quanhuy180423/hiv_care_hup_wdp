@@ -1,6 +1,17 @@
-import type { TreatmentProtocolType } from "@/types/treatmentProtocol";
-import { useQuery } from "@tanstack/react-query";
 import { treatmentProtocolsService } from "@/services/treatmentProtocolService";
+import type { TreatmentProtocolsResponse } from "@/types/treatmentProtocol";
+import { useQuery } from "@tanstack/react-query";
+
+type TreatmentProtocolsQueryParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  targetDisease?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  token: string;
+  enabled?: boolean;
+};
 
 export function useTreatmentProtocols({
   page = 1,
@@ -11,17 +22,8 @@ export function useTreatmentProtocols({
   sortOrder = "desc",
   enabled = true,
   token,
-}: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  targetDisease?: string;
-  sortBy?: string;
-  sortOrder?: string;
-  enabled?: boolean;
-  token: string;
-}) {
-  return useQuery<TreatmentProtocolType[]>({
+}: TreatmentProtocolsQueryParams) {
+  return useQuery<TreatmentProtocolsResponse>({
     queryKey: [
       "treatment-protocols",
       { page, limit, search, targetDisease, sortBy, sortOrder },

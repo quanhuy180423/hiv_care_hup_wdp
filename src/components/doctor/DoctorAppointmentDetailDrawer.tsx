@@ -11,7 +11,7 @@ import {
 import {
   PatientTreatmentForm,
   type PatientTreatmentFormValues,
-} from "./MedicalRecordForm";
+} from "./PatientTreatmentForm";
 
 interface AppointmentDetailDrawerProps {
   appointment: Appointment;

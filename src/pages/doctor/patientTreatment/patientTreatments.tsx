@@ -1,17 +1,19 @@
-import { PatientTreatmentForm } from "@/components/doctor/MedicalRecordForm";
 import { PatientTreatmentDetailDialog } from "@/components/doctor/PatientTreatmentDetailDialog";
+import { PatientTreatmentForm } from "@/components/doctor/PatientTreatmentForm";
 import { PatientTreatmentTable } from "@/components/doctor/PatientTreatmentTable";
 import { Input } from "@/components/ui/input";
+import { useMedicines } from "@/hooks/useMedicine";
 import type { Appointment } from "@/types/appointment";
-import { useMemo, useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
 import { Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 const DoctorPatientTreatments = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [openForm, setOpenForm] = useState(false);
   const [search, setSearch] = useState("");
+  const [filteredCount, setFilteredCount] = useState<number | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -26,15 +28,25 @@ const DoctorPatientTreatments = () => {
 
   // Lọc danh sách appointments theo search
   const filteredAppointments = useMemo(() => {
-    if (!search.trim()) return undefined; // undefined để PatientTreatmentTable lấy mặc định
-    return (appointments: Appointment[]) =>
-      appointments.filter(
+    if (!search.trim()) return undefined;
+    return (appointments: Appointment[]) => {
+      const filtered = appointments.filter(
         (appt) =>
           appt.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
           appt.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
           appt.notes?.toLowerCase().includes(search.toLowerCase())
       );
+      setFilteredCount(filtered.length);
+      return filtered;
+    };
   }, [search]);
+
+  const token = useMemo(() => localStorage.getItem("accessToken") || "", []);
+  // Lấy danh sách thuốc cho form (autocomplete/select)
+  const { data: medicines, isLoading: isLoadingMedicines } = useMedicines(
+    { page: 1, limit: 100 },
+    token
+  );
 
   return (
     <div className="p-4">
@@ -53,18 +65,16 @@ const DoctorPatientTreatments = () => {
               ref={searchInputRef}
               placeholder="Tìm kiếm bệnh nhân, email, ghi chú..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setFilteredCount(null);
+              }}
               className="pl-8"
             />
           </div>
-          {search && (
+          {search && filteredCount !== null && (
             <span className="text-xs text-gray-500 ml-2">
-              Đã tìm thấy{" "}
-              {filteredAppointments &&
-              typeof filteredAppointments === "function"
-                ? "..."
-                : ""}{" "}
-              kết quả
+              Đã tìm thấy {filteredCount} kết quả
             </span>
           )}
         </div>
@@ -78,14 +88,9 @@ const DoctorPatientTreatments = () => {
           onJoinMeet={handleJoinMeet}
           filterAppointments={filteredAppointments}
         />
-        {search && (
+        {search && filteredCount === 0 && (
           <div className="text-center text-gray-400 text-sm mt-2">
-            {/* Nếu không có kết quả sau khi lọc, hiển thị thông báo */}
-            {/* PatientTreatmentTable sẽ không render nếu không có appointments, nên kiểm tra ở đây */}
-            {/* Có thể truyền thêm prop để lấy số lượng kết quả thực tế nếu muốn chính xác hơn */}
-            {/* Hoặc custom lại PatientTreatmentTable để trả về số lượng kết quả */}
-            {/* Ở đây chỉ demo UX, bạn có thể tối ưu thêm */}
-            {/* Nếu cần, có thể truyền callback để nhận số lượng kết quả từ bảng */}
+            Không tìm thấy kết quả phù hợp.
           </div>
         )}
       </div>
@@ -106,6 +111,8 @@ const DoctorPatientTreatments = () => {
         <PatientTreatmentForm
           open={openForm}
           onClose={() => setOpenForm(false)}
+          medicines={medicines?.data}
+          isLoadingMedicines={isLoadingMedicines}
           onSubmit={async (values) => {
             setOpenForm(false);
             setSelectedAppointment(null);
@@ -122,20 +129,35 @@ const DoctorPatientTreatments = () => {
               const patientId = selectedAppointment.userId;
               const doctorId = selectedAppointment.doctorId;
               const startDate = selectedAppointment.appointmentTime;
+              const protocolId = Number(values.treatmentProtocol);
+
+              console.log(values);
+
               // Tạo hồ sơ bệnh án (chỉ truyền các trường hợp hợp lệ)
               await patientTreatmentService.create(
                 {
                   ...values,
-                  // Nếu backend yêu cầu, có thể cần truyền thêm patientId, doctorId, startDate, protocolId ở đây
+                  protocolId,
+                  patientId,
+                  doctorId,
+                  startDate,
+                } as import("@/types/patientTreatment").PatientTreatmentFormValues & {
+                  protocolId: number;
+                  patientId: number;
+                  doctorId: number;
+                  startDate: string;
                 },
                 token
               );
               // Lấy protocol object để truyền vào hàm tạo lịch tái khám
-              const protocols = await treatmentProtocolsService.getAll({
+              const protocolsRes = await treatmentProtocolsService.getAll({
                 token,
               });
+              const protocols = protocolsRes.data;
               const protocol = protocols.find(
-                (p) => p.id === Number(values.treatmentProtocol)
+                (
+                  p: import("@/types/treatmentProtocol").TreatmentProtocolType
+                ) => p.id === protocolId
               );
               if (protocol) {
                 await treatmentProtocolsService.createFollowupAppointments({

@@ -1,18 +1,7 @@
 import { apiClient } from "@/services/apiClient";
-import type { PaginationMeta } from "@/types/patientTreatment";
+import type { MedicineResponse, MedicineType } from "@/types/medicine";
 
-export interface Medicine {
-  id: number;
-  name: string;
-  description?: string;
-  unit: string;
-  dose: string;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MedicineQueryParams {
+export type MedicineQueryParams = {
   page?: number;
   limit?: number;
   search?: string;
@@ -21,7 +10,7 @@ export interface MedicineQueryParams {
   minPrice?: number;
   maxPrice?: number;
   unit?: string;
-}
+};
 
 export interface MedicineCreateInput {
   name: string;
@@ -37,22 +26,23 @@ export interface MedicineBulkCreateInput {
 }
 
 export const medicineService = {
-  async getAll(params: MedicineQueryParams, token: string) {
-    return apiClient.get<{ data: Medicine[]; meta: PaginationMeta }>(
-      "/medicines",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params,
-      }
-    );
+  async getAll(
+    params: MedicineQueryParams,
+    token: string
+  ): Promise<MedicineResponse> {
+    const res = await apiClient.get("/medicines", {
+      headers: { Authorization: `Bearer ${token}` },
+      params,
+    });
+    return res.data.data;
   },
   async getById(id: number | string, token: string) {
-    return apiClient.get<Medicine>(`/medicines/${id}`, {
+    return apiClient.get<MedicineType>(`/medicines/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
   async create(data: MedicineCreateInput, token: string) {
-    return apiClient.post<Medicine>("/medicines", data, {
+    return apiClient.post<MedicineType>("/medicines", data, {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
@@ -61,7 +51,7 @@ export const medicineService = {
     data: Partial<MedicineCreateInput>,
     token: string
   ) {
-    return apiClient.put<Medicine>(`/medicines/${id}`, data, {
+    return apiClient.put<MedicineType>(`/medicines/${id}`, data, {
       headers: { Authorization: `Bearer ${token}` },
     });
   },
@@ -71,7 +61,7 @@ export const medicineService = {
     });
   },
   async search(query: string, token: string) {
-    return apiClient.get<{ data: Medicine[] }>(`/medicines/search`, {
+    return apiClient.get<{ data: MedicineType[] }>(`/medicines/search`, {
       headers: { Authorization: `Bearer ${token}` },
       params: { q: query },
     });

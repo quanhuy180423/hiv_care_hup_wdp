@@ -11,12 +11,13 @@ export default function TreatmentProtocols() {
     typeof window !== "undefined"
       ? localStorage.getItem("accessToken") || ""
       : "";
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editProtocol, setEditProtocol] =
     useState<TreatmentProtocolType | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const {
     data: protocolsRaw,
     isLoading,
@@ -30,35 +31,36 @@ export default function TreatmentProtocols() {
     token,
     enabled: !!token,
   });
-  const protocols = Array.isArray(protocolsRaw) ? protocolsRaw : [];
 
-  // TODO: Thay bằng danh sách thuốc thực tế từ API
-  const allMedicines = [
-    { id: 1, name: "Lamivudine" },
-    { id: 2, name: "Tenofovir" },
-    { id: 3, name: "Efavirenz" },
-  ];
-  const findMedicineIdByName = (name: string) =>
-    allMedicines.find((m) => m.name === name)?.id || 0;
-  const findMedicineNameById = (id: number) =>
-    allMedicines.find((m) => m.id === id)?.name || "";
+  const protocols = Array.isArray(protocolsRaw?.data) ? protocolsRaw.data : [];
+  const meta = protocolsRaw?.meta;
 
-  // Create or update
+  // Handle create or update protocol
   const handleSubmit = async (values: {
     name: string;
     description: string;
     targetDisease: string;
     medicines: Array<{
-      name: string;
+      id: number;
       dosage: string;
       schedule: string;
       notes: string;
     }>;
   }) => {
+    // Validate medicines before submit
+    if (
+      values.medicines.length === 0 ||
+      values.medicines.some(
+        (m) => !m.dosage.trim() || isNaN(Number(m.id)) || Number(m.id) <= 0
+      )
+    ) {
+      alert("Vui lòng chọn thuốc hợp lệ và nhập đủ liều dùng cho từng thuốc.");
+      return;
+    }
     setIsPending(true);
     try {
       const mappedMedicines = values.medicines.map((m) => ({
-        medicineId: findMedicineIdByName(m.name),
+        medicineId: Number(m.id),
         dosage: m.dosage,
         duration: m.schedule,
         notes: m.notes,
@@ -90,7 +92,7 @@ export default function TreatmentProtocols() {
     }
   };
 
-  // Delete
+  // Handle delete protocol
   const handleDelete = async (id: string) => {
     if (!window.confirm("Bạn chắc chắn muốn xoá phác đồ này?")) return;
     setDeleteId(id);
@@ -133,6 +135,28 @@ export default function TreatmentProtocols() {
         onDelete={(id) => handleDelete(String(id))}
         deleteId={deleteId ? Number(deleteId) : null}
       />
+      {/* Pagination UI */}
+      {meta && (
+        <div className="flex justify-center mt-4 gap-2">
+          <Button
+            variant="outline"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Trang trước
+          </Button>
+          <span className="flex items-center gap-2">
+            Trang {meta.page} / {meta.totalPages}
+          </span>
+          <Button
+            variant="outline"
+            disabled={page >= meta.totalPages}
+            onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+          >
+            Trang sau
+          </Button>
+        </div>
+      )}
       <ProtocolFormModal
         open={modalOpen}
         onClose={() => {
@@ -148,7 +172,7 @@ export default function TreatmentProtocols() {
                 targetDisease: editProtocol.targetDisease ?? "HIV",
                 medicines:
                   editProtocol.medicines?.map((m) => ({
-                    name: findMedicineNameById(m.medicineId),
+                    id: m.medicineId,
                     dosage: m.dosage,
                     schedule: m.duration,
                     notes: m.notes ?? "",

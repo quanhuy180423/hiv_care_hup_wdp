@@ -7,8 +7,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useMedicines } from "@/hooks/useMedicine";
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 const DISEASES = [
@@ -16,17 +17,11 @@ const DISEASES = [
   { value: "LAO", label: "Lao" },
   { value: "COVID", label: "COVID-19" },
 ];
+
 const SCHEDULES = [
   { value: "MORNING", label: "Sáng" },
   { value: "AFTERNOON", label: "Chiều" },
   { value: "NIGHT", label: "Tối" },
-];
-
-// TODO: Thay bằng danh sách thuốc thực tế từ API
-const ALL_MEDICINES = [
-  { id: 1, name: "Lamivudine" },
-  { id: 2, name: "Tenofovir" },
-  { id: 3, name: "Efavirenz" },
 ];
 
 interface ProtocolFormModalProps {
@@ -37,7 +32,7 @@ interface ProtocolFormModalProps {
     description: string;
     targetDisease: string;
     medicines: Array<{
-      name: string;
+      id: number;
       dosage: string;
       schedule: string;
       notes: string;
@@ -48,7 +43,7 @@ interface ProtocolFormModalProps {
     description: string;
     targetDisease: string;
     medicines: Array<{
-      name: string;
+      id: number;
       dosage: string;
       schedule: string;
       notes: string;
@@ -80,7 +75,7 @@ export function ProtocolFormModal({
         Array.isArray(initialData.medicines) &&
         initialData.medicines.length > 0
           ? initialData.medicines
-          : [{ name: "", dosage: "", schedule: "MORNING", notes: "" }],
+          : [{ id: "", dosage: "", schedule: "MORNING", notes: "" }],
     },
   });
 
@@ -89,19 +84,47 @@ export function ProtocolFormModal({
     name: "medicines",
   });
 
+  // Lấy danh sách thuốc thực tế từ API
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("accessToken") || ""
+      : "";
+  const { data: medicinesData, isLoading: isLoadingMedicines } = useMedicines(
+    {},
+    token
+  );
+  // Đảm bảo ALL_MEDICINES luôn là mảng
+  const ALL_MEDICINES = useMemo(
+    () => (Array.isArray(medicinesData?.data) ? medicinesData.data : []),
+    [medicinesData]
+  );
+
+  // Helper ép id về số đúng chuẩn
+  type MedicineFormItem = {
+    id: number;
+    dosage: string;
+    schedule: string;
+    notes: string;
+  };
+  function normalizeMedicines(meds: unknown): MedicineFormItem[] {
+    if (!Array.isArray(meds))
+      return [{ id: 0, dosage: "", schedule: "MORNING", notes: "" }];
+    return meds.map((m) => ({
+      ...m,
+      id: Number(m.id) || 0,
+    }));
+  }
+
   useEffect(() => {
-    reset({
-      name: initialData?.name || "",
-      description: initialData?.description || "",
-      targetDisease: initialData?.targetDisease || "HIV",
-      medicines:
-        initialData &&
-        Array.isArray(initialData.medicines) &&
-        initialData.medicines.length > 0
-          ? initialData.medicines
-          : [{ name: "", dosage: "", schedule: "MORNING", notes: "" }],
-    });
-  }, [open, initialData, reset]);
+    if (open && !isLoadingMedicines) {
+      reset({
+        name: initialData?.name ?? "",
+        description: initialData?.description ?? "",
+        targetDisease: initialData?.targetDisease ?? "HIV",
+        medicines: normalizeMedicines(initialData?.medicines),
+      });
+    }
+  }, [open, isLoadingMedicines, initialData, reset]);
 
   // Tự động focus input tên khi mở modal
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -112,11 +135,19 @@ export function ProtocolFormModal({
   const onFormSubmit = handleSubmit((values) => {
     if (
       values.medicines.length === 0 ||
-      values.medicines.some((m) => !m.name.trim() || !m.dosage.trim())
+      values.medicines.some(
+        (m) => !m.dosage.trim() || isNaN(Number(m.id)) || Number(m.id) <= 0
+      )
     ) {
       return;
     }
-    onSubmit(values);
+    onSubmit({
+      ...values,
+      medicines: values.medicines.map((m) => ({
+        ...m,
+        id: Number(m.id),
+      })),
+    });
   });
 
   return (
@@ -134,7 +165,11 @@ export function ProtocolFormModal({
               {...register("name", {
                 required: "Tên phác đồ không được để trống",
               })}
-              ref={nameInputRef}
+              // Kết hợp ref để vừa focus vừa controlled
+              ref={(e) => {
+                register("name").ref(e);
+                nameInputRef.current = e;
+              }}
               required
               autoFocus
             />
@@ -162,14 +197,25 @@ export function ProtocolFormModal({
             <label className="block font-medium mb-1">Bệnh</label>
             <select
               {...register("targetDisease", { required: true })}
-              className="w-full border rounded px-2 py-1"
+              className={`w-full border rounded px-2 py-1 ${
+                errors.targetDisease ? "border-red-500" : ""
+              }`}
+              required
             >
+              <option value="" disabled className="text-gray-400">
+                Chọn bệnh
+              </option>
               {DISEASES.map((d) => (
-                <option key={d.value} value={d.value}>
+                <option key={d.value} value={d.value} className="text-gray-900">
                   {d.label}
                 </option>
               ))}
             </select>
+            {errors.targetDisease && (
+              <div className="text-xs text-red-500 mt-1">
+                Vui lòng chọn bệnh
+              </div>
+            )}
           </div>
           <div>
             <label className="block font-semibold mb-1 text-base">
@@ -186,32 +232,38 @@ export function ProtocolFormModal({
                     {/* Medicine select */}
                     <div className="flex-1 min-w-[120px]">
                       <select
-                        {...register(`medicines.${idx}.name`, {
+                        {...register(`medicines.${idx}.id`, {
                           required: true,
                         })}
                         className={`w-full border rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-primary/50 ${
-                          errors.medicines?.[idx]?.name ? "border-red-500" : ""
+                          errors.medicines?.[idx]?.id ? "border-red-500" : ""
                         }`}
                         required
                         aria-label="Chọn thuốc"
+                        disabled={isLoadingMedicines}
                       >
-                        <option value="" className="text-gray-400">
-                          Chọn thuốc
+                        <option value="" disabled className="text-gray-400">
+                          {isLoadingMedicines
+                            ? "Đang tải danh sách thuốc..."
+                            : "Chọn thuốc"}
                         </option>
-                        {ALL_MEDICINES.map((m) => (
-                          <option
-                            key={m.id}
-                            value={m.name}
-                            title={m.name}
-                            className="text-gray-900"
-                          >
-                            {m.name}
-                          </option>
-                        ))}
+                        {!isLoadingMedicines &&
+                          (ALL_MEDICINES as { id: number; name: string }[]).map(
+                            (m) => (
+                              <option
+                                key={m.id}
+                                value={String(m.id)}
+                                title={m.name}
+                                className="text-gray-900"
+                              >
+                                {m.name}
+                              </option>
+                            )
+                          )}
                       </select>
-                      {errors.medicines?.[idx]?.name && (
+                      {errors.medicines?.[idx]?.id && (
                         <div className="text-xs text-red-500 mt-1">
-                          Chọn thuốc
+                          Vui lòng chọn thuốc
                         </div>
                       )}
                     </div>
@@ -281,7 +333,7 @@ export function ProtocolFormModal({
                 className="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium px-3 py-2 rounded-lg border border-primary bg-primary/5 hover:bg-primary/10 transition mt-1"
                 onClick={() =>
                   append({
-                    name: "",
+                    id: 0,
                     dosage: "",
                     schedule: "MORNING",
                     notes: "",
