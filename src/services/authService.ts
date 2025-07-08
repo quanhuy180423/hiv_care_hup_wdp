@@ -86,6 +86,9 @@ export interface UpdateProfileRequest {
   avatar?: string;
 }
 
+export interface LogoutRequest {
+  refreshToken?: string;
+}
 // Auth service implementation
 export const authService = {
   // Login user
@@ -204,6 +207,25 @@ export const authService = {
         throw new Error("Đổi mật khẩu thất bại");
       }
     } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  },
+
+  // Logout user
+  logout: async (): Promise<void> => {
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        const res = await apiClient.post(AUTH_ENDPOINTS.LOGOUT, {
+          refreshToken,
+        });
+        return res.data;
+      }
+      // Clear tokens from localStorage
+      // localStorage.removeItem("auth_token");
+      // localStorage.removeItem("refresh_token");
+    } catch (error) {
+      console.error("🌐 authService.logout error:", error);
       throw new Error(handleApiError(error));
     }
   },

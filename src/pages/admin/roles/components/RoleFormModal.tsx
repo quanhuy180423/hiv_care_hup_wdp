@@ -29,7 +29,7 @@ import { useRoleModalStore } from "@/store/roleStore";
 import { usePermissions } from "@/hooks/usePermissions";
 import useAuthStore from "@/store/authStore";
 import toast from "react-hot-toast";
-import { handleApiError } from "@/utils/errorHandler";
+import { handleApiError } from "@/lib/utils/errorHandler";
 
 type RoleFormModalProps = {
   open: boolean;

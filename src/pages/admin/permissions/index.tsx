@@ -19,7 +19,7 @@ import type { Permission, PermissionFormValues } from "@/types/permission";
 import { getColumns } from "./columns";
 import { PermissionFormModal } from "./components/PermissionFormModal";
 import { PermissionDetailsDrawer } from "./components/PermissionDetailsDrawer";
-import { handleApiError } from "@/utils/errorHandler";
+import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function PermissionManagement() {
   const [searchText, setSearchText] = useState("");

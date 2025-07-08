@@ -25,7 +25,7 @@ import { MedicineDetailsDrawer } from "./components/MedicineDetailsDrawer";
 import { BulkCreateModal } from "./components/BulkCreateModal";
 import { AdvancedSearchModal } from "./components/AdvancedSearchModal";
 import { PriceRangeModal } from "./components/PriceRangeModal";
-import { handleApiError } from "@/utils/errorHandler";
+import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function MedicineManagement() {
   const [searchTerm, setSearchTerm] = useState("");

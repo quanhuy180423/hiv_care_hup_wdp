@@ -20,7 +20,7 @@ import type { User, UserFormValues, UpdateUserFormValues } from "@/types/user";
 import { getColumns } from "./columns";
 import { UserFormModal } from "./components/UserFormModal";
 import { UserDetailsDrawer } from "./components/UserDetailsDrawer";
-import { handleApiError } from "@/utils/errorHandler";
+import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function UserManagement() {
   const [searchText, setSearchText] = useState("");

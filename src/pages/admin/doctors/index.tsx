@@ -50,7 +50,7 @@ import { SwapShiftsModal } from "./components/SwapShiftsModal";
 import { DoctorDetailsDrawer } from "./components/DoctorDetailsDrawer";
 import { GenerateScheduleModal } from "./components/GenerateScheduleModal";
 import { getColumns } from "./columns";
-import { handleApiError } from "@/utils/errorHandler";
+import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function DoctorManagement() {
   const queryClient = useQueryClient();

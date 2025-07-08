@@ -30,3 +30,28 @@ export const formatTimeAgo = (date: string | Date) => {
   if (!date) return "";
   return formatDistanceToNow(new Date(date), { addSuffix: true });
 };
+
+export function formatUtcDateManually(
+  dateString?: string,
+  fallback = "N/A"
+): string {
+  if (!dateString) return fallback;
+
+  try {
+    const date = new Date(dateString);
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    const day = pad(date.getUTCDate());
+    const month = pad(date.getUTCMonth() + 1);
+    const year = date.getUTCFullYear();
+
+    const hours = pad(date.getUTCHours());
+    const minutes = pad(date.getUTCMinutes());
+
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  } catch (err) {
+    console.error("❌ UTC format error:", err);
+    return fallback;
+  }
+}

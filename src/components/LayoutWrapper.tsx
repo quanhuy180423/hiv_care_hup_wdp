@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { UserLayout } from "./layouts/UserLayout";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AuthLayout } from "./layouts/AuthLayout";
+import { StaffLayout } from "./layouts/StaffLayout";
 
 interface LayoutWrapperProps {
   children: ReactNode;
@@ -17,9 +18,10 @@ export function LayoutWrapper({
       return <AdminLayout>{children}</AdminLayout>;
     case "AUTH":
       return <AuthLayout>{children}</AuthLayout>;
-    case "PATIENT":
     case "DOCTOR":
+      return <UserLayout>{children}</UserLayout>; //tạm chưa dựng layout doctor
     case "STAFF":
+      return <StaffLayout>{children}</StaffLayout>;
     default:
       return <UserLayout>{children}</UserLayout>;
   }

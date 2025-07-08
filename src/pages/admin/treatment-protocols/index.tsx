@@ -20,7 +20,7 @@ import type { TreatmentProtocol } from "@/types/treatmentProtocol";
 import type { TreatmentProtocolFormValues } from "@/schemas/treatmentProtocol";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
-import { handleApiError } from "@/utils/errorHandler";
+import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function TreatmentProtocolsManagement() {
   const [searchText, setSearchText] = useState("");
