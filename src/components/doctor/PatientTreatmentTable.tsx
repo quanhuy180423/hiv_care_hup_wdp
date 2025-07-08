@@ -5,19 +5,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAppointmentsByDoctor } from "@/hooks/useAppointments";
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import type { Appointment } from "@/types/appointment";
-import { Eye, FilePlus2, Video } from "lucide-react";
-import { useQueries } from "@tanstack/react-query";
-import { useAuthStore } from "@/store/authStore";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
+import { useAuthStore } from "@/store/authStore";
+import type { Appointment } from "@/types/appointment";
 import type { PatientTreatmentType } from "@/types/patientTreatment";
+import { useQueries } from "@tanstack/react-query";
+import { Eye, FilePlus2, Video } from "lucide-react";
+import { useMemo } from "react";
 
 interface PatientTreatmentTableProps {
   onShowDetail: (appointment: Appointment) => void;
   onShowForm: (appointment: Appointment) => void;
   onJoinMeet: (appointment: Appointment) => void;
+  filterAppointments?: (appointments: Appointment[]) => Appointment[];
 }
 
 // Custom hook: lấy hồ sơ điều trị cho nhiều patientId
@@ -44,16 +45,20 @@ export const PatientTreatmentTable = ({
   onShowDetail,
   onShowForm,
   onJoinMeet,
+  filterAppointments,
 }: PatientTreatmentTableProps) => {
   const doctorData = JSON.parse(localStorage.getItem("userProfile") || "{}");
   const doctorId = doctorData.doctorId;
   const { data: appointments = [], isLoading } =
     useAppointmentsByDoctor(doctorId);
+  const displayAppointments = filterAppointments
+    ? filterAppointments(appointments)
+    : appointments;
 
   // Lấy tất cả patientId từ appointments
   const patientIds = useMemo(
-    () => Array.from(new Set(appointments.map((appt) => appt.userId))),
-    [appointments]
+    () => Array.from(new Set(displayAppointments.map((appt) => appt.userId))),
+    [displayAppointments]
   );
 
   // Lấy hồ sơ điều trị cho tất cả bệnh nhân
@@ -85,7 +90,7 @@ export const PatientTreatmentTable = ({
         </tr>
       </thead>
       <tbody>
-        {appointments.map((appt) => {
+        {displayAppointments.map((appt) => {
           const treatCount = treatmentsByPatient[appt.userId] || 0;
           return (
             <tr key={appt.id} className="border-b">
