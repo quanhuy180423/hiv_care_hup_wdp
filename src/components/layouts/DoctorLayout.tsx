@@ -30,6 +30,11 @@ const sidebarNav = [
     icon: Stethoscope,
     path: "/doctor/patient-treatments",
   },
+  {
+    name: "Phác dồ điều trị",
+    icon: Stethoscope,
+    path: "/doctor/treatment-protocols",
+  },
 ];
 
 export default function DoctorLayout({ children }: DoctorLayoutProps) {

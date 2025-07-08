@@ -7,8 +7,15 @@ export const patientTreatmentSchema = z.object({
   medicines: z
     .array(
       z.object({
+        id: z.number(),
         name: z.string().min(1, "Vui lòng nhập tên thuốc"),
-        dosage: z.string().min(1, "Vui lòng nhập liều dùng"),
+        unit: z.string().min(1, "Vui lòng nhập đơn vị"),
+        dose: z.string().min(1, "Vui lòng nhập liều dùng/hàm lượng"),
+        price: z.string().min(1, "Vui lòng nhập giá"),
+        createdAt: z.string().min(1, "Vui lòng nhập ngày tạo"),
+        updatedAt: z.string().min(1, "Vui lòng nhập ngày cập nhật"),
+        duration: z.string().optional(),
+        notes: z.string().optional(),
       })
     )
     .min(1, "Cần ít nhất 1 thuốc"),

@@ -3,20 +3,22 @@ import { ProtocolsTable } from "@/components/treatmentProtocols/ProtocolsTable";
 import { Button } from "@/components/ui/button";
 import { useTreatmentProtocols } from "@/hooks/useTreatmentProtocols";
 import { treatmentProtocolsService } from "@/services/treatmentProtocolService";
+import type { TreatmentProtocolType } from "@/types/treatmentProtocol";
 import { useState } from "react";
 
-export default function TreatmentProtocolsPage() {
+export default function TreatmentProtocols() {
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("accessToken") || ""
       : "";
   const [page] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editProtocol, setEditProtocol] = useState<any>(null);
+  const [editProtocol, setEditProtocol] =
+    useState<TreatmentProtocolType | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const {
-    data: protocols = [],
+    data: protocolsRaw,
     isLoading,
     isError,
     refetch,
@@ -28,18 +30,53 @@ export default function TreatmentProtocolsPage() {
     token,
     enabled: !!token,
   });
+  const protocols = Array.isArray(protocolsRaw) ? protocolsRaw : [];
+
+  // TODO: Thay bằng danh sách thuốc thực tế từ API
+  const allMedicines = [
+    { id: 1, name: "Lamivudine" },
+    { id: 2, name: "Tenofovir" },
+    { id: 3, name: "Efavirenz" },
+  ];
+  const findMedicineIdByName = (name: string) =>
+    allMedicines.find((m) => m.name === name)?.id || 0;
+  const findMedicineNameById = (id: number) =>
+    allMedicines.find((m) => m.id === id)?.name || "";
 
   // Create or update
   const handleSubmit = async (values: {
     name: string;
     description: string;
+    targetDisease: string;
+    medicines: Array<{
+      name: string;
+      dosage: string;
+      schedule: string;
+      notes: string;
+    }>;
   }) => {
     setIsPending(true);
     try {
+      const mappedMedicines = values.medicines.map((m) => ({
+        medicineId: findMedicineIdByName(m.name),
+        dosage: m.dosage,
+        duration: m.schedule,
+        notes: m.notes,
+      }));
+      const submitData = {
+        name: values.name,
+        description: values.description,
+        targetDisease: values.targetDisease,
+        medicines: mappedMedicines,
+      };
       if (editProtocol) {
-        await treatmentProtocolsService.update(editProtocol.id, values, token);
+        await treatmentProtocolsService.update(
+          editProtocol.id,
+          submitData,
+          token
+        );
       } else {
-        await treatmentProtocolsService.create(values, token);
+        await treatmentProtocolsService.create(submitData, token);
       }
       setModalOpen(false);
       setEditProtocol(null);
@@ -68,7 +105,7 @@ export default function TreatmentProtocolsPage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Quản lý phác đồ điều trị</h1>
         <Button
@@ -103,7 +140,22 @@ export default function TreatmentProtocolsPage() {
           setEditProtocol(null);
         }}
         onSubmit={handleSubmit}
-        initialData={editProtocol}
+        initialData={
+          editProtocol
+            ? {
+                name: editProtocol.name,
+                description: editProtocol.description ?? "",
+                targetDisease: editProtocol.targetDisease ?? "HIV",
+                medicines:
+                  editProtocol.medicines?.map((m) => ({
+                    name: findMedicineNameById(m.medicineId),
+                    dosage: m.dosage,
+                    schedule: m.duration,
+                    notes: m.notes ?? "",
+                  })) || [],
+              }
+            : null
+        }
         isPending={isPending}
       />
     </div>

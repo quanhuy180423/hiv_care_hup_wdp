@@ -28,7 +28,20 @@ export const treatmentProtocolsService = {
     return res.data.data;
   },
 
-  async create(data: { name: string; description: string }, token: string) {
+  async create(
+    data: {
+      name: string;
+      description: string;
+      targetDisease: string;
+      medicines: Array<{
+        medicineId: number;
+        dosage: string;
+        duration: string;
+        notes?: string;
+      }>;
+    },
+    token: string
+  ) {
     return apiClient.post(API_URL, data, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -36,7 +49,18 @@ export const treatmentProtocolsService = {
 
   async update(
     id: number,
-    data: { name: string; description: string },
+    data: {
+      name: string;
+      description: string;
+      targetDisease: string;
+      medicines: Array<{
+        id?: number;
+        medicineId: number;
+        dosage: string;
+        duration: string;
+        notes?: string;
+      }>;
+    },
     token: string
   ) {
     return apiClient.put(`${API_URL}/${id}`, data, {

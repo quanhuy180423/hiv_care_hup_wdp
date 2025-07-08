@@ -1,10 +1,19 @@
+export interface CustomMedication {
+  id: number; // id là bắt buộc
+  name: string;
+  unit: string;
+  dose: string;
+  price: string;
+  createdAt: string;
+  updatedAt: string;
+  duration?: string;
+  notes?: string;
+}
+
 export interface PatientTreatmentFormValues {
   diagnosis: string;
   treatmentProtocol: string;
-  medicines: Array<{
-    name: string;
-    dosage: string;
-  }>;
+  medicines: CustomMedication[];
   tests: Array<{
     name: string;
   }>;
@@ -37,41 +46,35 @@ export interface PatientTreatmentQueryParams {
   protocolId?: number;
   startDate?: string;
   endDate?: string;
-  // Add more specific filter fields as needed
 }
 
 export interface PatientTreatmentStats {
   totalTreatments: number;
   activeTreatments: number;
   completedTreatments: number;
-  // Add more specific stats fields as needed
 }
 
 export interface DoctorWorkloadStats {
   doctorId: number;
   totalPatients: number;
   totalTreatments: number;
-  // Add more specific workload fields as needed
 }
 
 export interface CustomMedicationStats {
   totalCustomMedications: number;
   mostCommonMedications: string[];
-  // Add more specific stats fields as needed
 }
 
 export interface TreatmentComplianceStats {
   patientId: number;
   complianceRate: number;
   missedDoses: number;
-  // Add more specific compliance fields as needed
 }
 
 export interface TreatmentCostAnalysis {
   totalCost: number;
   averageCost: number;
   breakdown: Record<string, number>;
-  // Add more specific cost analysis fields as needed
 }
 
 export interface BulkPatientTreatmentInput {
@@ -81,13 +84,11 @@ export interface BulkPatientTreatmentInput {
   startDate: string;
   endDate?: string;
   notes?: string;
-  // Add more specific bulk input fields as needed
 }
 
 export interface EndActiveTreatmentsResult {
   endedCount: number;
   affectedTreatmentIds: number[];
-  // Add more specific result fields as needed
 }
 
 export interface ActivePatientTreatmentType {
@@ -97,13 +98,11 @@ export interface ActivePatientTreatmentType {
   doctorId: number;
   startDate: string;
   endDate?: string;
-  // Add more specific active treatment fields as needed
 }
 
 export interface ActivePatientTreatmentsSummary {
   totalActive: number;
   patients: Array<{ patientId: number; activeTreatments: number }>;
-  // Add more specific summary fields as needed
 }
 
 export interface PaginatedActiveTreatmentsResult {

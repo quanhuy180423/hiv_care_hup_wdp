@@ -43,6 +43,7 @@ import RoleManagement from "./pages/admin/roles";
 import DoctorAppointments from "./pages/doctor/appointments";
 import DoctorPatientTreatments from "./pages/doctor/patientTreatment/patientTreatments";
 import DoctorSchedule from "./pages/doctor/schedule";
+import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 import AppointmentsManagement from "./pages/staff/appointments";
 import BlogsManagement from "./pages/staff/blogs";
 import CategoryBlogManagement from "./pages/staff/categoriesBlog";
@@ -357,6 +358,17 @@ export const doctorRoutes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["DOCTOR"],
   },
+  {
+    path: "/doctor/treatment-protocols",
+    component: TreatmentProtocols,
+    title: "Phác đồ điều trị",
+    description: "Quản lý phác đồ điều trị",
+    protected: true,
+    layout: "DOCTOR",
+    icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
 ];
 
 // Combine all routes
@@ -425,6 +437,7 @@ export const ROUTES = {
   DOCTOR_APPOINTMENTS: "/doctor/appointments",
   DOCTOR_SCHEDULE: "/doctor/schedule",
   DOCTOR_PATIENT_TREATMENTS: "/doctor/patient-treatments",
+  DOCTOR_TREATMENT_PROTOCOLS: "/doctor/treatment-protocols",
 } as const;
 
 // Helper function to get route config by path
