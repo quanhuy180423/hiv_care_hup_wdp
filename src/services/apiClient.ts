@@ -2,7 +2,6 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
-import toast from "react-hot-toast";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -244,16 +243,10 @@ class ApiClient {
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any) {
-    if (typeof window !== "undefined") {
-      // Chỉ gọi toast ở phía client
-      if (error.response) {
-        const message = error.response.data?.message || "Có lỗi xảy ra";
-        toast.error(message);
-      } else if (error.request) {
-        toast.error("Không thể kết nối tới server");
-      } else {
-        toast.error("Có lỗi xảy ra");
-      }
+    // Chỉ log error, không hiển thị toast tự động
+    // Component sẽ tự xử lý việc hiển thị toast
+    if (import.meta.env.DEV) {
+      console.error("API Error:", error);
     }
   }
 }

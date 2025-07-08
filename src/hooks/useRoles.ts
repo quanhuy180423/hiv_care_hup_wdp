@@ -2,11 +2,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roleService } from "@/services/roleService";
 import type { RoleFormValues } from "@/types/role";
 
-export const useRoles = (search?: string) => {
+interface UseRolesParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export const useRoles = (params: UseRolesParams = {}) => {
+  const { page = 1, limit = 10, search = "" } = params;
+  
   return useQuery({
-    queryKey: ["roles", { search }],
-    queryFn: () => roleService.getRoles({ limit: 100, search }),
-    select: (res) => res.data.data,
+    queryKey: ["roles", { page, limit, search }],
+    queryFn: () => roleService.getRoles({ page, limit, search }),
+    select: (res) => ({
+      data: res.data.data,
+      meta: res.data.meta,
+    }),
   });
 };
 

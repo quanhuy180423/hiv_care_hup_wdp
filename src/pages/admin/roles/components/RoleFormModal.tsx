@@ -29,6 +29,7 @@ import { useRoleModalStore } from "@/store/roleStore";
 import { usePermissions } from "@/hooks/usePermissions";
 import useAuthStore from "@/store/authStore";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/errorHandler";
 
 type RoleFormModalProps = {
   open: boolean;
@@ -37,7 +38,8 @@ type RoleFormModalProps = {
 
 const RoleFormModal = ({ open, onClose }: RoleFormModalProps) => {
   const { editingRole, closeModal } = useRoleModalStore();
-  const { data: permissions } = usePermissions();
+  const { data: permissionsData } = usePermissions();
+  const permissions = permissionsData?.data || [];
   const { mutate: createRole, isPending: isCreating } = useCreateRole();
   const { mutate: updateRole, isPending: isUpdating } = useUpdateRole();
   const { user } = useAuthStore();
@@ -80,12 +82,12 @@ const RoleFormModal = ({ open, onClose }: RoleFormModalProps) => {
         { id: editingRole.id, data: payload },
         {
           onSuccess: () => {
-            toast.success("Cập nhật vai trò thành công.");
+            toast.success("Cập nhật vai trò thành công.");
             closeModal();
             form.reset();
           },
-          onError: () => {
-            toast.error("Cập nhật vai trò thất bại.");
+          onError: (error: any) => {
+            toast.error(handleApiError(error));
           },
         }
       );
@@ -96,12 +98,12 @@ const RoleFormModal = ({ open, onClose }: RoleFormModalProps) => {
       };
       createRole(payload, {
         onSuccess: () => {
-          toast.success("Tạo vai trò thành công.");
+          toast.success("Tạo vai trò thành công.");
           closeModal();
           form.reset();
         },
-        onError: () => {
-          toast.error("Tạo vai trò thất bại.");
+        onError: (error: any) => {
+          toast.error(handleApiError(error));
         },
       });
     }

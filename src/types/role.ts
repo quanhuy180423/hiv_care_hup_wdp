@@ -18,13 +18,18 @@ export interface RoleFormValues {
   permissions: number[];
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface RolesResponse {
   data: {
     data: Role[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-    };
+    meta: PaginationMeta;
   };
 }

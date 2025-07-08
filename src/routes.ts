@@ -38,7 +38,11 @@ import {
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
 import RoleManagement from "./pages/admin/roles";
 import PermissionManagement from "./pages/admin/permissions";
-
+import UserManagement from "./pages/admin/users";
+import DoctorManagement from "./pages/admin/doctors";
+import MedicineManagement from "./pages/admin/medicines";
+import ServicesManagement from "./pages/admin/services";
+import TreatmentProtocolsManagement from "./pages/admin/treatment-protocols";
 // Route definition interface
 export interface RouteConfig {
   path: string;
@@ -190,7 +194,7 @@ export const adminRoutes: RouteConfig[] = [
   },
   {
     path: "/admin/users",
-    component: AdminUserManagementPage,
+    component: UserManagement,
     title: "Quản lý người dùng",
     description: "Quản lý người dùng hệ thống",
     protected: true,
@@ -201,7 +205,7 @@ export const adminRoutes: RouteConfig[] = [
   },
   {
     path: "/admin/doctors",
-    component: AdminDoctorManagementPage,
+    component: DoctorManagement,
     title: "Quản lý bác sĩ",
     description: "Quản lý thông tin bác sĩ",
     protected: true,
@@ -244,13 +248,35 @@ export const adminRoutes: RouteConfig[] = [
     allowedRoles: ["ADMIN"],
   },
   {
-    path: "/admin/reports",
-    component: AdminReportsPage,
-    title: "Báo cáo",
-    description: "Xem các báo cáo thống kê hệ thống",
+    path: "/admin/medicines",
+    component: MedicineManagement,
+    title: "Quản lý thuốc",
+    description: "Quản lý thuốc",
     protected: true,
     layout: "ADMIN",
     icon: Calculator,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/services",
+    component: ServicesManagement,
+    title: "Quản lý dịch vụ",
+    description: "Quản lý dịch vụ",
+    protected: true,
+    layout: "ADMIN",
+    icon: Calculator,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/treatment-protocols",
+    component: TreatmentProtocolsManagement,
+    title: "Quản lý protocols điều trị",
+    description: "Quản lý các protocols điều trị",
+    protected: true,
+    layout: "ADMIN",
+    icon: Stethoscope,
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
@@ -319,6 +345,7 @@ export const ROUTES = {
   ADMIN_APPOINTMENTS: "/admin/appointments",
   ADMIN_PATIENTS: "/admin/patients",
   ADMIN_ARV_PROTOCOLS: "/admin/arv-protocols",
+  ADMIN_TREATMENT_PROTOCOLS: "/admin/treatment-protocols",
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_SETTINGS: "/admin/settings",
 } as const;

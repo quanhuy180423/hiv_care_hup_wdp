@@ -6,6 +6,7 @@ import type {
   // RegisterRequest,
   ChangePasswordRequest,
   UpdateProfileRequest,
+  RegisterRequest,
 } from "@/services/authService";
 
 export const useAuth = () => {

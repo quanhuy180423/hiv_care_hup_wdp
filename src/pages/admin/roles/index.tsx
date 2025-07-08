@@ -12,9 +12,35 @@ import RoleDetailsDrawer from './components/RoleDetailsDrawer';
 
 const RoleManagement = () => {
   const [searchText, setSearchText] = useState('');
-  const { data: roles, isLoading } = useRoles(searchText);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
+  const { data: rolesData, isLoading } = useRoles({
+    page: currentPage,
+    limit: pageSize,
+    search: searchText,
+  });
+
+  const roles = rolesData?.data || [];
+  const meta = rolesData?.meta;
+  const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 0;
+
   const { isOpen: isModalOpen, openModal, closeModal } = useRoleModalStore();
   const { isOpen: isDrawerOpen, closeDrawer } = useRoleDrawerStore();
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset về trang đầu khi thay đổi page size
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1); // Reset về trang đầu khi tìm kiếm
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -34,7 +60,7 @@ const RoleManagement = () => {
           placeholder="Tìm kiếm vai trò..."
           className="pl-10"
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
 
@@ -46,8 +72,15 @@ const RoleManagement = () => {
         <CardContent>
           <DataTable
             columns={columns}
-            data={(roles || []).filter((role) => role.deletedAt === null)}
+            data={Array.isArray(roles) ? roles.filter((role: any) => role?.deletedAt === null) : []}
             isLoading={isLoading}
+            enablePagination={true}
+            pageCount={totalPages}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={meta?.total}
           />
         </CardContent>
       </Card>

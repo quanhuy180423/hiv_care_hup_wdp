@@ -35,10 +35,9 @@ const sidebarNav = [
   { name: "Quản lý quyền hạn", icon: UserLock, path: "/admin/permissions" },
   { name: "Quản lý người dùng", icon: Users, path: "/admin/users" },
   { name: "Quản lý bác sĩ", icon: UserCog, path: "/admin/doctors" },
-  { name: "Lịch hẹn", icon: Calendar, path: "/admin/appointments" },
-  { name: "Hồ sơ bệnh nhân", icon: FileText, path: "/admin/patients" },
-  { name: "Phác đồ ARV", icon: Activity, path: "/admin/arv-protocols" },
-  { name: "Báo cáo", icon: BarChart3, path: "/admin/reports" },
+  { name: "Quản lý thuốc", icon: BarChart3, path: "/admin/medicines" },
+  { name: "Quản lý dịch vụ", icon: BarChart3, path: "/admin/services" },
+  { name: "Protocols điều trị", icon: Activity, path: "/admin/treatment-protocols" },
   { name: "Cài đặt", icon: Settings, path: "/admin/settings" },
 ];
 

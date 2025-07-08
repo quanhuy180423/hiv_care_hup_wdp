@@ -10,14 +10,19 @@ export interface Permission {
   updatedById?: number;
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface PermissionsResponse {
   data: {
     data: Permission[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-    };
+    meta: PaginationMeta;
   };
 }
 

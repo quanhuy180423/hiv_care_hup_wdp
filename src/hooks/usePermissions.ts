@@ -2,11 +2,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { permissionService } from "@/services/permissionService";
 import type { Permission } from "@/types/permission";
 
-export const usePermissions = (params?: { search?: string }) => {
+interface UsePermissionsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export const usePermissions = (params: UsePermissionsParams = {}) => {
+  const { page = 1, limit = 10, search = "" } = params;
+  
   return useQuery({
-    queryKey: ["permissions", params],
-    queryFn: () => permissionService.getPermissions({ limit: 100, ...params }),
-    select: (res) => res.data.data,
+    queryKey: ["permissions", { page, limit, search }],
+    queryFn: () => permissionService.getPermissions({ page, limit, search }),
+    select: (res) => ({
+      data: res.data.data,
+      meta: res.data.meta,
+    }),
   });
 };
 
