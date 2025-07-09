@@ -1,31 +1,68 @@
+export enum ServiceType {
+  TEST = 'TEST',
+  TREATMENT = 'TREATMENT',
+  CONSULT = 'CONSULT',
+}
+
 export interface Service {
   id: number;
   name: string;
   slug: string;
-  description: string;
-  type: "CONSULT" | "TEST" | "TREATMENT";
   price: string;
+  type: ServiceType;
+  description: string;
   startTime: string;
   endTime: string;
-  content: string;
+  duration?: string | null;
   imageUrl: string;
+  content: string;
   isActive: boolean;
-  duration: number;
+  createdAt: string;
+  updatedAt: string;
 }
-export interface meta {
-  total: 3;
-  page: 2;
-  limit: 2;
-  totalPages: 2;
-  hasNextPage: false;
-  hasPreviousPage: true;
-}
-export interface dataresponse {
+
+export interface ServicesResponse {
   data: Service[];
-  meta: meta;
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
-export interface ServiceListResponse {
-  data: dataresponse;
-  statusCode: number;
-  message?: string;
-}
+
+export type ServiceFormValues = {
+  name: string;
+  price: string;
+  type: ServiceType;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  duration?: string;
+  imageUrl?: string;
+  content?: string;
+  isActive: boolean;
+};
+
+export type UpdateServiceFormValues = {
+  name?: string;
+  price?: string;
+  type?: ServiceType;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: string;
+  imageUrl?: string;
+  content?: string;
+  isActive?: boolean;
+};
+
+export type QueryServiceFormValues = {
+  search?: string;
+  type?: ServiceType;
+  isActive?: boolean;
+  page?: number;
+  limit?: number;
+}; 

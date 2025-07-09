@@ -1,66 +1,72 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { userService } from "@/services/userService";
+import type { User, UserFormValues, UpdateUserFormValues } from "@/types/user";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
+interface UseUsersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
 }
 
-// Fake API function
-const fetchUsers = async (): Promise<User[]> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Return fake data
-  return [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "123-456-7890",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "098-765-4321",
-    },
-    {
-      id: 3,
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      phone: "555-123-4567",
-    },
-  ];
-};
-
-export const useUsers = () => {
+export const useUsers = (params: UseUsersParams = {}) => {
+  const { page = 1, limit = 10, search = "" } = params;
+  
   return useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    queryKey: ["users", { page, limit, search }],
+    queryFn: () => userService.getUsers({ page, limit, search }),
+    select: (res) => ({
+      data: res.data.data,
+      meta: res.data.meta,
+    }),
   });
-};
-
-// Hook for fetching a single user
-const fetchUser = async (id: number): Promise<User> => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  const users = await fetchUsers();
-  const user = users.find((u) => u.id === id);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return user;
 };
 
 export const useUser = (id: number) => {
   return useQuery({
     queryKey: ["user", id],
-    queryFn: () => fetchUser(id),
+    queryFn: () => userService.getUserById(id),
     enabled: !!id,
+  });
+};
+
+export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UserFormValues) => userService.createUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateUserFormValues }) =>
+      userService.updateUser(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+};
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => userService.deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+
+export const useRestoreUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => userService.restoreUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
   });
 };

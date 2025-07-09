@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Users, Mail, Phone, RefreshCw } from "lucide-react";
 
 export function UsersList() {
-  const { data: users, isLoading, error, refetch, isRefetching } = useUsers();
+  const { data: usersData, isLoading, error, refetch, isRefetching } = useUsers();
+  const users = usersData?.data || [];
 
   if (isLoading) {
     return (
@@ -95,7 +96,7 @@ export function UsersList() {
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Phone className="mr-1 h-3 w-3" />
-                  {user.phone}
+                  {user.phoneNumber}
                 </div>
               </div>
             </div>

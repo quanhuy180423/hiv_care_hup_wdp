@@ -1,57 +1,72 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { serviceService } from "@/services/serviceService";
+import type { 
+  ServiceFormValues, 
+  UpdateServiceFormValues,
+  QueryServiceFormValues,
+  ServicesResponse
+} from "@/types/service";
 import { servicesAPI } from "../services/serviceService";
 import type { Service } from "../types/service";
 
-export const useServices = (page: number = 1, limit: number = 10) => {
-  const queryClient = useQueryClient();
-
-  // Fetch services
-  const {
-    data: services,
-    isLoading: isServicesLoading,
-    error: servicesError,
-  } = useQuery({
-    queryKey: ["services", page, limit],
-    queryFn: () => servicesAPI.getAll(page, limit),
+export const useServices = (params?: QueryServiceFormValues) => {
+  return useQuery<ServicesResponse>({
+    queryKey: ["services", params],
+    queryFn: () => serviceService.getServices(params),
   });
-
-  // Create service
-  const createService = useMutation({
-    mutationFn: (serviceData: Partial<Service>) =>
-      servicesAPI.create(serviceData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-    },
-  });
-
-  // Update service
-  const updateService = useMutation({
-    mutationFn: ({
-      id,
-      serviceData,
-    }: {
-      id: number;
-      serviceData: Partial<Service>;
-    }) => servicesAPI.update(id, serviceData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-    },
-  });
-
-  // Delete service
-  const deleteService = useMutation({
-    mutationFn: (id: number) => servicesAPI.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-    },
-  });
-
-  return {
-    services,
-    isServicesLoading,
-    servicesError,
-    createService,
-    updateService,
-    deleteService,
-  };
 };
+
+export const useService = (id: number) => {
+  return useQuery({
+    queryKey: ["service", id],
+    queryFn: () => serviceService.getServiceById(id),
+    enabled: !!id,
+  });
+};
+
+export const useServiceBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ["service-by-slug", slug],
+    queryFn: () => serviceService.getServiceBySlug(slug),
+    enabled: !!slug,
+  });
+};
+
+export const useCreateService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ServiceFormValues) => serviceService.createService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+  });
+};
+
+export const useUpdateService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateServiceFormValues }) =>
+      serviceService.updateService(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["service"] });
+    },
+  });
+};
+
+export const useDeleteService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => serviceService.deleteService(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+  });
+};
+
+export const useActiveServices = (params?: QueryServiceFormValues) => {
+  return useQuery<ServicesResponse>({
+    queryKey: ["active-services", params],
+    queryFn: () => serviceService.getActiveServices(params),
+  });
+}; 

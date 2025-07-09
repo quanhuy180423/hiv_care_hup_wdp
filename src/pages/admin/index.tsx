@@ -14,7 +14,7 @@ export function AdminUserManagementPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Quản lý người dùng</h1>
-      <p className="text-muted-foreground">Quản lý người dùng hệ thống</p>
+      <p className="text-muted-foreground">Quản lý người dùng hệ thống2</p>
       {/* Nội dung quản lý user sẽ được thêm sau */}
     </div>
   );
