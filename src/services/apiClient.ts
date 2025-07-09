@@ -242,18 +242,53 @@ class ApiClient {
       throw error;
     }
   }
+  // Cập nhật phương thức handleError
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any) {
     if (typeof window !== "undefined") {
-      // Chỉ gọi toast ở phía client
+      let errorMessage = "Có lỗi không xác định xảy ra. Vui lòng thử lại."; // Default message
+
       if (error.response) {
-        const message = error.response.data?.message || "Có lỗi xảy ra";
-        toast.error(message);
+        const errorData = error.response.data;
+
+        // Trường hợp lỗi validation với cấu trúc phức tạp
+        if (
+          errorData &&
+          typeof errorData.message === "object" &&
+          errorData.message !== null &&
+          Array.isArray(errorData.message.message)
+        ) {
+          // Lặp qua mảng các lỗi để lấy thông báo đầu tiên
+          if (
+            errorData.message.message.length > 0 &&
+            typeof errorData.message.message[0].error === "string"
+          ) {
+            errorMessage = errorData.message.message[0].error;
+          } else if (typeof errorData.message.error === "string") {
+            // Trường hợp lỗi 422 nhưng message bên ngoài là string (ít gặp với cấu trúc này)
+            errorMessage = errorData.message.error;
+          }
+        }
+        // Trường hợp lỗi thông thường, message là một chuỗi
+        else if (typeof errorData?.message === "string") {
+          errorMessage = errorData.message;
+        }
+        // Trường hợp lỗi Axios trả về statusText
+        else if (error.response.status) {
+          errorMessage = `Lỗi ${error.response.status}: ${
+            error.response.statusText || "Server Error"
+          }`;
+        }
       } else if (error.request) {
-        toast.error("Không thể kết nối tới server");
+        // Yêu cầu đã được gửi nhưng không nhận được phản hồi (ví dụ: mất mạng)
+        errorMessage =
+          "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng của bạn.";
       } else {
-        toast.error("Có lỗi xảy ra");
+        // Lỗi xảy ra khi thiết lập yêu cầu
+        errorMessage =
+          error.message || "Có lỗi xảy ra trong quá trình gửi yêu cầu.";
       }
+      toast.error(errorMessage);
     }
   }
 }

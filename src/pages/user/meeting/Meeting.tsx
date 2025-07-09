@@ -223,7 +223,7 @@ const ParticipantView: React.FC<{ participantId: string }> = ({
   }, [participantId]);
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-3xl">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{displayName || "Không xác định"}</span>
@@ -244,7 +244,7 @@ const ParticipantView: React.FC<{ participantId: string }> = ({
             autoPlay
             playsInline
             muted={isLocal}
-            className="w-full h-48 object-cover rounded-lg"
+            className="w-full h-96 object-cover rounded-lg"
             onError={(err) => {
               console.error("participant video error:", err);
             }}
@@ -261,14 +261,7 @@ const ParticipantView: React.FC<{ participantId: string }> = ({
 };
 
 const Controls: React.FC = () => {
-  const {
-    leave,
-    toggleMic,
-    toggleWebcam,
-    localParticipant,
-    enableMic,
-    enableWebcam,
-  } = useMeeting();
+  const { leave, toggleMic, toggleWebcam, localParticipant } = useMeeting();
   const micOn = localParticipant?.micOn || false;
   const webcamOn = localParticipant?.webcamOn || false;
 
@@ -323,26 +316,18 @@ const Controls: React.FC = () => {
 };
 
 const MeetingView: React.FC = () => {
-  const { join, participants, error, enableMic, enableWebcam } = useMeeting();
+  const { join, participants, enableWebcam } = useMeeting();
   const [isMeetingJoined, setIsMeetingJoined] = useState(false);
 
   useEffect(() => {
-    if (error) {
-      console.error("Lỗi cuộc họp:", error);
-      toast.error(`Lỗi cuộc họp: ${error.message}`);
-    }
     if (isMeetingJoined) {
       console.log("Tham gia cuộc họp thành công");
       if (enableWebcam) {
         enableWebcam();
         console.log("enableWebcam called after join");
       }
-      if (enableMic) {
-        enableMic();
-        console.log("enableMic called after join");
-      }
     }
-  }, [error, isMeetingJoined, enableMic, enableWebcam]);
+  }, [isMeetingJoined, enableWebcam]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

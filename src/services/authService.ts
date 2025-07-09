@@ -100,6 +100,7 @@ export const authService = {
       );
 
       if (response.data && response.data.data) {
+        
         // Store tokens in localStorage
         localStorage.setItem("auth_token", response.data.data.accessToken);
         localStorage.setItem("refresh_token", response.data.data.refreshToken);
@@ -237,9 +238,6 @@ export const authService = {
         });
         return res.data;
       }
-      // Clear tokens from localStorage
-      // localStorage.removeItem("auth_token");
-      // localStorage.removeItem("refresh_token");
     } catch (error) {
       console.error("🌐 authService.logout error:", error);
       throw new Error(handleApiError(error));

@@ -59,7 +59,7 @@ export interface RouteConfig {
   title: string;
   description?: string;
   protected?: boolean; // Require authentication
-  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH"; // Layout type
+  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE"; // Layout type
   icon?: LucideIcon; // Icon for navigation
   showInNav?: boolean; // Show in main navigation
   allowedRoles?: UserRole[]; // Allowed user roles
@@ -137,6 +137,17 @@ export const routes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
   },
+  {
+    path: "/meeting",
+    component: MeetingRoom,
+    title: "Lịch sử cuộc họp",
+    description: "Xem lịch sử cuộc họp của bạn",
+    protected: true,
+    layout: "PATIENT",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"], // Chỉ bệnh nhân và bác sĩ mới có thể truy cập
+  },
 ];
 
 // Authentication routes
@@ -169,7 +180,7 @@ export const userRoutes: RouteConfig[] = [
     title: "Hồ sơ cá nhân",
     description: "Quản lý thông tin cá nhân",
     protected: true,
-    layout: "PATIENT", // Use PATIENT layout for user profile
+    layout: "USER_PROFILE", // Use USER_PROFILE layout for user profile
     icon: Users,
     showInNav: false, // Không hiện trong nav chính, chỉ hiện trong user menu
     allowedRoles: ["PATIENT"], // Tất cả user đã đăng nhập đều có thể truy cập
@@ -180,21 +191,10 @@ export const userRoutes: RouteConfig[] = [
     title: "Lịch sử cuộc hẹn",
     description: "Xem lịch sử cuộc hẹn của bạn",
     protected: true,
-    layout: "PATIENT",
+    layout: "USER_PROFILE",
     icon: Calendar,
     showInNav: false,
     allowedRoles: ["PATIENT", "DOCTOR"],
-  },
-  {
-    path: "/meeting",
-    component: MeetingRoom,
-    title: "Lịch sử cuộc họp",
-    description: "Xem lịch sử cuộc họp của bạn",
-    protected: true,
-    layout: "PATIENT",
-    icon: Calendar,
-    showInNav: false,
-    allowedRoles: ["PATIENT", "DOCTOR"], // Chỉ bệnh nhân và bác sĩ mới có thể truy cập
   },
 ];
 

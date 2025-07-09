@@ -27,6 +27,7 @@ import {
   Mail,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import toast from "react-hot-toast";
 
 interface Props {
   open: boolean;
@@ -49,6 +50,7 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
     notes,
     isAnonymous,
     id,
+    doctorMeetingUrl,
   } = viewingAppointment;
 
   const getStatusStyle = () => {
@@ -73,6 +75,14 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
   };
 
   const getTypeVariant = () => (type === "ONLINE" ? "secondary" : "default");
+
+  const handleJoinMeeting = (url: string | null) => {
+    if (url) {
+      window.open(url, "_blank"); // Mở URL trong tab mới
+    } else {
+      toast.error("No meeting URL available");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -178,6 +188,14 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
                   <Badge variant={getTypeVariant()} className="mt-1">
                     {type === "ONLINE" ? "Online" : "Offline"}
                   </Badge>
+                  {type === "ONLINE" && (
+                    <Button
+                      onClick={() => handleJoinMeeting(doctorMeetingUrl)}
+                      className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                      Join Meeting
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -216,7 +234,11 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
         <Separator />
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} className="cursor-pointer">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="cursor-pointer"
+          >
             Đóng
           </Button>
           <Button

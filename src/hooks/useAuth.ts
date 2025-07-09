@@ -13,6 +13,7 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isLoading,
+    userProfile,
     setUser,
     setAuthenticated,
     setLoading,
@@ -28,7 +29,7 @@ export const useAuth = () => {
         setLoading(true);
         const response = await authService.login(credentials);
         const { user, accessToken, refreshToken } = response.data;
-
+        
         setUser(user);
         setTokens({ accessToken, refreshToken });
         setAuthenticated(true);
@@ -171,7 +172,7 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isLoading,
-
+    userProfile,
     // Actions
     login,
     register,

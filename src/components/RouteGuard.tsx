@@ -36,6 +36,16 @@ export function RouteGuard({
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
+  //if user is authenticated but not user try to access login page
+  if (
+    isAuthenticated &&
+    user &&
+    (location.pathname === ROUTES.LOGIN ||
+      location.pathname === ROUTES.REGISTER)
+  ) {
+    return <Navigate to={ROUTES.HOME} replace />;
+  }
+
   // Check if user has required role
   if (
     isAuthenticated &&

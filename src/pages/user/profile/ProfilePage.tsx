@@ -1,30 +1,24 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { User, Mail, Shield, Camera, Save, Edit } from "lucide-react";
+import { User, Mail, Camera, Save, Edit } from "lucide-react";
 
 export default function ProfilePage() {
   useDocumentTitle();
 
-  const { user, updateProfile, isLoading } = useAuth();
+  const { userProfile, updateProfile, isLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
+    name: userProfile?.name || "",
+    email: userProfile?.email || "",
   });
 
-  if (!user) {
+  if (!userProfile) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -48,60 +42,24 @@ export default function ProfilePage() {
 
   const handleCancel = () => {
     setFormData({
-      name: user.name,
-      email: user.email,
+      name: userProfile.name,
+      email: userProfile.email,
     });
     setIsEditing(false);
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-red-100 text-red-800";
-      case "doctor":
-        return "bg-blue-100 text-blue-800";
-      case "user":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getRoleText = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "Quản trị viên";
-      case "doctor":
-        return "Bác sĩ";
-      case "user":
-        return "Người dùng";
-      default:
-        return role;
-    }
-  };
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="">
+      <div className="w-full mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="flex justify-around gap-5">
-          <Card className="w-full max-w-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Hồ sơ cá nhân
-              </CardTitle>
-              <CardDescription>
-                Quản lý thông tin tài khoản của bạn
-              </CardDescription>
-            </CardHeader>
-
+        <div className="w-full">
+          <Card className="w-full ">
             <CardContent className="space-y-6">
               {/* Avatar Section */}
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
-                    {user.name.charAt(0).toUpperCase()}
+                    {userProfile.name.charAt(0).toUpperCase()}
                   </div>
                   <Button
                     size="sm"
@@ -115,16 +73,10 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(
-                      user.role
-                    )}`}
-                  >
-                    <Shield className="h-3 w-3 mr-1" />
-                    {getRoleText(user.role)}
-                  </span>
+                  <h3 className="text-lg font-semibold">{userProfile.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {userProfile.email}
+                  </p>
                 </div>
               </div>
 
@@ -184,21 +136,11 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Vai trò</Label>
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {getRoleText(user.role)} (Không thể thay đổi)
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Mã người dùng</Label>
+                    <Label>Ngày tạo tài khoảng: </Label>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground font-mono">
-                        {user.id}
+                        {new Date(userProfile.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -223,45 +165,6 @@ export default function ProfilePage() {
                     </Button>
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-          {/* Security Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Bảo mật
-              </CardTitle>
-              <CardDescription>
-                Quản lý mật khẩu và cài đặt bảo mật
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Đổi mật khẩu</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Cập nhật mật khẩu để bảo vệ tài khoản
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Đổi mật khẩu
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Xác thực hai yếu tố</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Tăng cường bảo mật với xác thực 2FA
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Kích hoạt
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>

@@ -1,80 +1,47 @@
-import { format } from "date-fns";
 import { toast } from "react-hot-toast";
-import type { Appointment } from "@/types/appointment";
-import { Button } from "@/components/ui/button";
 import { useAppointmentsByUser } from "@/hooks/useAppointments";
 import useAuth from "@/hooks/useAuth";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
+import { columns } from "./colums";
+import AppointmentDetailsDialog from "@/pages/doctor/appointments/components/AppointmentDetailsDialog";
+import { AppointmentFilters } from "@/pages/staff/appointments/components/AppointmentFilters";
+import { useState } from "react";
+import { useAppointmentDrawerStore } from "@/store/appointmentStore";
 
 const AppointmentHistory = () => {
   const { user } = useAuth();
-  const { data, isLoading, error } = useAppointmentsByUser(Number(user?.id));
-  const isDoctor = user?.role === "DOCTOR";
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  const [params, setParams] = useState({});
+  const { data, isLoading, error } = useAppointmentsByUser(
+    Number(user?.id),
+    params
+  );
+  const { isOpen: isDrawerOpen, closeDrawer } = useAppointmentDrawerStore();
+
   if (error) {
     toast.error("Failed to load appointments");
     return <div className="p-4">Error loading appointments</div>;
   }
-
-  const appointments: Appointment[] = data || [];
-
-  const handleJoinMeeting = (url: string | null) => {
-    if (url) {
-      window.open(url, "_blank"); // Mở URL trong tab mới
-    } else {
-      toast.error("No meeting URL available");
-    }
-  };
-
+  console.log("Appointment data:", data);
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Appointment History</h1>
-      {appointments.length === 0 ? (
-        <p>No appointments found.</p>
-      ) : (
-        <div className="space-y-4">
-          {appointments.map((appointment) => (
-            <div
-              key={appointment.id}
-              className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h2 className="text-lg font-semibold">
-                {appointment.service.name}
-              </h2>
-              <p className="text-gray-600">{appointment.service.description}</p>
-              <p>
-                <strong>Time:</strong>{" "}
-                {format(new Date(appointment.appointmentTime), "PPP 'at' p")}
-              </p>
-              <p>
-                <strong>{isDoctor ? "Patient" : "Doctor"}:</strong>{" "}
-                {isDoctor
-                  ? appointment.user.name
-                  : appointment.doctor.user.name}
-              </p>
-              <p>
-                <strong>Type:</strong> {appointment.type}
-              </p>
-              <p>
-                <strong>Status:</strong> {appointment.status}
-              </p>
-              {appointment.type === "ONLINE" && (
-                <Button
-                  onClick={() =>
-                    handleJoinMeeting(
-                      isDoctor
-                        ? appointment.doctorMeetingUrl
-                        : appointment.patientMeetingUrl
-                    )
-                  }
-                  className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                >
-                  Join Meeting
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="">
+      <h2 className="text-xl font-bold mb-4">Quản lý lịch hẹn</h2>
+      <AppointmentFilters onChange={setParams} />
+
+      <Card className="max-w-7xl mx-auto mt-6">
+        <CardHeader className="text-base font-semibold">
+          Danh sách lịch hẹn
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={data || []}
+            isLoading={isLoading}
+          />
+        </CardContent>
+      </Card>
+
+      <AppointmentDetailsDialog open={isDrawerOpen} onClose={closeDrawer} />
     </div>
   );
 };
