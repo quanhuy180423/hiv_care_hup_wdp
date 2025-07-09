@@ -1,56 +1,71 @@
-import {
-  AboutPage,
-  ContactPage,
-  HomePage,
-  KnowledgePage,
-  LoginPage,
-  NotFoundPage,
-  PricingPage,
-  ProfilePage,
-  RegisterPage,
-  ServicesPage,
-} from "@/pages";
-import {
-  AdminAppointmentManagementPage,
-  AdminARVProtocolPage,
-  AdminDoctorManagementPage,
-  AdminPatientRecordsPage,
-  AdminReportsPage,
-  AdminSettingsPage,
-  AdminUserManagementPage,
-} from "@/pages/admin";
+import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
+import type { UserRole } from "./store/authStore";
 import {
-  BookOpen,
-  Calculator,
-  Calendar,
-  DollarSign,
-  FileHeart,
-  FileText,
   Home,
   Info,
-  LogIn,
-  Phone,
+  DollarSign,
   Stethoscope,
+  BookOpen,
+  Phone,
+  LogIn,
+  Users,
+  Calculator,
   UserCog,
   UserLock,
-  Users,
+  Calendar, // Added from second block
+  FileHeart, // Added from second block
+  FileText, // Added from second block
 } from "lucide-react";
-import type { ComponentType } from "react";
+
+import {
+  HomePage,
+  LoginPage,
+  RegisterPage,
+  NotFoundPage,
+  AboutPage,
+  PricingPage,
+  ServicesPage,
+  KnowledgePage,
+  ContactPage,
+  ProfilePage,
+} from "@/pages";
+
+// Admin Pages
+import {
+  AdminUserManagementPage,
+  AdminDoctorManagementPage,
+  AdminAppointmentManagementPage,
+  AdminPatientRecordsPage,
+  AdminARVProtocolPage,
+  AdminReportsPage,
+  AdminSettingsPage,
+} from "@/pages/admin";
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
-import PermissionManagement from "./pages/admin/permissions";
 import RoleManagement from "./pages/admin/roles";
+import PermissionManagement from "./pages/admin/permissions";
+import UserManagement from "./pages/admin/users"; // This seems to be a duplicate of AdminUserManagementPage, consider consolidating
+import DoctorManagement from "./pages/admin/doctors"; // This seems to be a duplicate of AdminDoctorManagementPage, consider consolidating
+import MedicineManagement from "./pages/admin/medicines";
+import ServicesManagement from "./pages/admin/services";
+import TreatmentProtocolsManagement from "./pages/admin/treatment-protocols";
+
+// Staff Pages
+import AppointmentsManagement from "./pages/staff/appointments";
+import BlogsManagement from "./pages/staff/blogs";
+import CategoryBlogManagement from "./pages/staff/categoriesBlog";
+
+// Doctor Pages
 import DoctorAppointments from "./pages/doctor/appointments";
 import DoctorPatientTreatments from "./pages/doctor/patientTreatment/patientTreatments";
 import DoctorSchedule from "./pages/doctor/schedule";
 import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
-import AppointmentsManagement from "./pages/staff/appointments";
-import BlogsManagement from "./pages/staff/blogs";
-import CategoryBlogManagement from "./pages/staff/categoriesBlog";
+
+// User specific pages
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
-import type { UserRole } from "./store/authStore";
+
 
 // Route definition interface
 export interface RouteConfig {
@@ -59,20 +74,20 @@ export interface RouteConfig {
   title: string;
   description?: string;
   protected?: boolean; // Require authentication
-  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE"; // Layout type
+  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE"; // Expanded layout types
   icon?: LucideIcon; // Icon for navigation
   showInNav?: boolean; // Show in main navigation
   allowedRoles?: UserRole[]; // Allowed user roles
 }
 
-// Main application routes
+// Main application routes (publicly accessible or for general patient use)
 export const routes: RouteConfig[] = [
   {
     path: "/",
     component: HomePage,
     title: "Trang chủ",
     description: "Trang chủ HIV Care Hub",
-    layout: "PATIENT", // Use PATIENT layout for home
+    layout: "PATIENT",
     icon: Home,
     showInNav: true,
     allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
@@ -143,10 +158,10 @@ export const routes: RouteConfig[] = [
     title: "Lịch sử cuộc họp",
     description: "Xem lịch sử cuộc họp của bạn",
     protected: true,
-    layout: "PATIENT",
+    layout: "PATIENT", // Can be adjusted to a more specific "MEETING" layout if needed
     icon: Calendar,
     showInNav: false,
-    allowedRoles: ["PATIENT", "DOCTOR"], // Chỉ bệnh nhân và bác sĩ mới có thể truy cập
+    allowedRoles: ["PATIENT", "DOCTOR"],
   },
 ];
 
@@ -164,15 +179,15 @@ export const authRoutes: RouteConfig[] = [
   {
     path: "/register",
     component: RegisterPage,
-    title: "Dăng ký",
-    description: "Dăng ký với tài khoản hệ thống",
+    title: "Đăng ký", // Corrected "Dăng ký" to "Đăng ký"
+    description: "Đăng ký tài khoản hệ thống mới", // Corrected description
     layout: "AUTH",
     icon: LogIn,
     showInNav: false,
   },
 ];
 
-// User routes
+// User routes (for authenticated patients/users)
 export const userRoutes: RouteConfig[] = [
   {
     path: "/user/profile",
@@ -180,10 +195,10 @@ export const userRoutes: RouteConfig[] = [
     title: "Hồ sơ cá nhân",
     description: "Quản lý thông tin cá nhân",
     protected: true,
-    layout: "USER_PROFILE", // Use USER_PROFILE layout for user profile
+    layout: "USER_PROFILE",
     icon: Users,
-    showInNav: false, // Không hiện trong nav chính, chỉ hiện trong user menu
-    allowedRoles: ["PATIENT"], // Tất cả user đã đăng nhập đều có thể truy cập
+    showInNav: false,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"], // All authenticated users should access their profile
   },
   {
     path: "/user/appointments",
@@ -223,7 +238,7 @@ export const adminRoutes: RouteConfig[] = [
     allowedRoles: ["ADMIN"],
   },
   {
-    path: "admin/permissions",
+    path: "/admin/permissions", // Corrected path to start with /
     component: PermissionManagement,
     title: "Quản lý quyền hạn",
     description: "Quản lý quyền hạn hệ thống",
@@ -235,7 +250,7 @@ export const adminRoutes: RouteConfig[] = [
   },
   {
     path: "/admin/users",
-    component: AdminUserManagementPage,
+    component: AdminUserManagementPage, // Consolidated to AdminUserManagementPage
     title: "Quản lý người dùng",
     description: "Quản lý người dùng hệ thống",
     protected: true,
@@ -246,7 +261,7 @@ export const adminRoutes: RouteConfig[] = [
   },
   {
     path: "/admin/doctors",
-    component: AdminDoctorManagementPage,
+    component: AdminDoctorManagementPage, // Consolidated to AdminDoctorManagementPage
     title: "Quản lý bác sĩ",
     description: "Quản lý thông tin bác sĩ",
     protected: true,
@@ -262,7 +277,7 @@ export const adminRoutes: RouteConfig[] = [
     description: "Quản lý lịch hẹn của bệnh nhân",
     protected: true,
     layout: "ADMIN",
-    icon: Calculator,
+    icon: Calculator, // Consider changing this icon if a more suitable one exists for appointments
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
@@ -273,7 +288,7 @@ export const adminRoutes: RouteConfig[] = [
     description: "Quản lý hồ sơ và lịch sử điều trị",
     protected: true,
     layout: "ADMIN",
-    icon: Users,
+    icon: Users, // Consider changing this icon to something more specific for patient records
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
@@ -289,13 +304,46 @@ export const adminRoutes: RouteConfig[] = [
     allowedRoles: ["ADMIN"],
   },
   {
+    path: "/admin/medicines",
+    component: MedicineManagement,
+    title: "Quản lý thuốc",
+    description: "Quản lý thuốc trong hệ thống",
+    protected: true,
+    layout: "ADMIN",
+    icon: Calculator, // Consider changing this icon to something more specific for medicine
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/services",
+    component: ServicesManagement,
+    title: "Quản lý dịch vụ",
+    description: "Quản lý các dịch vụ y tế",
+    protected: true,
+    layout: "ADMIN",
+    icon: Calculator, // Consider changing this icon to something more specific for services
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    path: "/admin/treatment-protocols",
+    component: TreatmentProtocolsManagement,
+    title: "Quản lý phác đồ điều trị", // Corrected title
+    description: "Quản lý các phác đồ điều trị chung",
+    protected: true,
+    layout: "ADMIN",
+    icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
+  {
     path: "/admin/reports",
     component: AdminReportsPage,
     title: "Báo cáo",
     description: "Xem các báo cáo thống kê hệ thống",
     protected: true,
     layout: "ADMIN",
-    icon: Calculator,
+    icon: Calculator, // Consider changing this icon to something more specific for reports
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
@@ -306,12 +354,13 @@ export const adminRoutes: RouteConfig[] = [
     description: "Cài đặt và cấu hình hệ thống",
     protected: true,
     layout: "ADMIN",
-    icon: Calculator,
+    icon: Calculator, // Consider changing this icon to something more specific for settings
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
 ];
 
+// Staff routes
 export const staffRoutes: RouteConfig[] = [
   {
     path: "/staff/appointments",
@@ -348,6 +397,7 @@ export const staffRoutes: RouteConfig[] = [
   },
 ];
 
+// Doctor routes
 export const doctorRoutes: RouteConfig[] = [
   {
     path: "/doctor/appointments",
@@ -411,7 +461,7 @@ export const notFoundRoute: RouteConfig = {
   component: NotFoundPage,
   title: "Không tìm thấy trang",
   description: "Trang bạn tìm kiếm không tồn tại",
-  layout: "PATIENT",
+  layout: "PATIENT", // Can be adjusted to a generic "PUBLIC" or similar if preferred for 404
 };
 
 // Navigation items for header (filtered from routes)
@@ -431,19 +481,22 @@ export const ROUTES = {
   SERVICES: "/services",
   KNOWLEDGE: "/knowledge",
   CONTACT: "/contact",
-  USERS: "/users",
-  COUNTER: "/counter",
+  // Removed USERS and COUNTER as they didn't have corresponding routes defined
+  // USERS: "/users",
+  // COUNTER: "/counter",
 
   // Authentication routes
   LOGIN: "/login",
   REGISTER: "/register",
 
-  //user routes
+  // User routes
   PROFILE: "/user/profile",
+  USER_APPOINTMENTS: "/user/appointments", // Added user appointments route constant
   MEETING: "/meeting",
+  REGISTER_APPOINTMENT: "/services/appointment/register", // Added for consistency
 
   // Admin routes
-  ADMIN_DASHBOARD: "/admin",
+  ADMIN_DASHBOARD: "/admin/dashboard", // Corrected from "/admin"
   ADMIN_ROLES_MANAGEMENT: "/admin/roles",
   ADMIN_PERMISSIONS_MANAGEMENT: "/admin/permissions",
   ADMIN_USERS: "/admin/users",
@@ -451,6 +504,9 @@ export const ROUTES = {
   ADMIN_APPOINTMENTS: "/admin/appointments",
   ADMIN_PATIENTS: "/admin/patients",
   ADMIN_ARV_PROTOCOLS: "/admin/arv-protocols",
+  ADMIN_MEDICINES: "/admin/medicines", // Added
+  ADMIN_SERVICES: "/admin/services", // Added
+  ADMIN_TREATMENT_PROTOCOLS: "/admin/treatment-protocols", // Corrected name for clarity
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_SETTINGS: "/admin/settings",
 
@@ -499,7 +555,7 @@ export const hasAccessToRoute = (
     return route.allowedRoles.includes(userRole);
   }
 
-  // If no allowedRoles specified, allow access
+  // If no allowedRoles specified, allow access (for public routes)
   return true;
 };
 
