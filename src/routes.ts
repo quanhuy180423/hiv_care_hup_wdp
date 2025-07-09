@@ -45,6 +45,8 @@ import AppointmentsManagement from "./pages/staff/appointments";
 import BlogsManagement from "./pages/staff/blogs";
 import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
+import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
+import MeetingRoom from "./pages/user/meeting/Meeting";
 
 // Route definition interface
 export interface RouteConfig {
@@ -167,6 +169,28 @@ export const userRoutes: RouteConfig[] = [
     icon: Users,
     showInNav: false, // Không hiện trong nav chính, chỉ hiện trong user menu
     allowedRoles: ["PATIENT"], // Tất cả user đã đăng nhập đều có thể truy cập
+  },
+  {
+    path: "/user/appointments",
+    component: AppointmentHistory,
+    title: "Lịch sử cuộc hẹn",
+    description: "Xem lịch sử cuộc hẹn của bạn",
+    protected: true,
+    layout: "PATIENT",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"],
+  },
+  {
+    path: "/meeting",
+    component: MeetingRoom,
+    title: "Lịch sử cuộc họp",
+    description: "Xem lịch sử cuộc họp của bạn",
+    protected: true,
+    layout: "PATIENT",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"], // Chỉ bệnh nhân và bác sĩ mới có thể truy cập
   },
 ];
 
@@ -364,6 +388,8 @@ export const ROUTES = {
 
   //user routes
   PROFILE: "/user/profile",
+  MEETING: "/meeting",
+
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
   ADMIN_ROLES_MANAGEMENT: "/admin/roles",

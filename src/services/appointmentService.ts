@@ -25,7 +25,7 @@ export const appointmentService = {
     userId: number
   ): Promise<AppointmentsListResponse> => {
     const res = await apiClient.get<AppointmentsListResponse>(
-      `/appointments/user/${userId}`
+      `/appointments/user/${userId}?page=1&limit=100`
     );
     return res.data;
   },
