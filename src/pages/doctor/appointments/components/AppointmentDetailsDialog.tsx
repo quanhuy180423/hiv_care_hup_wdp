@@ -12,7 +12,6 @@ import {
   useAppointmentModalStore,
 } from "@/store/appointmentStore";
 import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
-import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,10 +21,10 @@ import {
   Stethoscope,
   ClipboardList,
   Clock,
-  DollarSign,
   Pencil,
   AlertCircle,
   FileCog,
+  Mail,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -73,13 +72,11 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
     }
   };
 
-  const getTypeVariant = () => {
-    return type === "ONLINE" ? "secondary" : "default";
-  };
+  const getTypeVariant = () => (type === "ONLINE" ? "secondary" : "default");
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[625px] max-h-[90vh] bg-white">
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] bg-white overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5" />
@@ -97,7 +94,8 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
 
         <div className="grid gap-4">
           <Card>
-            <CardContent className=" space-y-4">
+            <CardContent className="space-y-4 pt-4">
+              {/* Bệnh nhân */}
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-primary/10 rounded-full">
                   <User className="w-5 h-5 text-primary" />
@@ -109,9 +107,18 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
                   <p className="font-medium">
                     {isAnonymous ? "Ẩn danh" : user.name}
                   </p>
+                  {!isAnonymous && (
+                    <div className="text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1 mt-1">
+                        <Mail className="w-4 h-4" />
+                        {user.email}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
+              {/* Bác sĩ */}
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-blue-100 rounded-full">
                   <Stethoscope className="w-5 h-5 text-blue-600" />
@@ -124,13 +131,14 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
                 </div>
               </div>
 
+              {/* Thời gian */}
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-purple-100 rounded-full">
                   <CalendarClock className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">
-                    Thời gian
+                    Thời gian khám
                   </h4>
                   <p className="font-medium">
                     {formatUtcDateManually(appointmentTime, "dd/MM/yyyy HH:mm")}
@@ -140,7 +148,26 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
             </CardContent>
           </Card>
 
+          {/* Các thông tin chi tiết */}
           <div className="grid grid-cols-2 gap-4">
+            <Card className="col-span-2">
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <FileCog className="w-4 h-4" />
+                  <span>Dịch vụ</span>
+                </div>
+                <p className="font-medium">{service.name}</p>
+                {service.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {service.description}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  Thời gian phục vụ: {service.startTime} - {service.endTime}
+                </p>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardContent className="p-4">
                 <div className="flex justify-between gap-2">
@@ -170,32 +197,9 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex justify-between gap-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <FileCog className="w-4 h-4" />
-                    <span>Dịch vụ</span>
-                  </div>
-                  <p className="font-medium">{service.name}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex justify-between gap-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <DollarSign className="w-4 h-4" />
-                    <span>Giá</span>
-                  </div>
-                  <p className="font-medium">{formatCurrency(service.price)}</p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
+          {/* Ghi chú */}
           {notes && (
             <Card>
               <CardContent className="p-4 space-y-2">
@@ -212,11 +216,7 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
         <Separator />
 
         <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="cursor-pointer"
-          >
+          <Button variant="outline" onClick={onClose} className="cursor-pointer">
             Đóng
           </Button>
           <Button
@@ -224,8 +224,8 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
               openModal(viewingAppointment);
               onClose();
             }}
-            className="gap-2 cursor-pointer"
             variant="outline"
+            className="gap-2 cursor-pointer"
           >
             <Pencil className="w-4 h-4" />
             Cập nhật

@@ -1,5 +1,5 @@
 import { Assets } from "@/assets";
-import { Heart, Github, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -104,34 +104,11 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <hr className="my-8 border-gray-200" />
+        <hr className="my-4 border-gray-200" />
 
         {/* Bottom Footer */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>© 2025 HIV Care Hub. Made with</span>
-            <Heart className="h-4 w-4 text-red-500" />
-            <span>using modern React ecosystem</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="p-2">
-              <Github className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="p-2">
-              <Mail className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Tech Badge */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full border">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-medium text-muted-foreground">
-              Powered by React 18 + TypeScript + Vite
-            </span>
-          </div>
+        <div className="flex items-center justify-center">
+            <span>© 2025 HIV Care Hub.</span>
         </div>
       </div>
     </footer>
