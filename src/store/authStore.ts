@@ -12,6 +12,29 @@ export interface User {
   phone?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  roleId: string;
+  avatar?: string;
+  phoneNumber?: string;
+  status: string;
+  totpSecret?: string;
+  createdById?: string;
+  updatedById?: string;
+  deletedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  doctorId?: string;
+}
+
+export interface UserProfileRes {
+  data: UserProfile;
+  message: string;
+  success: boolean;
+}
+
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -19,6 +42,7 @@ export interface AuthTokens {
 
 export interface AuthActions {
   setUser: (user: User | null) => void;
+  setUserProfile: (userProfile: UserProfile | null) => void;
   setTokens: (tokens: AuthTokens | null) => void;
   setAuthenticated: (isAuthenticated: boolean) => void;
   setLoading: (isLoading: boolean) => void;
@@ -31,6 +55,7 @@ export interface AuthActions {
 
 export interface AuthState {
   user: User | null;
+  userProfile: UserProfile | null;
   tokens: AuthTokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -40,15 +65,18 @@ export interface AuthState {
 const restoreAuthState = (): AuthState => {
   try {
     const user = localStorage.getItem("user");
+    const userProfile = localStorage.getItem("userProfile");
     const accessToken = localStorage.getItem("accessToken");
     const refreshToken = localStorage.getItem("refreshToken");
 
     const parsedUser = user ? JSON.parse(user) : null;
+    const parsedUserProfile = userProfile ? JSON.parse(userProfile) : null;
     const tokens =
       accessToken && refreshToken ? { accessToken, refreshToken } : null;
 
     return {
       user: parsedUser,
+      userProfile: parsedUserProfile,
       tokens,
       isAuthenticated: !!(parsedUser && accessToken),
       isLoading: false,
@@ -56,6 +84,7 @@ const restoreAuthState = (): AuthState => {
   } catch (error) {
     console.error("Error restoring auth state:", error);
     return {
+      userProfile: null,
       user: null,
       tokens: null,
       isAuthenticated: false,
@@ -81,6 +110,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         }
       },
 
+      setUserProfile: (userProfile) => {
+        set({ userProfile });
+        // Persist user data to localStorage
+        if (userProfile) {
+          localStorage.setItem("userProfile", JSON.stringify(userProfile));
+        } else {
+          localStorage.removeItem("userProfile");
+        }
+      },
+
       setTokens: (tokens) => {
         set({ tokens });
         // Persist tokens to localStorage
@@ -99,8 +138,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       reset: () => {
         set(initialState);
         // Clear localStorage
-        
+
         localStorage.removeItem("user");
+        localStorage.removeItem("userProfile");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       },

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { servicesAPI } from "../services/apiService";
+import { servicesAPI } from "../services/serviceService";
 import type { Service } from "../types/service";
 
 export const useServices = (page: number = 1, limit: number = 10) => {

@@ -1,50 +1,56 @@
-import type { ComponentType } from "react";
-import type { LucideIcon } from "lucide-react";
-import type { UserRole } from "./store/authStore";
 import {
-  Home,
-  Info,
-  DollarSign,
-  Stethoscope,
-  BookOpen,
-  Phone,
-  LogIn,
-  Users,
-  Calculator,
-  UserCog,
-  UserLock,
-  Calendar,
-  FileHeart,
-  FileText,
-} from "lucide-react";
-import {
-  HomePage,
-  LoginPage,
-  RegisterPage,
-  NotFoundPage,
   AboutPage,
-  PricingPage,
-  ServicesPage,
-  KnowledgePage,
   ContactPage,
+  HomePage,
+  KnowledgePage,
+  LoginPage,
+  NotFoundPage,
+  PricingPage,
   ProfilePage,
+  RegisterPage,
+  ServicesPage,
 } from "@/pages";
 import {
-  AdminUserManagementPage,
-  AdminDoctorManagementPage,
   AdminAppointmentManagementPage,
-  AdminPatientRecordsPage,
   AdminARVProtocolPage,
+  AdminDoctorManagementPage,
+  AdminPatientRecordsPage,
   AdminReportsPage,
   AdminSettingsPage,
+  AdminUserManagementPage,
 } from "@/pages/admin";
+import type { LucideIcon } from "lucide-react";
+import {
+  BookOpen,
+  Calculator,
+  Calendar,
+  DollarSign,
+  FileHeart,
+  FileText,
+  Home,
+  Info,
+  LogIn,
+  Phone,
+  Stethoscope,
+  UserCog,
+  UserLock,
+  Users,
+} from "lucide-react";
+import type { ComponentType } from "react";
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
-import RoleManagement from "./pages/admin/roles";
 import PermissionManagement from "./pages/admin/permissions";
+import RoleManagement from "./pages/admin/roles";
+import DoctorAppointments from "./pages/doctor/appointments";
+import DoctorPatientTreatments from "./pages/doctor/patientTreatment/patientTreatments";
+import DoctorSchedule from "./pages/doctor/schedule";
+import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 import AppointmentsManagement from "./pages/staff/appointments";
 import BlogsManagement from "./pages/staff/blogs";
 import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
+import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
+import MeetingRoom from "./pages/user/meeting/Meeting";
+import type { UserRole } from "./store/authStore";
 
 // Route definition interface
 export interface RouteConfig {
@@ -53,7 +59,7 @@ export interface RouteConfig {
   title: string;
   description?: string;
   protected?: boolean; // Require authentication
-  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH"; // Layout type
+  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE"; // Layout type
   icon?: LucideIcon; // Icon for navigation
   showInNav?: boolean; // Show in main navigation
   allowedRoles?: UserRole[]; // Allowed user roles
@@ -131,6 +137,17 @@ export const routes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
   },
+  {
+    path: "/meeting",
+    component: MeetingRoom,
+    title: "Lịch sử cuộc họp",
+    description: "Xem lịch sử cuộc họp của bạn",
+    protected: true,
+    layout: "PATIENT",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"], // Chỉ bệnh nhân và bác sĩ mới có thể truy cập
+  },
 ];
 
 // Authentication routes
@@ -163,10 +180,21 @@ export const userRoutes: RouteConfig[] = [
     title: "Hồ sơ cá nhân",
     description: "Quản lý thông tin cá nhân",
     protected: true,
-    layout: "PATIENT", // Use PATIENT layout for user profile
+    layout: "USER_PROFILE", // Use USER_PROFILE layout for user profile
     icon: Users,
     showInNav: false, // Không hiện trong nav chính, chỉ hiện trong user menu
     allowedRoles: ["PATIENT"], // Tất cả user đã đăng nhập đều có thể truy cập
+  },
+  {
+    path: "/user/appointments",
+    component: AppointmentHistory,
+    title: "Lịch sử cuộc hẹn",
+    description: "Xem lịch sử cuộc hẹn của bạn",
+    protected: true,
+    layout: "USER_PROFILE",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"],
   },
 ];
 
@@ -320,6 +348,53 @@ export const staffRoutes: RouteConfig[] = [
   },
 ];
 
+export const doctorRoutes: RouteConfig[] = [
+  {
+    path: "/doctor/appointments",
+    component: DoctorAppointments,
+    title: "Lịch hẹn",
+    description: "Quản lý lịch hẹn",
+    protected: true,
+    layout: "DOCTOR",
+    icon: Calendar,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/schedule",
+    component: DoctorSchedule,
+    title: "Lịch làm việc",
+    description: "Quản lý lịch làm việc",
+    protected: true,
+    layout: "DOCTOR",
+    icon: Calendar,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/patient-treatments",
+    component: DoctorPatientTreatments,
+    title: "Điều trị bệnh nhân",
+    description: "Quản lý điều trị bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    icon: FileHeart,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/treatment-protocols",
+    component: TreatmentProtocols,
+    title: "Phác đồ điều trị",
+    description: "Quản lý phác đồ điều trị",
+    protected: true,
+    layout: "DOCTOR",
+    icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+];
+
 // Combine all routes
 export const allRoutes = [
   ...routes,
@@ -327,6 +402,7 @@ export const allRoutes = [
   ...userRoutes,
   ...adminRoutes,
   ...staffRoutes,
+  ...doctorRoutes,
 ];
 
 // 404 Not Found route
@@ -364,6 +440,8 @@ export const ROUTES = {
 
   //user routes
   PROFILE: "/user/profile",
+  MEETING: "/meeting",
+
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
   ADMIN_ROLES_MANAGEMENT: "/admin/roles",
@@ -375,6 +453,17 @@ export const ROUTES = {
   ADMIN_ARV_PROTOCOLS: "/admin/arv-protocols",
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_SETTINGS: "/admin/settings",
+
+  // Staff routes
+  STAFF_APPOINTMENTS: "/staff/appointments",
+  STAFF_BLOG: "/staff/blog",
+  STAFF_BLOG_CATEGORIES: "/staff/blog-categories",
+
+  // Doctor routes
+  DOCTOR_APPOINTMENTS: "/doctor/appointments",
+  DOCTOR_SCHEDULE: "/doctor/schedule",
+  DOCTOR_PATIENT_TREATMENTS: "/doctor/patient-treatments",
+  DOCTOR_TREATMENT_PROTOCOLS: "/doctor/treatment-protocols",
 } as const;
 
 // Helper function to get route config by path
@@ -420,7 +509,9 @@ export const getDefaultRouteForRole = (role: UserRole): string => {
     case "ADMIN":
       return ROUTES.ADMIN_DASHBOARD;
     case "DOCTOR":
-      return ROUTES.HOME; // Doctors use user layout for now
+      return ROUTES.DOCTOR_APPOINTMENTS;
+    case "STAFF":
+      return ROUTES.STAFF_APPOINTMENTS;
     case "PATIENT":
       return ROUTES.HOME;
     default:

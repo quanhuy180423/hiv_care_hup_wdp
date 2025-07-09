@@ -32,11 +32,13 @@ export interface Appointment {
   type: AppointmentType;
   status: AppointmentStatus;
   notes: string | null;
-  createdAt: string;
-  updatedAt: string;
   user: User;
   doctor: Doctor;
+  patientMeetingUrl: string | null;
+  doctorMeetingUrl: string | null;
   service: Service;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AppointmentFormValues {

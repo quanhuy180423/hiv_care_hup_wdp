@@ -4,32 +4,58 @@ import type {
   AppointmentFormValues,
   AppointmentQueryParams,
 } from "@/types/appointment";
+import type { Appointment } from "@/types/appointment";
 import toast from "react-hot-toast";
+
+// Helper type for API response shape
+interface AppointmentsApiData {
+  data: Appointment[];
+  meta?: unknown;
+}
 
 // Get all appointments (admin view)
 export const useAppointments = (params: AppointmentQueryParams = {}) => {
   return useQuery({
     queryKey: ["appointments", params],
     queryFn: () => appointmentService.getAllAppointments(params),
-    select: (res) => res.data.data,
+    select: (res) => {
+      const data = res?.data?.data;
+      if (Array.isArray(data)) return data;
+      if (
+        data &&
+        typeof data === "object" &&
+        Array.isArray((data as AppointmentsApiData).data)
+      ) {
+        return (data as AppointmentsApiData).data;
+      }
+      // Nếu trả về object lỗi hoặc không đúng, trả về mảng rỗng
+      return [];
+    },
   });
 };
 
 // Get appointments by user
-export const useAppointmentsByUser = (userId?: number) => {
+export const useAppointmentsByUser = (
+  userId?: number,
+  params?: AppointmentQueryParams
+) => {
   return useQuery({
-    queryKey: ["appointments-user", userId],
-    queryFn: () => appointmentService.getAppointmentByUserId(userId!),
+    queryKey: ["appointments-user", userId, params],
+    queryFn: () => appointmentService.getAppointmentByUserId(userId!, params),
     enabled: !!userId,
     select: (res) => res.data.data,
   });
 };
 
 // Get appointments by doctor
-export const useAppointmentsByDoctor = (doctorId?: number) => {
+export const useAppointmentsByDoctor = (
+  doctorId?: number,
+  params?: AppointmentQueryParams
+) => {
   return useQuery({
-    queryKey: ["appointments-doctor", doctorId],
-    queryFn: () => appointmentService.getAppointmentByDoctorId(doctorId!),
+    queryKey: ["appointments-doctor", doctorId, params],
+    queryFn: () =>
+      appointmentService.getAppointmentByDoctorId(doctorId!, params),
     enabled: !!doctorId,
     select: (res) => res.data.data,
   });

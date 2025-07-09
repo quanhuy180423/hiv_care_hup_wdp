@@ -1,5 +1,5 @@
 import { apiClient } from "./apiClient";
-import type { User } from "@/store/authStore";
+import type { User, UserProfileRes } from "@/store/authStore";
 import axios from "axios";
 
 // Error handler utility
@@ -100,6 +100,7 @@ export const authService = {
       );
 
       if (response.data && response.data.data) {
+        
         // Store tokens in localStorage
         localStorage.setItem("auth_token", response.data.data.accessToken);
         localStorage.setItem("refresh_token", response.data.data.refreshToken);
@@ -175,6 +176,22 @@ export const authService = {
     }
   },
 
+  getUserProfile: async (): Promise<UserProfileRes> => {
+    try {
+      const response = await apiClient.get<UserProfileRes>(
+        AUTH_ENDPOINTS.PROFILE
+      );
+
+      if (response.data) {
+        return response.data;
+      }
+
+      throw new Error("Không thể lấy thông tin người dùng");
+    } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  },
+
   // Update user profile
   updateProfile: async (profileData: UpdateProfileRequest): Promise<User> => {
     try {
@@ -221,9 +238,6 @@ export const authService = {
         });
         return res.data;
       }
-      // Clear tokens from localStorage
-      // localStorage.removeItem("auth_token");
-      // localStorage.removeItem("refresh_token");
     } catch (error) {
       console.error("🌐 authService.logout error:", error);
       throw new Error(handleApiError(error));

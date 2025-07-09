@@ -37,7 +37,7 @@ export const LoginPage = () => {
       if (res.statusCode === 200) {
         toast.success("Đăng nhập thành công!");
         if (res.data.user.role === "PATIENT") navigate("/");
-        else if (res.data.user.role === "DOCTOR") navigate("/doctor/dashboard");
+        else if (res.data.user.role === "DOCTOR") navigate("/doctor/appointments");
         else if (res.data.user.role === "ADMIN") navigate("/admin/dashboard");
         else if (res.data.user.role === "STAFF")
           navigate("/staff/appointments");

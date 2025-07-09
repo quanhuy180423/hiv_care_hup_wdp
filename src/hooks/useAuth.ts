@@ -13,11 +13,13 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isLoading,
+    userProfile,
     setUser,
     setAuthenticated,
     setLoading,
     reset,
     setTokens,
+    setUserProfile,
   } = useAuthStore();
 
   // Login function
@@ -27,14 +29,19 @@ export const useAuth = () => {
         setLoading(true);
         const response = await authService.login(credentials);
         const { user, accessToken, refreshToken } = response.data;
-
+        
         setUser(user);
         setTokens({ accessToken, refreshToken });
         setAuthenticated(true);
 
+        // Fetch user profile after successful login
+        const userProfile = await authService.getUserProfile();
+        setUserProfile(userProfile.data);
+
         return response;
       } catch (error) {
         setUser(null);
+        setUserProfile(null);
         setTokens(null);
         setAuthenticated(false);
         throw error;
@@ -42,7 +49,7 @@ export const useAuth = () => {
         setLoading(false);
       }
     },
-    [setUser, setTokens, setAuthenticated, setLoading]
+    [setUser, setTokens, setAuthenticated, setLoading, setUserProfile]
   );
 
   // Register function
@@ -165,7 +172,7 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isLoading,
-
+    userProfile,
     // Actions
     login,
     register,
