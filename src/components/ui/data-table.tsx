@@ -24,19 +24,41 @@ import {
 } from "@/components/ui/table";
 
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { Loader } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
 // import { DataTableToolbar } from "@/components/ui/data-table-toolbar"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  enablePagination?: boolean;
+  pageCount?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  currentPage?: number;
+  pageSize?: number;
+  totalItems?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading,
+  enablePagination = true,
+  pageCount,
+  onPageChange,
+  onPageSizeChange,
+  currentPage = 1,
+  pageSize = 10,
+  totalItems,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -63,7 +85,38 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
     },
+    // Disable built-in pagination if using server-side pagination
+    manualPagination: enablePagination && !!pageCount,
+    pageCount: pageCount || 0,
   });
+
+  // Override pagination handlers for server-side pagination
+  React.useEffect(() => {
+    if (enablePagination && onPageChange && onPageSizeChange) {
+      // Set current page
+      if (currentPage !== table.getState().pagination.pageIndex + 1) {
+        table.setPageIndex(currentPage - 1);
+      }
+    }
+  }, [enablePagination, onPageChange, onPageSizeChange, currentPage, table]);
+
+  // Custom pagination handlers
+  const handlePageChange = React.useCallback((pageIndex: number) => {
+    if (onPageChange) {
+      onPageChange(pageIndex + 1);
+    }
+  }, [onPageChange]);
+
+  const handlePageSizeChange = React.useCallback((newPageSize: number) => {
+    if (onPageSizeChange) {
+      onPageSizeChange(newPageSize);
+    }
+  }, [onPageSizeChange]);
+
+  console.log(data);
+  console.log('table.getRowModel().rows:', table.getRowModel().rows);
+  console.log('table.getRowModel().rows.length:', table.getRowModel().rows.length);
+  console.log('isLoading:', isLoading);
 
   return (
     <div className="space-y-4">
@@ -122,14 +175,65 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Không có kết quả.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      {enablePagination && (
+        <div className="flex items-center justify-between px-2">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {totalItems && `Tổng cộng ${totalItems} mục`}
+          </div>
+          <div className="flex items-center space-x-6 lg:space-x-8">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-medium">Mục mỗi trang</p>
+              <Select
+                value={`${pageSize}`}
+                onValueChange={(value) => {
+                  handlePageSizeChange(Number(value));
+                }}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue placeholder={pageSize} />
+                </SelectTrigger>
+                <SelectContent side="top" className="bg-white">
+                  {[5, 10, 20, 50].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+              Trang {currentPage} / {pageCount || 1}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handlePageChange(currentPage - 2)}
+                disabled={currentPage <= 1}
+              >
+                <span className="sr-only">Trang trước</span>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handlePageChange(currentPage)}
+                disabled={currentPage >= (pageCount || 1)}
+              >
+                <span className="sr-only">Trang sau</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
