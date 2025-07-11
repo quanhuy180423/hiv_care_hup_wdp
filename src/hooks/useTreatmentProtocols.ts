@@ -153,9 +153,6 @@ export const useCreateTreatmentProtocol = () => {
         queryKey: treatmentProtocolKeys.lists(),
       });
     },
-    onError: (error: unknown) => {
-      console.error("Create treatment protocol error:", error);
-    },
   });
 };
 
@@ -173,9 +170,6 @@ export const useUpdateTreatmentProtocol = () => {
         queryKey: treatmentProtocolKeys.detail(id),
       });
     },
-    onError: (error: unknown) => {
-      console.error("Update treatment protocol error:", error);
-    },
   });
 };
 
@@ -189,9 +183,6 @@ export const useDeleteTreatmentProtocol = () => {
       queryClient.invalidateQueries({
         queryKey: treatmentProtocolKeys.lists(),
       });
-    },
-    onError: (error: unknown) => {
-      console.error("Delete treatment protocol error:", error);
     },
   });
 };
@@ -207,9 +198,6 @@ export const useCloneTreatmentProtocol = () => {
         queryKey: treatmentProtocolKeys.lists(),
       });
     },
-    onError: (error: unknown) => {
-      console.error("Clone treatment protocol error:", error);
-    },
   });
 };
 
@@ -223,9 +211,6 @@ export const useBulkCreateTreatmentProtocols = () => {
       queryClient.invalidateQueries({
         queryKey: treatmentProtocolKeys.lists(),
       });
-    },
-    onError: (error: unknown) => {
-      console.error("Bulk create treatment protocols error:", error);
     },
   });
 };
@@ -250,9 +235,6 @@ export const useCreateCustomProtocolFromTreatment = () => {
         queryKey: treatmentProtocolKeys.lists(),
       });
     },
-    onError: (error: unknown) => {
-      console.error("Create custom protocol error:", error);
-    },
   });
 };
 
@@ -260,8 +242,5 @@ export const useProtocolComparison = () => {
   return useMutation({
     mutationFn: (data: ProtocolComparison) =>
       treatmentProtocolService.getProtocolComparison(data),
-    onError: (error: unknown) => {
-      console.error("Protocol comparison error:", error);
-    },
   });
 };

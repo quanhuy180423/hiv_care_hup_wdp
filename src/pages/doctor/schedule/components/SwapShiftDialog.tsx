@@ -50,7 +50,12 @@ export default function SwapShiftDialog({ doctorId }: SwapShiftDialogProps) {
   // Danh sách lịch trực hiện tại của bác sĩ
   const uniqueDates: string[] =
     mySchedules
-      ?.filter((s) => !s.isOff)
+      ?.filter((s) => {
+        const scheduleDate = new Date(s.date.slice(0, 10));
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return !s.isOff && scheduleDate >= today;
+      })
       .reduce((acc: string[], curr) => {
         const date = curr.date.slice(0, 10);
         if (!acc.includes(date)) acc.push(date);
@@ -162,6 +167,7 @@ export default function SwapShiftDialog({ doctorId }: SwapShiftDialogProps) {
             <Input
               type="date"
               value={toDate}
+              min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
               onChange={(e) => {
                 setToDate(e.target.value);
                 setTargetDoctorId("");

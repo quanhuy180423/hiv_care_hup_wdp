@@ -135,7 +135,6 @@ export function ServiceFormModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -171,7 +170,6 @@ export function ServiceFormModal({
                   </FormItem>
                 )}
               />
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -185,7 +183,7 @@ export function ServiceFormModal({
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Chọn loại dịch vụ" />
                         </SelectTrigger>
                       </FormControl>
@@ -275,7 +273,7 @@ export function ServiceFormModal({
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Chọn thời gian thực hiện" />
                         </SelectTrigger>
                       </FormControl>
@@ -315,6 +313,7 @@ export function ServiceFormModal({
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-300 border border-gray-300 shadow-md"
                     />
                   </FormControl>
                 </FormItem>
@@ -357,7 +356,7 @@ export function ServiceFormModal({
               )}
             />
 
-            <DialogFooter className="pt-4 flex justify-end gap-2">
+            <DialogFooter className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"

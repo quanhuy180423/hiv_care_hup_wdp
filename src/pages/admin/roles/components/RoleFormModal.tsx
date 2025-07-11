@@ -29,7 +29,6 @@ import { useRoleModalStore } from "@/store/roleStore";
 import { usePermissions } from "@/hooks/usePermissions";
 import useAuthStore from "@/store/authStore";
 import toast from "react-hot-toast";
-import { handleApiError } from "@/lib/utils/errorHandler";
 
 type RoleFormModalProps = {
   open: boolean;
@@ -86,9 +85,6 @@ const RoleFormModal = ({ open, onClose }: RoleFormModalProps) => {
             closeModal();
             form.reset();
           },
-          onError: (error: any) => {
-            toast.error(handleApiError(error));
-          },
         }
       );
     } else {
@@ -101,9 +97,6 @@ const RoleFormModal = ({ open, onClose }: RoleFormModalProps) => {
           toast.success("Tạo vai trò thành công.");
           closeModal();
           form.reset();
-        },
-        onError: (error: any) => {
-          toast.error(handleApiError(error));
         },
       });
     }

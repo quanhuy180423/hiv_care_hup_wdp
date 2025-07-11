@@ -228,10 +228,10 @@ const ParticipantView: React.FC<{ participantId: string }> = ({
         <CardTitle className="flex items-center justify-between">
           <span>{displayName || "Không xác định"}</span>
           <div className="flex gap-2">
-            <Badge variant={micOn ? "success" : "destructive"}>
+            <Badge variant={micOn ? "default" : "destructive"}>
               Mic {micOn ? "Bật" : "Tắt"}
             </Badge>
-            <Badge variant={webcamOn ? "success" : "destructive"}>
+            <Badge variant={webcamOn ? "default" : "destructive"}>
               Webcam {webcamOn ? "Bật" : "Tắt"}
             </Badge>
           </div>

@@ -3,8 +3,6 @@ import {
   LayoutDashboard,
   Users,
   UserCog,
-  Calendar,
-  FileText,
   Activity,
   BarChart3,
   Settings,

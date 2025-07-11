@@ -31,7 +31,7 @@ const sidebarNav = [
     path: "/doctor/patient-treatments",
   },
   {
-    name: "Phác dồ điều trị",
+    name: "Phác đồ điều trị",
     icon: Stethoscope,
     path: "/doctor/treatment-protocols",
   },

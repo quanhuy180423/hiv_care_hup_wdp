@@ -3,23 +3,36 @@ import type { Blog } from "@/types/blog";
 import { Badge } from "@/components/ui/badge";
 import BlogActionsCell from "./components/BlogActionsCell";
 
-export const columns: ColumnDef<Blog>[] = [
+export const getColumns = (
+  currentPage: number,
+  pageSize: number
+): ColumnDef<Blog>[] => [
   {
     accessorKey: "STT",
     header: () => <div className="text-center">STT</div>,
-    cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        {(currentPage - 1) * pageSize + row.index + 1}
+      </div>
+    ),
   },
   {
     accessorKey: "title",
     header: "Tiêu đề",
     cell: ({ row }) => (
-      <span className="font-medium line-clamp-1">{row.getValue("title")}</span>
+      <span className="font-medium truncate max-w-[350px] block">
+        {row.getValue("title")}
+      </span>
     ),
   },
   {
     accessorKey: "category",
     header: "Danh mục",
-    cell: ({ row }) => <span>{row.original.category?.title || "—"}</span>,
+    cell: ({ row }) => (
+      <span className="truncate max-w-[180px] block">
+        {row.original.category?.title || "—"}
+      </span>
+    ),
   },
   {
     accessorKey: "author",

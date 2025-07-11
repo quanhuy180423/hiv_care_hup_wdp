@@ -90,7 +90,7 @@ const BlogFormModal = ({ open, onClose }: Props) => {
 
   const { mutate: createBlog, isPending: creating } = useCreateBlog();
   const { mutate: updateBlog, isPending: updating } = useUpdateBlog();
-  const { data: categories = [] } = useCategoryBlogs();
+  const { data: categories = [] } = useCategoryBlogs({page: 1, limit: 100});
   const { user } = useAuth();
 
   const form = useForm<FormBlogSchema>({
@@ -234,16 +234,16 @@ const BlogFormModal = ({ open, onClose }: Props) => {
             onClose();
             toast.success("Cập nhật bài viết thành công.");
           },
-          onError: () => toast.error("Cập nhật bài viết thất bại."),
         }
       );
     } else {
       createBlog(payload, {
         onSuccess: () => {
           onClose();
+          reset();
+          editor?.commands.setContent("");
           toast.success("Tạo bài viết thành công.");
         },
-        onError: () => toast.error("Tạo bài viết thất bại."),
       });
     }
   };
@@ -276,7 +276,7 @@ const BlogFormModal = ({ open, onClose }: Props) => {
                         className="mt-1"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-600 font-semibold"/>
+                    <FormMessage className="text-red-600 font-semibold" />
                   </FormItem>
                 )}
               />
@@ -292,7 +292,7 @@ const BlogFormModal = ({ open, onClose }: Props) => {
                       onValueChange={(value) => field.onChange(Number(value))}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-full mt-1">
+                        <SelectTrigger className="w-full mt-1 align-top">
                           <SelectValue placeholder="Chọn danh mục bài viết" />
                         </SelectTrigger>
                       </FormControl>
@@ -304,7 +304,7 @@ const BlogFormModal = ({ open, onClose }: Props) => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage className="text-red-600 font-semibold"/>
+                    <FormMessage className="text-red-600 font-semibold" />
                   </FormItem>
                 )}
               />
@@ -323,7 +323,7 @@ const BlogFormModal = ({ open, onClose }: Props) => {
                       className="mt-1"
                     />
                   </FormControl>
-                  <FormMessage className="text-red-600 font-semibold"/>
+                  <FormMessage className="text-red-600 font-semibold" />
                 </FormItem>
               )}
             />
@@ -778,7 +778,7 @@ const BlogFormModal = ({ open, onClose }: Props) => {
                       </>
                     )}
                   </div>
-                  <FormMessage className="text-red-600 font-semibold"/>
+                  <FormMessage className="text-red-600 font-semibold" />
                 </FormItem>
               )}
             />

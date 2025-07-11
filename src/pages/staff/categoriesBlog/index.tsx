@@ -4,19 +4,41 @@ import { useCategoryBlogs } from "@/hooks/useCategoryBlogs";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
 import { Button } from "@/components/ui/button";
-import { useCategoryBlogDrawerStore, useCategoryBlogModalStore } from "@/store/categoryBlogStore";
+import {
+  useCategoryBlogDrawerStore,
+  useCategoryBlogModalStore,
+} from "@/store/categoryBlogStore";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategoryBlogModal from "./components/CategoryBlogModal";
 import CategoryBlogDetail from "./components/CategoryBlogDetail";
 import { PlusIcon, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CateBlogQueryParams } from "@/types/categoryBlog";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const CategoryBlogManagement = () => {
+  const [params, setParams] = useState<CateBlogQueryParams>({
+    page: 1,
+    limit: 10,
+  });
   const [search, setSearch] = useState("");
-  const { isOpen: isModalOpen, openModal, closeModal } = useCategoryBlogModalStore();
-  const { data: categories, isLoading } = useCategoryBlogs(search);
+  const debouncedSearch = useDebounce(search, 500);
+  const {
+    isOpen: isModalOpen,
+    openModal,
+    closeModal,
+  } = useCategoryBlogModalStore();
+  const { data: categories, isLoading } = useCategoryBlogs(params);
   const { isOpen: isDrawerOpen, closeDrawer } = useCategoryBlogDrawerStore();
+
+  useEffect(() => {
+    setParams((prev) => ({
+      ...prev,
+      page: 1,
+      search: debouncedSearch.trim(),
+    }));
+  }, [debouncedSearch]);
 
   return (
     <div className="p-6 space-y-6">
@@ -54,8 +76,8 @@ const CategoryBlogManagement = () => {
           />
         </CardContent>
       </Card>
-      <CategoryBlogModal open={isModalOpen} onClose={closeModal}/>
-      <CategoryBlogDetail open={isDrawerOpen} onClose={closeDrawer}/>
+      <CategoryBlogModal open={isModalOpen} onClose={closeModal} />
+      <CategoryBlogDetail open={isDrawerOpen} onClose={closeDrawer} />
     </div>
   );
 };

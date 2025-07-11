@@ -5,11 +5,15 @@ import type { ColumnDef } from "@tanstack/react-table";
 import AppointmentActionsCell from "./components/AppointmentActionsCell";
 import { translateStatus } from "@/lib/utils/status/translateStatus";
 
-export const columns: ColumnDef<Appointment>[] = [
+export const getColumns = (currentPage: number, pageSize: number): ColumnDef<Appointment>[] => [
   {
     accessorKey: "STT",
     header: () => <div className="text-center">STT</div>,
-    cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        {(currentPage - 1) * pageSize + row.index + 1}
+      </div>
+    ),
   },
   {
     accessorKey: "user.name",

@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { Service } from "@/types/service";
 import { ServiceType } from "@/types/service";
+import { formatDate } from "@/lib/utils/dates/formatDate";
+import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 
 interface ServiceColumnsProps {
   onEdit?: (service: Service) => void;
@@ -81,16 +83,9 @@ export const createColumns = ({ onEdit, onDelete}: ServiceColumnsProps): ColumnD
     header: "Giá (VND)",
     cell: ({ row }) => {
       const price = row.getValue("price") as string;
-      const formatPrice = (price: string) => {
-        return new Intl.NumberFormat('vi-VN', {
-          style: 'currency',
-          currency: 'VND'
-        }).format(parseFloat(price));
-      };
-
       return (
         <span className="font-medium text-green-700">
-          {formatPrice(price)}
+          {formatCurrency(price)}
         </span>
       );
     },
@@ -114,7 +109,7 @@ export const createColumns = ({ onEdit, onDelete}: ServiceColumnsProps): ColumnD
     cell: ({ row }) => {
       const duration = row.getValue("duration") as string;
       return duration ? (
-        <span className="text-sm">{duration}</span>
+        <span className="text-sm">{duration}:00</span>
       ) : (
         <span className="text-sm text-gray-400">-</span>
       );
@@ -142,7 +137,7 @@ export const createColumns = ({ onEdit, onDelete}: ServiceColumnsProps): ColumnD
       const updatedAt = row.getValue("updatedAt") as string;
       return (
         <span className="text-sm text-gray-500">
-          {new Date(updatedAt).toLocaleDateString('vi-VN')}
+          {formatDate(updatedAt, "dd/MM/yyyy HH:mm")}
         </span>
       );
     },

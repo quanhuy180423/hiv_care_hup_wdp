@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { blogService } from "@/services/blogService";
-import type { BlogFormValues } from "@/types/blog";
-import toast from "react-hot-toast";
+import type { BlogFormValues, BlogQueryParams } from "@/types/blog";
 
-export const useBlogs = (search?: string) => {
+export const useBlogs = (params: BlogQueryParams) => {
   return useQuery({
-    queryKey: ["blogs", { search }],
-    queryFn: () => blogService.getAllBlogs({ limit: 100, search }),
-    select: (res) => res.data.data,
+    queryKey: ["blogs", params],
+    queryFn: () => blogService.getAllBlogs(params),
+    select: (res) => res.data,
   });
 };
 
@@ -26,10 +25,6 @@ export const useCreateBlog = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi tạo bài viết!");
-      return error;
-    },
   });
 };
 
@@ -41,10 +36,6 @@ export const useUpdateBlog = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật bài viết!");
-      return error;
-    },
   });
 };
 
@@ -54,10 +45,6 @@ export const useDeleteBlog = () => {
     mutationFn: (id: number) => blogService.deleteBlog(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi xoá bài viết!");
-      return error;
     },
   });
 };
@@ -69,10 +56,6 @@ export const useChangeBlogStatus = () => {
       blogService.changeStatusBlog(id, { isPublished }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật trạng thái bài viết!");
-      return error;
     },
   });
 };

@@ -88,6 +88,10 @@ class ApiClient {
               data: error.response?.data,
             }
           );
+          toast.error(
+            error.response.data.message.message ||
+              "Có lỗi xảy ra trong quá trình gửi yêu cầu."
+          );
         }
 
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -288,7 +292,8 @@ class ApiClient {
         errorMessage =
           error.message || "Có lỗi xảy ra trong quá trình gửi yêu cầu.";
       }
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
+      console.error("API Error:", errorMessage);
     }
   }
 }

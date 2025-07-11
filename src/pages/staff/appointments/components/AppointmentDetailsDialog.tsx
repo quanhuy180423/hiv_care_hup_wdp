@@ -79,7 +79,7 @@ const AppointmentDetailsDialog = ({ open, onClose }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[625px] max-h-[90vh] bg-white">
+      <DialogContent className="sm:max-w-[625px] max-h-[92vh] bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5" />

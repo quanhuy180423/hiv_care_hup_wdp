@@ -20,7 +20,6 @@ import type { User, UserFormValues, UpdateUserFormValues } from "@/types/user";
 import { getColumns } from "./columns";
 import { UserFormModal } from "./components/UserFormModal";
 import { UserDetailsDrawer } from "./components/UserDetailsDrawer";
-import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function UserManagement() {
   const [searchText, setSearchText] = useState("");
@@ -78,14 +77,12 @@ export default function UserManagement() {
   const handleDelete = (id: number) => {
     deleteUser(id, {
       onSuccess: () => toast.success("Xóa người dùng thành công."),
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
   const handleRestore = (id: number) => {
     restoreUser(id, {
       onSuccess: () => toast.success("Khôi phục người dùng thành công."),
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
@@ -100,7 +97,6 @@ export default function UserManagement() {
             toast.success("Cập nhật người dùng thành công.");
             closeModal();
           },
-          onError: (error: any) => toast.error(handleApiError(error)),
         }
       );
     } else {
@@ -109,7 +105,6 @@ export default function UserManagement() {
           toast.success("Tạo người dùng thành công.");
           closeModal();
         },
-        onError: (error: any) => toast.error(handleApiError(error)),
       });
     }
   };

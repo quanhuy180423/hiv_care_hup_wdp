@@ -44,8 +44,6 @@ import {
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
 import RoleManagement from "./pages/admin/roles";
 import PermissionManagement from "./pages/admin/permissions";
-import UserManagement from "./pages/admin/users"; // This seems to be a duplicate of AdminUserManagementPage, consider consolidating
-import DoctorManagement from "./pages/admin/doctors"; // This seems to be a duplicate of AdminDoctorManagementPage, consider consolidating
 import MedicineManagement from "./pages/admin/medicines";
 import ServicesManagement from "./pages/admin/services";
 import TreatmentProtocolsManagement from "./pages/admin/treatment-protocols";
@@ -65,7 +63,6 @@ import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
-
 
 // Route definition interface
 export interface RouteConfig {

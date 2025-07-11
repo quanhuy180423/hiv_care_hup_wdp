@@ -40,6 +40,6 @@ export const permissionService = {
   },
 
   deletePermission: async (id: number) => {
-    await apiClient.delete(`/permissions/${id}`);
+    return await apiClient.delete(`/permissions/${id}`);
   },
 };

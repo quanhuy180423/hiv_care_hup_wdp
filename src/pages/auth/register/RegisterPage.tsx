@@ -41,7 +41,6 @@ export const RegisterPage = () => {
         phoneNumber: data.phoneNumber,
         password: data.password,
         confirmPassword: data.confirmPassword,
-        role: "user",
       });
       if (!res) {
         toast.error(error);

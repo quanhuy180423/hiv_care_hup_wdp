@@ -30,7 +30,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { bulkCreateMedicineFormSchema } from "@/schemas/medicine";
-import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 interface BulkCreateModalProps {
   isOpen: boolean;

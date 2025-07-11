@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { categoryBlogService } from "@/services/categoryBlogService";
-import type { CategoryBlogFormValues } from "@/types/categoryBlog";
-import toast from "react-hot-toast";
+import type {
+  CateBlogQueryParams,
+  CategoryBlogFormValues,
+} from "@/types/categoryBlog";
 
-export const useCategoryBlogs = (search?: string) => {
+export const useCategoryBlogs = (params: CateBlogQueryParams) => {
   return useQuery({
-    queryKey: ["category-blogs", { search }],
-    queryFn: () =>
-      categoryBlogService.getAllCategoryBlogs({ limit: 100, search }),
+    queryKey: ["category-blogs", params],
+    queryFn: () => categoryBlogService.getAllCategoryBlogs(params),
     select: (res) => res.data.data,
   });
 };
@@ -28,10 +29,6 @@ export const useCreateCategoryBlog = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["category-blogs"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi tạo danh mục!");
-      return error;
-    },
   });
 };
 
@@ -43,10 +40,6 @@ export const useUpdateCategoryBlog = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["category-blogs"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật danh mục!");
-      return error;
-    },
   });
 };
 
@@ -56,10 +49,6 @@ export const useDeleteCategoryBlog = () => {
     mutationFn: (id: number) => categoryBlogService.deleteCategoryBlog(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["category-blogs"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi xóa danh mục!");
-      return error;
     },
   });
 };
@@ -71,10 +60,6 @@ export const useChangeCategoryBlogStatus = () => {
       categoryBlogService.changeStatusCategoryBlog(id, { isPublished }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["category-blogs"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật trang thái danh mục!");
-      return error;
     },
   });
 };

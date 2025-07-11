@@ -57,9 +57,5 @@ export const useSwapShifts = () => {
       queryClient.invalidateQueries({ queryKey: ["doctor"] });
       queryClient.invalidateQueries({ queryKey: ["doctor", "schedule"] });
     },
-    onError: (error) => {
-      console.log(error);
-      toast.error("Đổi ca thất bại!");
-    },
   });
 };
