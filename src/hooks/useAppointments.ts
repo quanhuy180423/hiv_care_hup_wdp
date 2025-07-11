@@ -5,7 +5,6 @@ import type {
   AppointmentQueryParams,
 } from "@/types/appointment";
 import type { Appointment } from "@/types/appointment";
-import toast from "react-hot-toast";
 
 // Helper type for API response shape
 interface AppointmentsApiData {
@@ -49,15 +48,15 @@ export const useAppointmentsByUser = (
 
 // Get appointments by doctor
 export const useAppointmentsByDoctor = (
-  doctorId?: number,
+  doctorId: number,
   params?: AppointmentQueryParams
 ) => {
   return useQuery({
     queryKey: ["appointments-doctor", doctorId, params],
     queryFn: () =>
-      appointmentService.getAppointmentByDoctorId(doctorId!, params),
+      appointmentService.getAppointmentByDoctorId(doctorId, params),
     enabled: !!doctorId,
-    select: (res) => res.data.data,
+    select: (res) => res.data,
   });
 };
 
@@ -66,7 +65,7 @@ export const useAppointmentsByStaff = (params: AppointmentQueryParams = {}) => {
   return useQuery({
     queryKey: ["appointments-staff", params],
     queryFn: () => appointmentService.getAppointmentByStaff(params),
-    select: (res) => res.data.data,
+    select: (res) => res.data,
   });
 };
 
@@ -88,10 +87,6 @@ export const useCreateAppointment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi tạo cuộc hẹn!");
-      return error;
-    },
   });
 };
 
@@ -104,10 +99,6 @@ export const useUpdateAppointment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật cuộc hẹn!");
-      return error;
-    },
   });
 };
 
@@ -118,10 +109,6 @@ export const useDeleteAppointment = () => {
     mutationFn: (id: number) => appointmentService.deleteAppointment(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi xoá cuộc hẹn!");
-      return error;
     },
   });
 };
@@ -134,10 +121,6 @@ export const useChangeAppointmentStatus = () => {
       appointmentService.changeStatusAppointment(id, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments-staff"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật trạng thái cuộc hẹn!");
-      return error;
     },
   });
 };

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
-import type { User, UserFormValues, UpdateUserFormValues } from "@/types/user";
+import type { UserFormValues, UpdateUserFormValues } from "@/types/user";
 
 interface UseUsersParams {
   page?: number;
@@ -10,7 +10,7 @@ interface UseUsersParams {
 
 export const useUsers = (params: UseUsersParams = {}) => {
   const { page = 1, limit = 10, search = "" } = params;
-  
+
   return useQuery({
     queryKey: ["users", { page, limit, search }],
     queryFn: () => userService.getUsers({ page, limit, search }),

@@ -4,7 +4,7 @@ export { RegisterPage } from "./auth/register/RegisterPage";
 export { NotFoundPage } from "./user/notFound/NotFoundPage";
 export { AboutPage } from "./user/abouts/AboutPage";
 export { PricingPage } from "./user/pricing/PricingPage";
-export { ServicesPage } from "./user/services/ServicesPage";
+export { default as ServicesPage } from "./user/services/ServicesPage";
 export { KnowledgePage } from "./user/knowledge/KnowledgePage";
 export { ContactPage } from "./user/contracts/ContactPage";
 

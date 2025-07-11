@@ -100,17 +100,17 @@ export const authService = {
       );
 
       if (response.data && response.data.data) {
-        
         // Store tokens in localStorage
         localStorage.setItem("auth_token", response.data.data.accessToken);
         localStorage.setItem("refresh_token", response.data.data.refreshToken);
         return response.data;
       }
-      throw new Error(response.data.message || "Đăng nhập thất bại");
+      // throw new Error(response.data.message || "Đăng nhập thất bại");
     } catch (error) {
       console.error("🌐 authService.login error:", error);
       throw new Error(handleApiError(error));
     }
+    return Promise.reject(new Error("Login failed"));
   },
 
   // Register user
@@ -123,7 +123,7 @@ export const authService = {
 
       return response.data;
 
-      throw new Error(response.data.message || "Đăng ký thất bại");
+      // throw new Error(response.data.message || "Đăng ký thất bại");
     } catch (error) {
       throw new Error(handleApiError(error));
     }

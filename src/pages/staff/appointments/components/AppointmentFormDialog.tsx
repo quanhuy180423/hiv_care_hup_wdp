@@ -54,7 +54,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
     useForm<AppointmentFormValues>();
   const { mutate, isPending } = useUpdateAppointment();
 
-  const { services } = useServices(1, 100);
+  const { data: services } = useServices({ page: 1, limit: 100 });
   const { data: doctors } = useDoctors();
 
   const [selectedDate, setSelectedDate] = useState("");
@@ -130,7 +130,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
                 <SelectContent className="bg-white">
                   {doctors?.map((doctor) => (
                     <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                      {doctor.user.name}
+                      {doctor.user?.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -143,7 +143,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
             <Label className="mb-2">Dịch vụ</Label>
             <Select
               onValueChange={(value) => {
-                const selectedService = services?.data?.data.find(
+                const selectedService = services?.data.find(
                   (s) => s.id === Number(value)
                 );
                 setValue("serviceId", Number(value));
@@ -159,7 +159,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
                 <SelectValue placeholder="Chọn dịch vụ" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                {services?.data?.data.map((service) => (
+                {services?.data.map((service) => (
                   <SelectItem key={service.id} value={service.id.toString()}>
                     {service.name}
                   </SelectItem>

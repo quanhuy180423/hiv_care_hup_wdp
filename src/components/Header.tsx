@@ -57,7 +57,15 @@ export default function Header() {
 
   const handleProfile = () => {
     setIsUserMenuOpen(false);
-    navigate("/user/profile"); // Navigate to correct profile path
+    if (user?.role === "PATIENT") {
+      navigate("/user/profile");
+    } else if (user?.role === "DOCTOR") {
+      navigate("/doctor/appointments");
+    } else if (user?.role === "ADMIN") {
+      navigate("/admin/roles");
+    } else if (user?.role === "STAFF") {
+      navigate("/staff/appointments");
+    }
   };
 
   return (
@@ -122,21 +130,20 @@ export default function Header() {
                       />
                       <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md border shadow-lg z-20">
                         <div className="py-1">
-                          <div className="px-3 py-2 text-sm text-muted-foreground border-b ursor-pointer">
+                          <div className="px-3 py-2 text-sm text-muted-foreground border-b">
                             <p className="font-medium">{user.name}</p>
-                            <p className="text-xs">{user.email}</p>
                             <p className="text-xs capitalize">{user.role}</p>
                           </div>
                           <Button
                             onClick={handleProfile}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                            className="w-full px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 justify-start cursor-pointer"
                           >
                             <Settings className="h-4 w-4" />
                             Hồ sơ cá nhân
                           </Button>
                           <Button
                             onClick={handleLogout}
-                            className="w-full text-left px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 flex items-center gap-2 text-red-600"
+                            className="w-full px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 justify-start text-red-600 cursor-pointer"
                           >
                             <LogOut className="h-4 w-4" />
                             Đăng xuất

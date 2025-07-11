@@ -1,7 +1,7 @@
 // import { useNavigate } from "react-router-dom";
 import Banner from "@/components/Banner";
-import { ServicesPage } from "../services/ServicesPage";
 import { AboutPage } from "../abouts/AboutPage";
+import ServicesPage from "../services/ServicesPage";
 
 export function HomePage() {
   return (

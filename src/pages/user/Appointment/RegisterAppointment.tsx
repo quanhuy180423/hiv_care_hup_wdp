@@ -52,7 +52,10 @@ const RegisterAppointment = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [availableSlots, setAvailableSlots] = useState(slots);
 
-  const { services } = useServices();
+  const services = useServices({
+    page: 1,
+    limit: 100,
+  });
   const { data: doctors } = useDoctorSchedulesByDate(
     selectedDate || new Date().toISOString().split("T")[0]
   );
@@ -300,20 +303,12 @@ const RegisterAppointment = () => {
                     <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                       <SelectValue placeholder="Chọn dịch vụ bạn cần" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       {services?.data?.data?.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id.toString()}
-                          className="flex items-center bg-white hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ease-in-out"
                         >
-                          <span className="mr-2">
-                            {service.type === "CONSULT"
-                              ? "💬"
-                              : service.type === "TEST"
-                              ? "🔬"
-                              : "💊"}
-                          </span>
                           {service.name}
                         </SelectItem>
                       ))}

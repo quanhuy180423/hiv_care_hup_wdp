@@ -25,7 +25,6 @@ import { MedicineDetailsDrawer } from "./components/MedicineDetailsDrawer";
 import { BulkCreateModal } from "./components/BulkCreateModal";
 import { AdvancedSearchModal } from "./components/AdvancedSearchModal";
 import { PriceRangeModal } from "./components/PriceRangeModal";
-import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function MedicineManagement() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,7 +113,6 @@ export default function MedicineManagement() {
   const handleDelete = (id: number) => {
     deleteMedicine(id, {
       onSuccess: () => toast.success("Xóa thuốc thành công."),
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
@@ -134,7 +132,6 @@ export default function MedicineManagement() {
             }
             closeModal();
           },
-          onError: (error: any) => toast.error(handleApiError(error)),
         }
       );
     } else {
@@ -148,7 +145,6 @@ export default function MedicineManagement() {
           }
           closeModal();
         },
-        onError: (error: any) => toast.error(handleApiError(error)),
       });
     }
   };
@@ -183,7 +179,6 @@ export default function MedicineManagement() {
         }
         closeBulkCreateModal();
       },
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roleService } from "@/services/roleService";
 import type { RoleFormValues } from "@/types/role";
-import toast from "react-hot-toast";
 
 interface UseRolesParams {
   page?: number;
@@ -11,7 +10,7 @@ interface UseRolesParams {
 
 export const useRoles = (params: UseRolesParams = {}) => {
   const { page = 1, limit = 10, search = "" } = params;
-  
+
   return useQuery({
     queryKey: ["roles", { page, limit, search }],
     queryFn: () => roleService.getRoles({ page, limit, search }),
@@ -37,10 +36,6 @@ export const useCreateRole = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi tạo vai trò!");
-      return error;
-    },
   });
 };
 
@@ -52,10 +47,6 @@ export const useUpdateRole = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi cập nhật vai trò!");
-      return error;
-    },
   });
 };
 
@@ -65,10 +56,6 @@ export const useDeleteRole = () => {
     mutationFn: (id: number) => roleService.deleteRole(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Lỗi khi xóa vai trò!");
-      return error;
     },
   });
 };

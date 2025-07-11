@@ -33,3 +33,11 @@ export interface CategoryBlogListResponse {
   statusCode: number;
   message: string;
 }
+
+export type CateBlogQueryParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  orderBy?: string;
+};
