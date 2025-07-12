@@ -5,6 +5,7 @@ import {
   FileText,
   LogOut,
   Shield,
+  User,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ interface StaffLayoutProps {
 }
 
 const sidebarNav = [
+  { name: "Thông tin cá nhân", icon: User, path: "/staff/profile" },
   { name: "Lịch hẹn", icon: Calendar, path: "/staff/appointments" },
   { name: "Tin tức", icon: FileHeart, path: "/staff/blog" },
   { name: "Danh mục tin tức", icon: FileText, path: "/staff/blog-categories" },

@@ -30,7 +30,7 @@ export const useAuth = () => {
         setLoading(true);
         const response = await authService.login(credentials);
         const { user, accessToken, refreshToken } = response.data;
-        
+
         setUser(user);
         setTokens({ accessToken, refreshToken });
         setAuthenticated(true);
@@ -84,13 +84,13 @@ export const useAuth = () => {
       try {
         setLoading(true);
         const updatedUser = await authService.updateProfile(profileData);
-        setUser(updatedUser);
+        setUserProfile(updatedUser.data);
         return updatedUser;
       } finally {
         setLoading(false);
       }
     },
-    [setUser, setLoading]
+    [setUserProfile, setLoading]
   );
 
   // Change password function
@@ -130,7 +130,7 @@ export const useAuth = () => {
 
       // Get current user profile
       const userProfile = await authService.getProfile();
-      setUser(userProfile);
+      setUserProfile(userProfile.data);
       setAuthenticated(true);
     } catch (error) {
       console.warn("Auth check failed:", error);
@@ -140,7 +140,7 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }, [setUser, setAuthenticated, setLoading, reset]);
+  }, [setUserProfile, setAuthenticated, setLoading, reset]);
 
   // Refresh authentication token
   const refreshAuth = useCallback(async () => {
@@ -150,7 +150,7 @@ export const useAuth = () => {
 
       // After successful refresh, get updated user profile
       const userProfile = await authService.getProfile();
-      setUser(userProfile);
+      setUserProfile(userProfile.data);
       setAuthenticated(true);
     } catch (error) {
       console.warn("Token refresh failed:", error);
@@ -161,7 +161,18 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }, [setUser, setAuthenticated, setLoading, reset]);
+  }, [setUserProfile, setAuthenticated, setLoading, reset]);
+
+  const refetchProfile = useCallback(async () => {
+    try {
+      const userProfile = await authService.getUserProfile();
+      setUserProfile(userProfile.data);
+      return userProfile.data;
+    } catch (error) {
+      console.error("Failed to refetch profile:", error);
+      throw error;
+    }
+  }, [setUserProfile]);
 
   // Initialize auth on app start
   const initializeAuth = useCallback(async () => {
@@ -190,6 +201,8 @@ export const useAuth = () => {
       authService.clearAuth();
       reset();
     },
+
+    refetchProfile,
   };
 };
 
