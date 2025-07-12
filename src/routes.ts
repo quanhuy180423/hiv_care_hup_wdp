@@ -15,7 +15,8 @@ import {
   UserLock,
   Calendar, // Added from second block
   FileHeart, // Added from second block
-  FileText, // Added from second block
+  FileText,
+  User, // Added from second block
 } from "lucide-react";
 
 import {
@@ -63,6 +64,7 @@ import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
+import ProfileDoctorPage from "./pages/doctor/profile";
 
 // Route definition interface
 export interface RouteConfig {
@@ -360,6 +362,17 @@ export const adminRoutes: RouteConfig[] = [
 // Staff routes
 export const staffRoutes: RouteConfig[] = [
   {
+    path: "/staff/profile",
+    component: ProfilePage,
+    title: "Hồ sơ cá nhân",
+    description: "Quản lý hồ sơ cá nhân",
+    protected: true,
+    layout: "STAFF",
+    icon: User,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
+  {
     path: "/staff/appointments",
     component: AppointmentsManagement,
     title: "Lịch hẹn",
@@ -396,6 +409,17 @@ export const staffRoutes: RouteConfig[] = [
 
 // Doctor routes
 export const doctorRoutes: RouteConfig[] = [
+  {
+    path: "/doctor/profile",
+    component: ProfileDoctorPage,
+    title: "Hồ sơ cá nhân",
+    description: "Quản lý hồ sơ cá nhân",
+    protected: true,
+    layout: "DOCTOR",
+    icon: User,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
   {
     path: "/doctor/appointments",
     component: DoctorAppointments,

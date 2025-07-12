@@ -12,6 +12,16 @@ export interface User {
   phone?: string;
 }
 
+export interface Doctor {
+  id: string;
+  userId: string;
+  specialization: string;
+  certifications: string[];
+  isAvailable: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -27,6 +37,7 @@ export interface UserProfile {
   createdAt: Date;
   updatedAt: Date;
   doctorId?: string;
+  doctor: Doctor | null;
 }
 
 export interface UserProfileRes {
