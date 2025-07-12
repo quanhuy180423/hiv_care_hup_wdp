@@ -69,3 +69,4 @@ src/
 - Follow accessibility best practices
 - Use semantic HTML elements
 - Implement proper error handling patterns
+- Do not write file readme
