@@ -65,6 +65,7 @@ import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import ProfileDoctorPage from "./pages/doctor/profile";
+import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 
 // Route definition interface
 export interface RouteConfig {
@@ -139,6 +140,16 @@ export const routes: RouteConfig[] = [
     layout: "PATIENT",
     icon: BookOpen,
     showInNav: true,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
+  },
+  {
+    path: "/blogs/:slug",
+    component: BlogDetailPage,
+    title: "Bài viết",
+    description: "Xem bài viết",
+    layout: "PATIENT",
+    icon: BookOpen,
+    showInNav: false,
     allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
   },
   {
