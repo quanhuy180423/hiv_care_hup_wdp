@@ -83,4 +83,5 @@ export type AppointmentQueryParams = {
   type?: string;
   dateFrom?: string;
   dateTo?: string;
+  serviceType?: string;
 };

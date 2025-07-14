@@ -5,6 +5,7 @@ import {
   FileText,
   LogOut,
   Shield,
+  Stethoscope,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,11 @@ const sidebarNav = [
   { name: "Lịch hẹn", icon: Calendar, path: "/staff/appointments" },
   { name: "Tin tức", icon: FileHeart, path: "/staff/blog" },
   { name: "Danh mục tin tức", icon: FileText, path: "/staff/blog-categories" },
+  {
+    name: "Xét nghiệm bệnh nhân",
+    icon: Stethoscope,
+    path: "/staff/patient-tests",
+  },
 ];
 
 export default function SidebarStaff({ children }: StaffLayoutProps) {

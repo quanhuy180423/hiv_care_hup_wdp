@@ -63,6 +63,7 @@ import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
+import TestResultPage from "./pages/staff/testResult/TestResult";
 
 // Route definition interface
 export interface RouteConfig {
@@ -392,6 +393,17 @@ export const staffRoutes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["STAFF"],
   },
+  {
+    path: "/staff/patient-tests",
+    component: TestResultPage,
+    title: "Xét nghiệm bệnh nhân",
+    description: "Quản lý xét nghiệm bệnh nhân",
+    protected: true,
+    layout: "STAFF",
+    icon: Stethoscope,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
 ];
 
 // Doctor routes
@@ -511,6 +523,7 @@ export const ROUTES = {
   STAFF_APPOINTMENTS: "/staff/appointments",
   STAFF_BLOG: "/staff/blog",
   STAFF_BLOG_CATEGORIES: "/staff/blog-categories",
+  STAFF_PATIENT_TESTS: "/staff/patient-tests",
 
   // Doctor routes
   DOCTOR_APPOINTMENTS: "/doctor/appointments",
