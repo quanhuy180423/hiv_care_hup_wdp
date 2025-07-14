@@ -69,13 +69,13 @@ const BlogsManagement = () => {
         <CardContent>
           <DataTable
             columns={getColumns(params.page || 1, params.limit || 10)}
-            data={data?.data || []}
+            data={data?.data.data || []}
             isLoading={isLoading}
             enablePagination={true}
             currentPage={params.page || 1}
             pageSize={params.limit || 10}
-            pageCount={data?.meta.totalPages || 1}
-            totalItems={data?.meta.total || 0}
+            pageCount={data?.data.meta.totalPages || 1}
+            totalItems={data?.data.meta.total || 0}
             onPageChange={(page) => setParams((prev) => ({ ...prev, page }))}
             onPageSizeChange={(limit) =>
               setParams((prev) => ({ ...prev, page: 1, limit }))
