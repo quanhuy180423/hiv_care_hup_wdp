@@ -1,5 +1,7 @@
+import type { PaginatedResponse } from "./common";
+
 export interface CustomMedication {
-  id: number; // id là bắt buộc
+  id: number;
   name: string;
   unit: string;
   dose: string;
@@ -10,15 +12,12 @@ export interface CustomMedication {
   notes?: string;
 }
 
-export interface PatientTreatmentFormValues {
-  diagnosis: string;
-  treatmentProtocol: string;
-  medicines: CustomMedication[];
-  tests: Array<{
-    name: string;
-  }>;
+export type TreatmentMedicineSubmit = {
+  medicineId: number;
+  dosage: string;
+  duration: string;
   notes?: string;
-}
+};
 
 export interface PatientTreatmentType {
   id: number;
@@ -33,6 +32,61 @@ export interface PatientTreatmentType {
   total: number;
   createdAt: string;
   updatedAt: string;
+  patient?: {
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber: string;
+  };
+  protocol?: {
+    id: number;
+    name: string;
+    description: string;
+    targetDisease: string;
+    createdById: number;
+    updatedById: number;
+    createdAt: string;
+    updatedAt: string;
+    medicines: Array<{
+      id: number;
+      protocolId: number;
+      medicineId: number;
+      dosage: string;
+      duration: string;
+      notes: string;
+      createdAt: string;
+      updatedAt: string;
+      medicine: {
+        id: number;
+        name: string;
+        description: string;
+        unit: string;
+        dose: string;
+        price: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }>;
+  };
+  doctor?: {
+    id: number;
+    userId: number;
+    specialization: string;
+    certifications: string[];
+    isAvailable: boolean;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      id: number;
+      name: string;
+      email: string;
+    };
+  };
+  createdBy?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
 
 export interface PatientTreatmentQueryParams {
@@ -118,3 +172,31 @@ export interface PaginationMeta {
   hasNextPage?: boolean;
   hasPreviousPage?: boolean;
 }
+
+export type PatientTreatmentFormSubmit = {
+  patientId: number;
+  protocolId: number;
+  doctorId: number;
+  customMedications?: Record<string, unknown>;
+  notes?: string;
+  startDate: string;
+  endDate?: string;
+  total: number;
+};
+
+export type CreatePatientTreatmentInput = {
+  patientId: number;
+  protocolId: number;
+  doctorId: number;
+  startDate: string;
+  endDate?: string;
+  notes?: string;
+};
+
+export type PatientTreatmentResponse = {
+  data: PaginatedResponse<PatientTreatmentType>;
+};
+
+export type UpdatePatientTreatmentInput = Partial<CreatePatientTreatmentInput>;
+
+export type PatientTreatmentQuery = PatientTreatmentQueryParams;

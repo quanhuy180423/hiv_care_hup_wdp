@@ -56,7 +56,7 @@ import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 
 // Doctor Pages
 import DoctorAppointments from "./pages/doctor/appointments";
-import DoctorPatientTreatments from "./pages/doctor/patientTreatment/patientTreatments";
+import DoctorPatientTreatments from "./pages/doctor/patientTreatment";
 import DoctorSchedule from "./pages/doctor/schedule";
 import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 

@@ -1,107 +1,111 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { patientTreatmentService } from "@/services/patientTreatmentService";
-import { useAuthStore } from "@/store/authStore";
+import { patientTreatmentSchema } from "@/schemas/patientTreatment";
+import {
+  createPatientTreatment,
+  deletePatientTreatment,
+  getActivePatientTreatments,
+  getPatientTreatmentById,
+  getPatientTreatments,
+  searchPatientTreatments,
+  updatePatientTreatment,
+} from "@/services/patientTreatmentService";
 import type {
-  PatientTreatmentType,
-  PatientTreatmentFormValues,
+  PatientTreatmentFormSubmit,
+  PatientTreatmentQuery,
+  UpdatePatientTreatmentInput,
 } from "@/types/patientTreatment";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
 
-// Lấy danh sách hồ sơ điều trị của bệnh nhân theo appointmentId
-export const usePatientTreatmentsByAppointment = (
-  appointmentId?: number,
-  patientId?: number
-) => {
-  const getAccessToken = useAuthStore((s) => s.getAccessToken);
-  const token = getAccessToken();
-  return useQuery<PatientTreatmentType[]>({
-    queryKey: ["patient-treatments", appointmentId, patientId],
+export const usePatientTreatments = (
+  query: PatientTreatmentQuery,
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["patientTreatments", query],
     queryFn: async () => {
-      if ((!appointmentId && !patientId) || !token) return [];
-      // Nếu cần lọc theo appointmentId, cần API hỗ trợ. Ở đây tạm lọc theo patientId.
-      const res = await patientTreatmentService.getAll(
-        patientId ? { patientId } : {},
-        token
-      );
-      return res.data?.data || [];
+      const res = await getPatientTreatments(query);
+      return res.data.data;
     },
-    enabled: (!!appointmentId || !!patientId) && !!token,
+    ...(options ?? {}),
   });
-};
 
-// Tạo mới hồ sơ điều trị
+export const usePatientTreatment = (
+  id: number,
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["patientTreatment", id],
+    queryFn: async () => {
+      const res = await getPatientTreatmentById(id);
+      return patientTreatmentSchema.parse(res);
+    },
+    enabled: !!id,
+    ...(options ?? {}),
+  });
+
 export const useCreatePatientTreatment = () => {
   const queryClient = useQueryClient();
-  const getAccessToken = useAuthStore((s) => s.getAccessToken);
-  const token = getAccessToken();
   return useMutation({
-    mutationFn: async (data: PatientTreatmentFormValues) => {
-      if (!token) throw new Error("No access token");
-      const res = await patientTreatmentService.create(data, token);
-      return res.data;
-    },
+    mutationFn: (input: PatientTreatmentFormSubmit) =>
+      createPatientTreatment(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["patient-treatments"] });
+      queryClient.invalidateQueries({ queryKey: ["patientTreatments"] });
     },
   });
 };
 
-// Lấy chi tiết hồ sơ điều trị theo id
-export const usePatientTreatmentDetail = (id?: number) => {
-  const getAccessToken = useAuthStore((s) => s.getAccessToken);
-  const token = getAccessToken();
-  return useQuery<PatientTreatmentType | null>({
-    queryKey: ["patient-treatment-detail", id],
-    queryFn: async () => {
-      if (!id || !token) return null;
-      const res = await patientTreatmentService.getById(id, token);
-      return res.data || null;
-    },
-    enabled: !!id && !!token,
-  });
-};
-
-// Cập nhật hồ sơ điều trị
 export const useUpdatePatientTreatment = () => {
   const queryClient = useQueryClient();
-  const getAccessToken = useAuthStore((s) => s.getAccessToken);
-  const token = getAccessToken();
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       id,
       data,
     }: {
       id: number;
-      data: Partial<PatientTreatmentFormValues>;
-    }) => {
-      if (!token) throw new Error("No access token");
-      const res = await patientTreatmentService.update(id, data, token);
-      return res.data;
-    },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["patient-treatment-detail", variables.id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["patient-treatments"] });
+      data: UpdatePatientTreatmentInput;
+    }) => updatePatientTreatment(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patientTreatments"] });
     },
   });
 };
 
-// Xóa hồ sơ điều trị
 export const useDeletePatientTreatment = () => {
   const queryClient = useQueryClient();
-  const getAccessToken = useAuthStore((s) => s.getAccessToken);
-  const token = getAccessToken();
   return useMutation({
-    mutationFn: async (id: number) => {
-      if (!token) throw new Error("No access token");
-      const res = await patientTreatmentService.delete(id, token);
-      return res.data;
-    },
-    onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({
-        queryKey: ["patient-treatment-detail", id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["patient-treatments"] });
+    mutationFn: (id: number) => deletePatientTreatment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patientTreatments"] });
     },
   });
 };
+
+export const useSearchPatientTreatments = (
+  params: PatientTreatmentQuery,
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["searchPatientTreatments", params],
+    queryFn: async () => {
+      const res = await searchPatientTreatments(params);
+      return res.data;
+    },
+    ...options,
+  });
+
+export const useActivePatientTreatments = (
+  params: PatientTreatmentQuery,
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["activePatientTreatments", params],
+    queryFn: async () => {
+      const res = await getActivePatientTreatments(params);
+      return res.data;
+    },
+    ...options,
+  });

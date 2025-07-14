@@ -1,204 +1,135 @@
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useAppointmentsByDoctor } from "@/hooks/useAppointments";
-import { cn } from "@/lib/utils";
-import { patientTreatmentService } from "@/services/patientTreatmentService";
-import { useAuthStore } from "@/store/authStore";
-import type { Appointment } from "@/types/appointment";
 import type { PatientTreatmentType } from "@/types/patientTreatment";
-import { useQueries } from "@tanstack/react-query";
-import { Eye, FilePlus2, Video } from "lucide-react";
-import { useMemo } from "react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import React from "react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
-interface PatientTreatmentTableProps {
-  onShowDetail: (appointment: Appointment) => void;
-  onShowForm: (appointment: Appointment) => void;
-  onJoinMeet: (appointment: Appointment) => void;
-  filterAppointments?: (appointments: Appointment[]) => Appointment[];
+export interface PatientTreatmentTableProps {
+  treatments: (PatientTreatmentType & {
+    patient?: { name?: string };
+    doctor?: { user?: { name?: string } };
+    protocol?: { name?: string };
+  })[];
+  onShowDetail: (treatment: PatientTreatmentType) => void;
+  onEdit: (treatment: PatientTreatmentType) => void;
+  onDelete: (id: number) => void;
 }
 
-// Custom hook: lấy hồ sơ điều trị cho nhiều patientId
-function useAllPatientsTreatments(patientIds: number[]) {
-  const getAccessToken = useAuthStore((s) => s.getAccessToken);
-  const token = getAccessToken();
-  return useQueries({
-    queries: patientIds.map((id) => ({
-      queryKey: ["patient-treatments", undefined, id],
-      queryFn: async (): Promise<PatientTreatmentType[]> => {
-        if (!id || !token) return [];
-        const res = await patientTreatmentService.getAll(
-          { patientId: id },
-          token
-        );
-        return res.data?.data || [];
-      },
-      enabled: !!id && !!token,
-    })),
-  });
-}
-
-export const PatientTreatmentTable = ({
+export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
+  treatments,
   onShowDetail,
-  onShowForm,
-  onJoinMeet,
-  filterAppointments,
-}: PatientTreatmentTableProps) => {
-  const doctorData = JSON.parse(localStorage.getItem("userProfile") || "{}");
-  const doctorId = doctorData.doctorId;
-  const { data: appointments = [], isLoading } =
-    useAppointmentsByDoctor(doctorId);
-  const displayAppointments = filterAppointments
-    ? filterAppointments(appointments)
-    : appointments;
-
-  // Lấy tất cả patientId từ appointments
-  const patientIds = useMemo(
-    () => Array.from(new Set(displayAppointments.map((appt) => appt.userId))),
-    [displayAppointments]
-  );
-
-  // Lấy hồ sơ điều trị cho tất cả bệnh nhân
-  const treatmentsQueries = useAllPatientsTreatments(patientIds);
-  const treatmentsByPatient = useMemo(() => {
-    const map: Record<number, number> = {};
-    treatmentsQueries.forEach((q, idx) => {
-      const pid = patientIds[idx];
-      if (Array.isArray(q.data)) {
-        map[pid] = q.data.length;
-      }
-    });
-    return map;
-  }, [treatmentsQueries, patientIds]);
-  const treatmentsLoading = treatmentsQueries.some((q) => q.isLoading);
-
-  if (isLoading) return <div>Đang tải dữ liệu...</div>;
-
+  onEdit,
+  onDelete,
+}) => {
   return (
-    <table className="w-full text-sm border">
-      <thead>
-        <tr className="bg-gray-100">
-          <th className="p-2 border">Bệnh nhân</th>
-          <th className="p-2 border">Giờ</th>
-          <th className="p-2 border">Loại</th>
-          <th className="p-2 border">Trạng thái</th>
-          <th className="p-2 border">Hồ sơ điều trị</th>
-          <th className="p-2 border">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody>
-        {displayAppointments.map((appt) => {
-          const treatCount = treatmentsByPatient[appt.userId] || 0;
-          return (
-            <tr key={appt.id} className="border-b">
-              <td className="p-2 border">{appt.user?.name}</td>
-              <td className="p-2 border">
-                {new Date(appt.appointmentTime).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </td>
-              <td className="p-2 border">
-                <span
-                  className={`flex items-center justify-center ${
-                    appt.type === "ONLINE"
-                      ? "bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"
-                      : "bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs"
-                  }`}
-                >
-                  {appt.type}
-                </span>
-              </td>
-              <td className="p-2 border">
-                <span
-                  className={`flex items-center justify-center  px-2 py-1 rounded text-xs ${
-                    appt.status === "CONFIRMED"
-                      ? "bg-green-100 text-green-700"
-                      : appt.status === "PENDING"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : appt.status === "CANCELLED"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {appt.status}
-                </span>
-              </td>
-              <td className="p-2 border text-center">
-                {treatmentsLoading ? (
-                  <span className="text-xs text-gray-400">
-                    Đang kiểm tra...
-                  </span>
-                ) : treatCount > 0 ? (
-                  <span className="text-green-600 font-semibold">
-                    Đã có ({treatCount})
-                  </span>
-                ) : (
-                  <span className="text-red-500 font-semibold">Chưa có</span>
-                )}
-              </td>
-              <td className="p-2 border">
-                <div
-                  className={cn(
-                    "flex flex-nowrap items-center gap-2 min-h-[40px]"
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm border rounded-xl overflow-hidden">
+        <thead>
+          <tr className="bg-gray-50 text-gray-700">
+            <th className="p-3 border-b font-medium">Mã BN</th>
+            <th className="p-3 border-b font-medium">Mã Bác sĩ</th>
+            <th className="p-3 border-b font-medium">Mã Phác đồ</th>
+            <th className="p-3 border-b font-medium">Ngày bắt đầu</th>
+            <th className="p-3 border-b font-medium">Trạng thái</th>
+            <th className="p-3 border-b font-medium">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {treatments.map(
+            (
+              t: PatientTreatmentType & {
+                patient?: { name?: string };
+                doctor?: { user?: { name?: string } };
+                protocol?: { name?: string };
+              },
+              idx: number
+            ) => (
+              <tr
+                key={t.id}
+                className={`border-b transition hover:bg-primary/5 text-center ${
+                  idx % 2 === 1 ? "bg-gray-50" : ""
+                }`}
+              >
+                <td className="p-3 text-gray-900 font-medium">
+                  {t.patient?.name || t.patientId}
+                  {t.createdAt &&
+                    Date.now() - new Date(t.createdAt).getTime() <
+                      1000 * 60 * 60 * 24 && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-2 animate-bounce shadow-lg border-2 border-blue-500 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold"
+                      >
+                        Tạo mới
+                      </Badge>
+                    )}
+                </td>
+                <td className="p-3 text-gray-700">
+                  {t.doctor?.user?.name || t.doctorId}
+                </td>
+                <td className="p-3 text-gray-700">
+                  {t.protocol?.name || t.protocolId}
+                </td>
+                <td className="p-3 text-gray-700">
+                  {t.startDate?.slice(0, 10)}
+                </td>
+                <td className="p-3">
+                  {t.endDate ? (
+                    <span className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-500 text-xs">
+                      Đã kết thúc
+                    </span>
+                  ) : (
+                    <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
+                      Đang điều trị
+                    </span>
                   )}
-                >
+                </td>
+                <td className="p-3 flex gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        size="icon"
-                        aria-label={treatCount > 0 ? "Xem hồ sơ" : "Tạo hồ sơ"}
-                        variant="ghost"
-                        className={cn(
-                          treatCount > 0
-                            ? "hover:bg-blue-100 hover:text-blue-700"
-                            : "hover:bg-green-100 hover:text-green-700"
-                        )}
-                        onClick={() =>
-                          treatCount > 0 ? onShowDetail(appt) : onShowForm(appt)
-                        }
-                        disabled={treatmentsLoading}
+                        className="inline-flex items-center justify-center min-w-[40px] h-9 rounded text-primary hover:bg-primary/10 transition text-xs font-medium focus:ring-2 focus:ring-primary/40"
+                        onClick={() => onShowDetail(t)}
+                        aria-label="Xem chi tiết hồ sơ"
                       >
-                        {treatCount > 0 ? (
-                          <Eye className="size-5" />
-                        ) : (
-                          <FilePlus2 className="size-5" />
-                        )}
+                        <Eye className="w-5 h-5" />
+                        <span className="sr-only">Xem</span>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      {treatCount > 0
-                        ? "Xem hồ sơ điều trị"
-                        : "Tạo hồ sơ điều trị"}
-                    </TooltipContent>
+                    <TooltipContent>Xem chi tiết hồ sơ</TooltipContent>
                   </Tooltip>
-                  {appt.type === "ONLINE" && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          aria-label="Vào phòng tư vấn"
-                          className={cn(
-                            "hover:bg-purple-100 hover:text-purple-700"
-                          )}
-                          onClick={() => onJoinMeet(appt)}
-                        >
-                          <Video className="size-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Vào phòng tư vấn</TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="inline-flex items-center justify-center min-w-[40px] h-9 rounded text-green-700 hover:bg-green-100 transition text-xs font-medium focus:ring-2 focus:ring-green-400"
+                        onClick={() => onEdit(t)}
+                        aria-label="Sửa hồ sơ"
+                      >
+                        <Pencil className="w-5 h-5" />
+                        <span className="sr-only">Sửa</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Sửa hồ sơ</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="inline-flex items-center justify-center min-w-[40px] h-9 rounded text-red-600 hover:bg-red-100 transition text-xs font-medium focus:ring-2 focus:ring-red-400"
+                        onClick={() => onDelete(t.id)}
+                        aria-label="Xóa hồ sơ"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                        <span className="sr-only">Xóa</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Xóa hồ sơ</TooltipContent>
+                  </Tooltip>
+                </td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 };

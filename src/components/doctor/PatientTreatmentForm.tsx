@@ -1,366 +1,298 @@
-import { useAutoFillMedicinesFromTreatmentProtocol } from "@/hooks/useAutoFillMedicinesFromTreatmentProtocol";
-import { useTreatmentProtocols } from "@/hooks/useTreatmentProtocols";
-import { patientTreatmentSchema } from "@/schemas/patientTreatment";
-import type { MedicineType } from "@/types/medicine";
-import type {
-  CustomMedication,
-  PatientTreatmentFormValues,
-} from "@/types/patientTreatment";
+import React, { useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Button } from "../ui/button";
+import { useForm, useFieldArray } from "react-hook-form";
+import toast from "react-hot-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import {
+  AutoEndSubmitSection,
+  CustomMedicationsSection,
+  DatesTotalSection,
+  ExistingTreatmentDialog,
+  NotesSection,
+  PatientProtocolSection,
+  ProtocolMedicinesSection,
+} from "./forms";
+import { patientTreatmentSchema } from "@/schemas/patientTreatment";
+import { patientTreatmentService } from "@/services/patientTreatmentService";
+import { treatmentProtocolService } from "@/services/treatmentProtocolService";
+import type { PatientTreatmentFormSubmit } from "@/types/patientTreatment";
+import type { TreatmentProtocol } from "@/types/treatmentProtocol";
+import type { ErrorResponse } from "@/types/common";
+import type { Medicine } from "@/types/medicine";
 
-export interface PatientTreatmentFormProps {
+interface PatientTreatmentFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (values: PatientTreatmentFormValues) => void;
-  medicines?: MedicineType[];
-  isLoadingMedicines?: boolean;
+  onSubmit: (
+    data: PatientTreatmentFormSubmit,
+    autoEndExisting: boolean
+  ) => void;
 }
 
-const defaultMedicine = (): CustomMedication => ({
-  id: Date.now(),
-  name: "",
-  unit: "",
-  dose: "",
-  price: "",
-  createdAt: new Date().toISOString().slice(0, 16),
-  updatedAt: new Date().toISOString().slice(0, 16),
-  duration: "",
-  notes: "",
-});
-
-export const PatientTreatmentForm = ({
+export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
   open,
   onClose,
   onSubmit,
-  medicines: externalMedicines,
-}: PatientTreatmentFormProps) => {
+}) => {
+  // ===== State =====
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [existingTreatment, setExistingTreatment] = useState<{
+    id: number;
+    patientId: number;
+  } | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [protocolDetail, setProtocolDetail] =
+    useState<TreatmentProtocol | null>(null);
+  const [autoEndExisting, setAutoEndExisting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Accordion state
+  const [openProtocol, setOpenProtocol] = useState(true);
+  const [openCustomMed, setOpenCustomMed] = useState(false);
+  const [openNotes, setOpenNotes] = useState(false);
+
   const {
+    control,
     register,
     handleSubmit,
-    control,
-    setValue,
+    watch,
     formState: { errors, isSubmitting },
-    reset,
-  } = useForm<PatientTreatmentFormValues>({
+  } = useForm<import("@/schemas/patientTreatment").PatientTreatmentFormValues>({
     resolver: zodResolver(patientTreatmentSchema),
     defaultValues: {
-      medicines: [defaultMedicine()],
-      tests: [],
+      patientId: undefined,
+      protocolId: undefined,
+      doctorId: undefined,
+      customMedications: { additionalMeds: [] },
+      notes: "",
+      startDate: new Date().toISOString().slice(0, 16),
+      endDate: undefined,
+      total: 0,
     },
     mode: "onChange",
   });
 
-  const {
-    fields: medicineFields,
-    append: appendMedicine,
-    remove: removeMedicine,
-    replace: replaceMedicine,
-  } = useFieldArray({
-    control,
-    name: "medicines",
-  });
-
-  const {
-    fields: testFields,
-    append: appendTest,
-    remove: removeTest,
-  } = useFieldArray({
-    control,
-    name: "tests",
-  });
-
-  const token = useMemo(() => localStorage.getItem("accessToken") || "", []);
-  const { data: protocolsData, isLoading: isLoadingProtocols } =
-    useTreatmentProtocols({
-      page: 1,
-      limit: 20,
-      search: "",
-      targetDisease: "HIV",
-      token,
-      enabled: open && !!token,
-    });
-  const protocols = useMemo(
-    () => (Array.isArray(protocolsData?.data) ? protocolsData.data : []),
-    [protocolsData]
-  );
-
-  const selectedProtocolId = useWatch({ control, name: "treatmentProtocol" });
-  const selectedProtocolObj = protocols.find(
-    (p) => String(p.id) === String(selectedProtocolId)
-  );
-
-  useEffect(() => {
-    if (!protocols.length) {
-      reset((prev) => ({ ...prev, treatmentProtocol: "" }));
+  // ===== Callbacks =====
+  const handleCheckExisting = useCallback(async (patientId: number) => {
+    try {
+      const res = await patientTreatmentService.getByPatient(
+        String(patientId),
+        {}
+      );
+      const treatments = res.data.data || [];
+      if (treatments.length > 0) {
+        const t = treatments[0];
+        setExistingTreatment({ id: t.id, patientId: t.patientId });
+        setShowEditDialog(true);
+      } else {
+        setExistingTreatment(null);
+      }
+    } catch {
+      setExistingTreatment(null);
     }
-  }, [protocols, reset]);
+  }, []);
 
-  useAutoFillMedicinesFromTreatmentProtocol({
-    protocols,
-    selectedProtocolId,
-    replaceMedicine,
-  });
+  const searchProtocols = useCallback(async (query: string) => {
+    const res = await treatmentProtocolService.getAllTreatmentProtocols({
+      search: query,
+      limit: "100000",
+    });
+    const list: TreatmentProtocol[] = res.data.data || [];
+    return list.map((p) => ({ id: p.id, name: p.name }));
+  }, []);
+
+  const searchPatients = useCallback(async (query: string) => {
+    if (query.length < 1) return [];
+    const res = await patientTreatmentService.search({
+      search: query,
+      limit: 10,
+    });
+    return res.data.data.map((p) => ({
+      id: p.patientId,
+      name: p.patient?.name ?? "",
+    }));
+  }, []);
+
+  // ===== Doctor info =====
+  let doctorNameFromStorage: string | undefined;
+  try {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      doctorNameFromStorage = user.name || user.doctorName;
+    }
+  } catch {
+    toast.error("Không thể lấy thông tin bác sĩ.");
+  }
+
+  const watchedProtocolId = watch("protocolId");
+  const watchedPatientId = watch("patientId");
+
+  // ===== Effects =====
+
+  // Lấy thông tin phác đồ khi watchedProtocolId thay đổi
+  useEffect(() => {
+    if (typeof watchedProtocolId === "number") {
+      treatmentProtocolService
+        .getTreatmentProtocolById(watchedProtocolId)
+        .then((res) => {
+          setProtocolDetail({
+            ...res.data,
+            medicines: Array.isArray(res.data?.medicines)
+              ? res.data.medicines
+              : [],
+          });
+        })
+        .catch(() => setProtocolDetail(null));
+    } else {
+      setProtocolDetail(null);
+    }
+  }, [watchedProtocolId]);
+
+  // Lấy danh sách thuốc khi mount
+  useEffect(() => {
+    import("@/services/medicineService").then(({ medicineService }) => {
+      medicineService
+        .getMedicines({ limit: 10000 })
+        .then((res) => setMedicines(res.data.data || []))
+        .catch(() => setMedicines([]));
+    });
+  }, []);
+
+  // Watch patientId -> check existing
+  useEffect(() => {
+    if (typeof watchedPatientId === "number") {
+      handleCheckExisting(watchedPatientId);
+    }
+  }, [watchedPatientId, handleCheckExisting]);
+
+  // ===== Form logic =====
+  const {
+    fields: customMedFields,
+    append: appendCustomMed,
+    remove: removeCustomMed,
+  } = useFieldArray({ control, name: "customMedications.additionalMeds" });
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg bg-white rounded-lg shadow-lg p-6">
-        <DialogHeader>
-          <DialogTitle>Tạo điều trị bệnh nhân</DialogTitle>
-        </DialogHeader>
-        <form
-          onSubmit={handleSubmit((values) => {
-            // Đảm bảo mọi giá trị price đều là chuỗi số hợp lệ trước khi gửi
-            const medicines = values.medicines.map((med) => {
-              let price = String(med.price ?? "").replace(/[^\d]/g, "");
-              if (!price || isNaN(Number(price))) price = "0";
-              return { ...med, price };
-            });
-            onSubmit({ ...values, medicines });
-          })}
-          className="space-y-4 mt-2"
-        >
-          <div>
-            <label htmlFor="diagnosis" className="block font-medium mb-1">
-              Chẩn đoán
-            </label>
-            <Input
-              id="diagnosis"
-              {...register("diagnosis")}
-              placeholder="Nhập chẩn đoán"
-              className="text-gray-900 placeholder-gray-400"
-              aria-invalid={!!errors.diagnosis}
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-lg md:max-w-2xl bg-white rounded-xl shadow-xl p-0 overflow-hidden">
+          <DialogHeader className="bg-primary/5 px-6 py-4 border-b">
+            <DialogTitle className="text-xl font-bold text-primary">
+              Tạo điều trị bệnh nhân
+              {doctorNameFromStorage && (
+                <span className="block text-base font-medium text-gray-700">
+                  bởi <strong>{doctorNameFromStorage}</strong>
+                </span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form
+            onSubmit={handleSubmit(async (values) => {
+              setSubmitError(null);
+              try {
+                const data: PatientTreatmentFormSubmit = {
+                  patientId: values.patientId!,
+                  protocolId: values.protocolId!,
+                  doctorId: values.doctorId!,
+                  customMedications: values.customMedications,
+                  notes: values.notes,
+                  startDate: values.startDate,
+                  endDate: values.endDate ?? "",
+                  total: values.total!,
+                };
+                onSubmit(data, autoEndExisting);
+              } catch (err) {
+                const be = err as ErrorResponse;
+                if (be.response?.status === 409) {
+                  const msg =
+                    typeof be.response.data?.message === "object"
+                      ? be.response.data.message.message
+                      : be.response.data?.message || "Xung đột dữ liệu.";
+                  setSubmitError(msg || "Đã xảy ra lỗi. Vui lòng thử lại.");
+                  toast.error(msg || "Đã xảy ra lỗi. Vui lòng thử lại.");
+                } else {
+                  setSubmitError("Đã xảy ra lỗi. Vui lòng thử lại.");
+                  toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+                }
+              }
+            })}
+            className="space-y-8 px-6 py-4 rounded-xl"
+          >
+            <div className="mb-2">
+              <h2 className="text-lg font-semibold text-primary mb-1">
+                Thông tin điều trị
+              </h2>
+              <p className="text-gray-500 text-sm mb-2">
+                Vui lòng nhập đầy đủ thông tin để tạo điều trị cho bệnh nhân.
+              </p>
+            </div>
+            {/* Patient & Protocol section */}
+            <PatientProtocolSection
+              control={control}
+              register={register}
+              errors={errors}
+              searchPatients={searchPatients}
+              searchProtocols={searchProtocols}
             />
-            {errors.diagnosis && (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.diagnosis.message}
-              </div>
-            )}
-          </div>
-          <div>
-            <label
-              htmlFor="treatmentProtocol"
-              className="block font-medium mb-1"
-            >
-              Phác đồ điều trị
-            </label>
-            <select
-              id="treatmentProtocol"
-              {...register("treatmentProtocol")}
-              className="w-full border rounded px-2 py-1 text-gray-900"
-              disabled={isLoadingProtocols}
-              aria-invalid={!!errors.treatmentProtocol}
-            >
-              <option value="" className="text-gray-400">
-                {isLoadingProtocols ? "Đang tải..." : "Chọn phác đồ"}
-              </option>
-              {protocols.map((p) => (
-                <option key={p.id} value={p.id} className="text-gray-900">
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            {selectedProtocolObj && (
-              <div className="text-xs text-gray-600 mt-1 border-l-2 border-blue-400 pl-2 bg-blue-50">
-                {selectedProtocolObj.description}
-              </div>
-            )}
-            {errors.treatmentProtocol && (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.treatmentProtocol.message}
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Thuốc</label>
-            {medicineFields.length === 0 && (
-              <div className="text-gray-500 text-sm mb-2">
-                Chưa có thuốc nào.
-              </div>
-            )}
-            {medicineFields.map((field, idx) => (
-              <div
-                key={field.id}
-                className="flex flex-wrap gap-2 mb-2 border-b pb-2 last:border-b-0 last:pb-0 transition-colors"
-              >
-                <Input
-                  {...register(`medicines.${idx}.name`)}
-                  placeholder="Tên thuốc"
-                  className="text-gray-900 placeholder-gray-400 flex-1 min-w-[120px]"
-                  aria-label="Tên thuốc"
-                  list={externalMedicines ? "medicine-list" : undefined}
-                />
-                {/* Autocomplete datalist cho tên thuốc */}
-                {externalMedicines && idx === 0 && (
-                  <datalist id="medicine-list">
-                    {externalMedicines.map((med) => (
-                      <option key={med.id} value={med.name} />
-                    ))}
-                  </datalist>
-                )}
-                <Input
-                  {...register(`medicines.${idx}.dose`)}
-                  placeholder="Liều dùng/Hàm lượng"
-                  className="text-gray-900 placeholder-gray-400 flex-1 min-w-[90px]"
-                  aria-label="Liều dùng/Hàm lượng"
-                />
-                <Input
-                  {...register(`medicines.${idx}.unit`)}
-                  placeholder="Đơn vị"
-                  className="text-gray-900 placeholder-gray-400 flex-1 min-w-[80px]"
-                  aria-label="Đơn vị"
-                />
-                <Input
-                  key={`price-input-${field.id}`}
-                  defaultValue={
-                    typeof field.price === "string" && field.price
-                      ? Number(
-                          field.price.replace(/[^\d]/g, "")
-                        ).toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                          maximumFractionDigits: 0,
-                        })
-                      : ""
-                  }
-                  placeholder="Giá"
-                  type="text"
-                  className="text-gray-900 placeholder-gray-400 flex-1 min-w-[80px]"
-                  aria-label="Giá"
-                  inputMode="numeric"
-                  onFocus={(e) => {
-                    // Khi focus, hiển thị giá trị gốc (chuỗi số)
-                    const raw = String(field.price ?? "").replace(/[^\d]/g, "");
-                    e.target.value = raw || "";
-                  }}
-                  onBlur={(e) => {
-                    // Khi blur, format lại hiển thị
-                    const value = e.target.value;
-                    const numeric = Number(value.replace(/[^\d]/g, ""));
-                    setValue(
-                      `medicines.${idx}.price`,
-                      numeric ? String(numeric) : "",
-                      { shouldValidate: true, shouldDirty: true }
-                    );
-                    if (value) {
-                      const formatted = numeric.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                        maximumFractionDigits: 0,
-                      });
-                      e.target.value = formatted;
-                    } else {
-                      e.target.value = "";
-                    }
-                  }}
-                />
-                <Input
-                  {...register(`medicines.${idx}.createdAt`)}
-                  placeholder="Ngày tạo"
-                  type="datetime-local"
-                  className="text-gray-900 placeholder-gray-400 flex-1 min-w-[140px]"
-                  aria-label="Ngày tạo"
-                />
-                <Input
-                  {...register(`medicines.${idx}.updatedAt`)}
-                  placeholder="Ngày cập nhật"
-                  type="datetime-local"
-                  className="text-gray-900 placeholder-gray-400 flex-1 min-w-[140px]"
-                  aria-label="Ngày cập nhật"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => removeMedicine(idx)}
-                  aria-label="Xóa thuốc"
-                  className="ml-1 text-red-600 hover:text-red-800"
-                  title="Xóa thuốc"
-                >
-                  <span className="sr-only">Xóa</span>-
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => appendMedicine(defaultMedicine())}
-              className="mt-1"
-            >
-              + Thêm thuốc
-            </Button>
-            {errors.medicines && (
-              <div className="text-red-500 text-sm mt-1">
-                {Array.isArray(errors.medicines)
-                  ? errors.medicines.map(
-                      (err, i) =>
-                        err?.message && <div key={i}>{err.message}</div>
-                    )
-                  : (errors.medicines as { message?: string })?.message}
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Xét nghiệm</label>
-            {testFields.length === 0 && (
-              <div className="text-gray-500 text-sm mb-2">
-                Chưa có xét nghiệm nào.
-              </div>
-            )}
-            {testFields.map((field, idx) => (
-              <div key={field.id} className="flex gap-2 mb-2">
-                <Input
-                  {...register(`tests.${idx}.name`)}
-                  placeholder="Tên xét nghiệm"
-                  className="text-gray-900 placeholder-gray-400"
-                  aria-label="Tên xét nghiệm"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => removeTest(idx)}
-                  aria-label="Xóa xét nghiệm"
-                >
-                  -
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => appendTest({ name: "" })}
-              className="mt-1"
-            >
-              + Thêm xét nghiệm
-            </Button>
-          </div>
-          <div>
-            <label htmlFor="notes" className="block font-medium mb-1">
-              Ghi chú
-            </label>
-            <Textarea
-              id="notes"
-              {...register("notes")}
-              placeholder="Ghi chú thêm (nếu có)"
-              className="text-gray-900 placeholder-gray-400"
-              aria-invalid={!!errors.notes}
+
+            {/* Existing Treatment Dialog */}
+            <ExistingTreatmentDialog
+              show={showEditDialog}
+              existingTreatment={existingTreatment}
+              onClose={() => setShowEditDialog(false)}
+              onEdit={(id) => {
+                window.location.href = `/admin/patient-treatments/${id}/edit`;
+              }}
             />
-          </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Đang tạo..." : "Tạo điều trị"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+
+            {/* Protocol Medicines section */}
+            {protocolDetail && (
+              <ProtocolMedicinesSection
+                open={openProtocol}
+                setOpen={setOpenProtocol}
+                protocolDetail={protocolDetail}
+              />
+            )}
+
+            {/* Custom Medications section */}
+            <CustomMedicationsSection
+              open={openCustomMed}
+              setOpen={setOpenCustomMed}
+              customMedFields={customMedFields}
+              appendCustomMed={appendCustomMed}
+              removeCustomMed={removeCustomMed}
+              register={register}
+              errors={errors}
+              medicines={medicines}
+            />
+
+            {/* Dates & Total section */}
+            <DatesTotalSection register={register} errors={errors} />
+
+            {/* Notes section */}
+            <NotesSection
+              open={openNotes}
+              setOpen={setOpenNotes}
+              register={register}
+              errors={errors}
+            />
+
+            {/* Auto end & Submit section */}
+            <AutoEndSubmitSection
+              autoEndExisting={autoEndExisting}
+              setAutoEndExisting={setAutoEndExisting}
+              isSubmitting={isSubmitting}
+            />
+
+            {submitError && (
+              <p className="text-red-600 text-sm mt-4 border border-red-200 rounded p-2 bg-red-50">
+                {submitError}
+              </p>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
-
-export type { PatientTreatmentFormValues };

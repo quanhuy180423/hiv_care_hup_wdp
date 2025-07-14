@@ -69,8 +69,8 @@ export interface UpdateTreatmentProtocol {
 }
 
 export interface QueryTreatmentProtocol {
-  page?: string;
-  limit?: string;
+  page?: string | number;
+  limit?: string | number;
   search?: string;
   targetDisease?: string;
   sortBy?: "name" | "targetDisease" | "createdAt";
@@ -177,3 +177,13 @@ export interface ProtocolCostEstimation {
 export type TreatmentProtocolType = TreatmentProtocol;
 
 export type TreatmentProtocolsResponse = PaginatedResponse<TreatmentProtocol>;
+
+export interface TreatmentProtocolsGetByIdResponse {
+  data: TreatmentProtocol;
+  statusCode: number;
+  message: string;
+}
+
+export type TreatmentProtocolGetAllServiceResponse = {
+  data: PaginatedResponse<TreatmentProtocol>;
+};
