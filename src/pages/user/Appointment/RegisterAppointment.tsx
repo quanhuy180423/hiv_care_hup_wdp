@@ -212,9 +212,9 @@ const RegisterAppointment = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-4xl shadow-xl rounded-2xl overflow-hidden border-0">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-lg">
           <div className="flex items-center space-x-3">
             <div className="bg-white/20 p-2 rounded-lg">
               <svg
@@ -267,19 +267,19 @@ const RegisterAppointment = () => {
               <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="space-y-1">
-                    <p className="font-medium text-gray-500">Họ tên:</p>
+                    <p className="font-medium text-gray-500">Họ và tên</p>
                     <p className="font-semibold text-gray-800">
                       {userProfile?.name || "Chưa có"}
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium text-gray-500">Email:</p>
+                    <p className="font-medium text-gray-500">Email</p>
                     <p className="font-semibold text-gray-800">
                       {userProfile?.email || "Chưa có"}
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium text-gray-500">Số điện thoại:</p>
+                    <p className="font-medium text-gray-500">Số điện thoại</p>
                     <p className="font-semibold text-gray-800">
                       {userProfile?.phoneNumber || "Chưa có"}
                     </p>
@@ -643,7 +643,7 @@ const RegisterAppointment = () => {
             <div className="pt-4">
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-200"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-200 cursor-pointer"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
