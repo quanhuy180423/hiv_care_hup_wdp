@@ -43,6 +43,7 @@ const AUTH_ENDPOINTS = {
   LOGOUT: "/auth/logout",
   REFRESH: "/auth/refresh",
   PROFILE: "/auth/profile",
+  UPDATE_PROFILE: "/auth/update-profile",
   CHANGE_PASSWORD: "/auth/change-password",
 } as const;
 
@@ -82,8 +83,11 @@ export interface ChangePasswordRequest {
 // Profile update request type
 export interface UpdateProfileRequest {
   name?: string;
+  phoneNumber?: string;
   email?: string;
   avatar?: string;
+  specialization?: string;
+  certifications?: string[];
 }
 
 export interface LogoutRequest {
@@ -162,9 +166,11 @@ export const authService = {
   },
 
   // Get current user profile
-  getProfile: async (): Promise<User> => {
+  getProfile: async (): Promise<UserProfileRes> => {
     try {
-      const response = await apiClient.get<User>(AUTH_ENDPOINTS.PROFILE);
+      const response = await apiClient.get<UserProfileRes>(
+        AUTH_ENDPOINTS.PROFILE
+      );
 
       if (response.data) {
         return response.data;
@@ -193,10 +199,12 @@ export const authService = {
   },
 
   // Update user profile
-  updateProfile: async (profileData: UpdateProfileRequest): Promise<User> => {
+  updateProfile: async (
+    profileData: UpdateProfileRequest
+  ): Promise<UserProfileRes> => {
     try {
-      const response = await apiClient.patch<User>(
-        AUTH_ENDPOINTS.PROFILE,
+      const response = await apiClient.patch<UserProfileRes>(
+        AUTH_ENDPOINTS.UPDATE_PROFILE,
         profileData
       );
 

@@ -21,6 +21,8 @@ import { slots } from "@/lib/utils/slotsAppointment";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateAppointment } from "@/hooks/useAppointments";
+import type { AppointmentFormValues, AppointmentType } from "@/types/appointment";
+import { useNavigate } from "react-router";
 
 const appointmentSchema = z
   .object({
@@ -48,7 +50,8 @@ const appointmentSchema = z
   );
 
 const RegisterAppointment = () => {
-  const { user } = useAuth();
+  const navigation = useNavigate();
+  const { userProfile } = useAuth();
   const [selectedDate, setSelectedDate] = useState("");
   const [availableSlots, setAvailableSlots] = useState(slots);
 
@@ -70,7 +73,7 @@ const RegisterAppointment = () => {
   } = useForm({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
-      userId: user?.id ? Number(user.id) : 0,
+      userId: userProfile?.id ? Number(userProfile.id) : 0,
       doctorId: 0,
       serviceId: 0,
       appointmentDate: "",
@@ -146,18 +149,16 @@ const RegisterAppointment = () => {
       return;
     }
 
-    // Format appointmentTime thành ISO string UTC
-    const [startTime] = data.appointmentTime.split("-"); // "HH:mm"
+    // Format appointmentTime
+    const [startTime] = data.appointmentTime.split("-");
     const [hours, minutes] = startTime.split(":").map(Number);
     const date = new Date(data.appointmentDate);
 
-    // Gán giờ theo local time
     date.setHours(hours);
     date.setMinutes(minutes);
     date.setSeconds(0);
     date.setMilliseconds(0);
 
-    // Tạo ISO string theo local time, không bị lệch múi giờ
     const pad = (n: number) => String(n).padStart(2, "0");
     const localISOString = `${date.getFullYear()}-${pad(
       date.getMonth() + 1
@@ -179,18 +180,35 @@ const RegisterAppointment = () => {
       }
     }
 
-    const submitData = {
-      userId: data.userId,
-      doctorId: data.doctorId,
-      serviceId: data.serviceId,
-      appointmentTime: localISOString,
-      isAnonymous: data.isAnonymous,
-      type: data.type,
-      notes: data.notes,
-    };
+    // Prepare submit data based on service type
+    let submitData: AppointmentFormValues;
+    if (selectedService?.type !== "CONSULT") {
+      submitData = {
+        userId: data.userId,
+        doctorId: data.doctorId,
+        serviceId: data.serviceId,
+        appointmentTime: localISOString,
+        isAnonymous: false,
+        type: data.type,
+        notes: data.notes,
+      };
+    } else {
+      submitData = {
+        userId: data.userId,
+        serviceId: data.serviceId,
+        appointmentTime: localISOString,
+        isAnonymous: data.isAnonymous,
+        type: "ONLINE" as AppointmentType,
+        notes: data.notes,
+      };
+    }
 
-    createAppointment(submitData);
-    toast.success("Đặt lịch hẹn thành công!");
+    createAppointment(submitData, {
+      onSuccess: () => {
+        toast.success("Đặt lịch hẹn thành công!");
+        navigation("/user/appointments");
+      },
+    });
   };
 
   return (
@@ -251,19 +269,19 @@ const RegisterAppointment = () => {
                   <div className="space-y-1">
                     <p className="font-medium text-gray-500">Họ tên:</p>
                     <p className="font-semibold text-gray-800">
-                      {user?.name || "Chưa có"}
+                      {userProfile?.name || "Chưa có"}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <p className="font-medium text-gray-500">Email:</p>
                     <p className="font-semibold text-gray-800">
-                      {user?.email || "Chưa có"}
+                      {userProfile?.email || "Chưa có"}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <p className="font-medium text-gray-500">Số điện thoại:</p>
                     <p className="font-semibold text-gray-800">
-                      {user?.phone || "Chưa có"}
+                      {userProfile?.phoneNumber || "Chưa có"}
                     </p>
                   </div>
                 </div>
@@ -444,6 +462,7 @@ const RegisterAppointment = () => {
             </div>
 
             {/* Doctor Selection */}
+            {selectedService?.type !== "CONSULT" && (
             <div className="space-y-3">
               <Label
                 htmlFor="doctorId"
@@ -497,6 +516,7 @@ const RegisterAppointment = () => {
                 </p>
               )}
             </div>
+            )}
 
             {/* Appointment Type */}
             <div className="space-y-3">
