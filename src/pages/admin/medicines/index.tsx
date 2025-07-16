@@ -41,7 +41,6 @@ export default function MedicineManagement() {
   const { data: advancedSearchResults, isLoading: isAdvancedSearchLoading } = useAdvancedSearchMedicines(searchParams);
   
 
-  console.log("medicinesData", medicinesData);
   
   const medicines = medicinesData?.data || [];
   const meta = medicinesData?.meta;

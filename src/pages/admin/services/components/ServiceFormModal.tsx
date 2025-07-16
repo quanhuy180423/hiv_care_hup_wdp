@@ -320,24 +320,7 @@ export function ServiceFormModal({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Nội dung</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Nội dung chi tiết về dịch vụ"
-                      className="resize-none"
-                      rows={4}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-600 font-semibold" />
-                </FormItem>
-              )}
-            />
+            
 
             <FormField
               control={form.control}
