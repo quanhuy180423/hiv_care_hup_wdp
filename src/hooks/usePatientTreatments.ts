@@ -4,6 +4,8 @@ import { useAuthStore } from "@/store/authStore";
 import type {
   PatientTreatmentType,
   PatientTreatmentFormValues,
+  PatientTreatmentQueryParams,
+  PatientTreatmentsResponse,
 } from "@/types/patientTreatment";
 
 // Lấy danh sách hồ sơ điều trị của bệnh nhân theo appointmentId
@@ -103,5 +105,35 @@ export const useDeletePatientTreatment = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["patient-treatments"] });
     },
+  });
+};
+
+// Lấy tất cả hồ sơ điều trị của bệnh nhân theo patientId
+export const usePatientTreatmentsByPatient = (
+  patientId?: number,
+  params: PatientTreatmentQueryParams = {}
+) => {
+  const getAccessToken = useAuthStore((s) => s.getAccessToken);
+  const token = getAccessToken();
+
+  return useQuery<PatientTreatmentsResponse>({
+    queryKey: ["patient-treatments", "by-patient", patientId, params],
+    queryFn: async () => {
+      if (!patientId || !token) {
+        throw new Error("Missing patientId or access token");
+      }
+
+      const response = await patientTreatmentService.getByPatient(
+        patientId,
+        params,
+        token
+      );
+
+      return response;
+    },
+    enabled: !!patientId && !!token,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 };

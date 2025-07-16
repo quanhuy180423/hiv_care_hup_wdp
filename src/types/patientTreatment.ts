@@ -25,7 +25,12 @@ export interface PatientTreatmentType {
   patientId: number;
   protocolId: number;
   doctorId: number;
-  customMedications?: Record<string, unknown> | null;
+  customMedications?: Array<{
+    id: number;
+    note: string;
+    dosage: string;
+    schedule: string;
+  }>;
   notes?: string | null;
   startDate: string;
   endDate?: string | null;
@@ -33,6 +38,72 @@ export interface PatientTreatmentType {
   total: number;
   createdAt: string;
   updatedAt: string;
+  patient?: {
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber: string;
+  };
+  protocol?: {
+    id: number;
+    name: string;
+    description: string;
+    targetDisease: string;
+    createdById: number;
+    updatedById: number;
+    createdAt: string;
+    updatedAt: string;
+    medicines: Array<{
+      id: number;
+      protocolId: number;
+      medicineId: number;
+      dosage: string;
+      durationValue: number;
+      durationUnit: string;
+      schedule: string;
+      notes: string;
+      createdAt: string;
+      updatedAt: string;
+      medicine: {
+        id: number;
+        name: string;
+        description: string;
+        unit: string;
+        dose: string;
+        price: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }>;
+  };
+  doctor?: {
+    id: number;
+    userId: number;
+    specialization: string;
+    certifications: string[];
+    isAvailable: boolean;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      id: number;
+      name: string;
+      email: string;
+    };
+  };
+  createdBy?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface PatientTreatmentsResponse {
+  data: {
+    data: PatientTreatmentType[];
+    meta: PaginationMeta;
+  };
+  statusCode: number;
+  message: string;
 }
 
 export interface PatientTreatmentQueryParams {
@@ -46,6 +117,7 @@ export interface PatientTreatmentQueryParams {
   protocolId?: number;
   startDate?: string;
   endDate?: string;
+  includeCompleted?: boolean;
 }
 
 export interface PatientTreatmentStats {

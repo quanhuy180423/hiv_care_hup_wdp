@@ -66,6 +66,7 @@ import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
+import TreatmentSchedule from "./pages/user/treatment-schedule";
 
 // Route definition interface
 export interface RouteConfig {
@@ -215,6 +216,17 @@ export const userRoutes: RouteConfig[] = [
     component: AppointmentHistory,
     title: "Lịch sử cuộc hẹn",
     description: "Xem lịch sử cuộc hẹn của bạn",
+    protected: true,
+    layout: "USER_PROFILE",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"],
+  },
+  {
+    path: "/user/treatment-schedule",
+    component: TreatmentSchedule,
+    title: "Lịch điều trị",
+    description: "Xem lịch điều trị của bạn",
     protected: true,
     layout: "USER_PROFILE",
     icon: Calendar,
