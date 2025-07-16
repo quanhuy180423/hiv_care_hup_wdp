@@ -11,6 +11,7 @@ import type {
   DoctorQueryParams,
   DoctorScheduleByDateResponse,
   DoctorScheduleResponse,
+  WeeklyScheduleResponse,
   DoctorSwapFromValues,
   DoctorSwapResponse,
 } from "@/types/doctor";
@@ -137,7 +138,7 @@ export const doctorService = {
   getWeeklySchedule: async (params?: {
     startDate?: string;
     endDate?: string;
-  }): Promise<DoctorScheduleResponse> => {
+  }): Promise<WeeklyScheduleResponse> => {
     const searchParams = new URLSearchParams();
     if (params?.startDate) searchParams.append("startDate", params.startDate);
     if (params?.endDate) searchParams.append("endDate", params.endDate);

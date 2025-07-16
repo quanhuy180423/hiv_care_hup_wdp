@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import Header from "../Header";
 import Footer from "../Footer";
+import { ChevronDown, Facebook, Instagram, Twitter } from "lucide-react";
+import Header from "../Header";
 
 interface UserLayoutProps {
   children: ReactNode;
@@ -10,13 +11,13 @@ export function UserLayout({ children }: UserLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* User Header */}
-      <Header />
+     <Header />
 
       {/* Main Content */}
-      <main className="container mx-auto">{children}</main>
+      <main>{children}</main>
 
-      {/* Footer */}
-      <Footer />
+       {/* Footer */}
+      <Footer />  
     </div>
   );
 }

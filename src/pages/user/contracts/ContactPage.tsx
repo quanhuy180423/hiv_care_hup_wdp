@@ -19,6 +19,12 @@ import {
   Calendar,
   User,
   Building,
+  Shield,
+  Heart,
+  Users,
+  Star,
+  ArrowRight,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,6 +41,7 @@ export function ContactPage() {
     {
       icon: Phone,
       title: "Điện thoại",
+      color: "bg-blue-100 text-blue-600",
       details: [
         { label: "Hotline 24/7", value: "1900 xxxx" },
         { label: "Tư vấn", value: "(024) 3xxx xxxx" },
@@ -43,6 +50,7 @@ export function ContactPage() {
     {
       icon: Mail,
       title: "Email",
+      color: "bg-purple-100 text-purple-600",
       details: [
         { label: "Hỗ trợ chung", value: "support@hivcarehub.vn" },
         { label: "Khẩn cấp", value: "emergency@hivcarehub.vn" },
@@ -51,6 +59,7 @@ export function ContactPage() {
     {
       icon: MapPin,
       title: "Địa chỉ",
+      color: "bg-green-100 text-green-600",
       details: [
         { label: "Trụ sở chính", value: "123 Đường ABC, Quận 1, TP.HCM" },
         { label: "Chi nhánh HN", value: "456 Đường XYZ, Đống Đa, Hà Nội" },
@@ -59,6 +68,7 @@ export function ContactPage() {
     {
       icon: Clock,
       title: "Giờ làm việc",
+      color: "bg-orange-100 text-orange-600",
       details: [
         { label: "Thứ 2 - Thứ 6", value: "8:00 - 18:00" },
         { label: "Cuối tuần", value: "9:00 - 17:00" },
@@ -73,6 +83,7 @@ export function ContactPage() {
       phone: "(028) 3xxx xxxx",
       email: "hcm@hivcarehub.vn",
       hours: "8:00 - 18:00 (T2-T6)",
+      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop",
     },
     {
       city: "Hà Nội",
@@ -80,6 +91,7 @@ export function ContactPage() {
       phone: "(024) 3xxx xxxx",
       email: "hanoi@hivcarehub.vn",
       hours: "8:00 - 18:00 (T2-T6)",
+      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop",
     },
     {
       city: "Đà Nẵng",
@@ -87,6 +99,7 @@ export function ContactPage() {
       phone: "(0236) 3xxx xxxx",
       email: "danang@hivcarehub.vn",
       hours: "8:00 - 17:00 (T2-T6)",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=300&fit=crop",
     },
   ];
 
@@ -131,266 +144,271 @@ export function ContactPage() {
   };
 
   return (
-    <div className="space-y-12">
-      {/* Header Section */}
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-          <MessageCircle className="h-4 w-4" />
-          Liên hệ với chúng tôi
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center space-y-8">
+            <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium">
+              <MessageCircle className="h-4 w-4" />
+              Liên hệ với chúng tôi
+            </div>
+            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              Chúng tôi luôn sẵn sàng
+              <span className="text-purple-600 block">hỗ trợ bạn</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Đội ngũ chuyên gia của chúng tôi sẵn sàng tư vấn và hỗ trợ bạn 24/7.
+              Hãy liên hệ với chúng tôi qua bất kỳ kênh nào thuận tiện nhất
+            </p>
+          </div>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight">
-          Chúng tôi luôn sẵn sàng hỗ trợ bạn
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Đội ngũ chuyên gia của chúng tôi sẵn sàng tư vấn và hỗ trợ bạn 24/7.
-          Hãy liên hệ với chúng tôi qua bất kỳ kênh nào thuận tiện nhất
-        </p>
-      </div>
+      </section>
 
       {/* Quick Contact Info */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {contactInfo.map((info, index) => {
-          const IconComponent = info.icon;
-          return (
-            <Card key={index} className="text-center">
-              <CardHeader className="pb-4">
-                <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
-                  <IconComponent className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="text-lg">{info.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {info.details.map((detail, detailIndex) => (
-                  <div key={detailIndex}>
-                    <div className="text-sm text-muted-foreground">
-                      {detail.label}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {contactInfo.map((info, index) => {
+              const IconComponent = info.icon;
+              return (
+                <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+                  <CardHeader className="pb-4">
+                    <div className={`mx-auto w-16 h-16 ${info.color} rounded-full flex items-center justify-center mb-4`}>
+                      <IconComponent className="h-8 w-8" />
                     </div>
-                    <div className="font-medium">{detail.value}</div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <CardTitle className="text-xl text-gray-900">{info.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {info.details.map((detail, detailIndex) => (
+                      <div key={detailIndex}>
+                        <div className="text-sm text-gray-500 mb-1">
+                          {detail.label}
+                        </div>
+                        <div className="font-semibold text-gray-900">{detail.value}</div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Contact Form */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5" />
-                Gửi tin nhắn cho chúng tôi
-              </CardTitle>
-              <CardDescription>
-                Điền thông tin và chúng tôi sẽ phản hồi trong vòng 24 giờ
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Họ và tên *</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Nhập họ và tên"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Nhập email"
-                      required
-                    />
-                  </div>
-                </div>
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <Card className="border-0 shadow-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 text-gray-900 py-8">
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Send className="h-6 w-6 text-purple-600" />
+                    </div>
+                    Gửi tin nhắn cho chúng tôi
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 text-base mt-2">
+                    Điền thông tin và chúng tôi sẽ phản hồi trong vòng 24 giờ
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-10 bg-white">
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="grid sm:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <Label htmlFor="name" className="text-gray-800 font-semibold text-sm uppercase tracking-wide">Họ và tên *</Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          placeholder="Nhập họ và tên"
+                          className="border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 h-12 text-base"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="email" className="text-gray-800 font-semibold text-sm uppercase tracking-wide">Email *</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="Nhập email"
+                          className="border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 h-12 text-base"
+                          required
+                        />
+                      </div>
+                    </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Số điện thoại</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="Nhập số điện thoại"
-                    />
+                    <div className="grid sm:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <Label htmlFor="phone" className="text-gray-800 font-semibold text-sm uppercase tracking-wide">Số điện thoại</Label>
+                        <Input
+                          id="phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="Nhập số điện thoại"
+                          className="border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 h-12 text-base"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="subject" className="text-gray-800 font-semibold text-sm uppercase tracking-wide">Chủ đề *</Label>
+                        <Input
+                          id="subject"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                          placeholder="Chủ đề cần tư vấn"
+                          className="border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 h-12 text-base"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="message" className="text-gray-800 font-semibold text-sm uppercase tracking-wide">Nội dung tin nhắn *</Label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        placeholder="Mô tả chi tiết vấn đề hoặc câu hỏi của bạn..."
+                        className="w-full min-h-[140px] px-4 py-4 border border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 resize-y"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg border border-purple-100">
+                      <CheckCircle className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                      <span className="text-purple-800 font-medium">Thông tin của bạn sẽ được bảo mật tuyệt đối</span>
+                    </div>
+
+                    <Button type="submit" size="lg" className="w-full sm:w-auto bg-white border-2 border-purple-200 hover:border-purple-300 text-purple-600 font-semibold h-12 px-8">
+                      <Send className="mr-2 h-5 w-5" />
+                      Gửi tin nhắn
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Emergency Contact */}
+              <Card className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-red-600 flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                   0353366459
+                  </CardTitle>
+                </CardHeader>
+               
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Hành động nhanh</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-300">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Đặt lịch hẹn
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-300">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Chat trực tuyến
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-300">
+                    <User className="mr-2 h-4 w-4" />
+                    Tạo tài khoản
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Trust Indicators */}
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
+                <CardHeader>
+                  <CardTitle className="text-green-700 flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Cam kết của chúng tôi
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Bảo mật thông tin 100%</span>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Chủ đề *</Label>
-                    <Input
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      placeholder="Chủ đề cần tư vấn"
-                      required
-                    />
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Tư vấn chuyên môn cao</span>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Nội dung tin nhắn *</Label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    placeholder="Mô tả chi tiết vấn đề hoặc câu hỏi của bạn..."
-                    className="w-full min-h-[120px] px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-y"
-                    required
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  Thông tin của bạn sẽ được bảo mật tuyệt đối
-                </div>
-
-                <Button type="submit" size="lg" className="w-full sm:w-auto">
-                  <Send className="mr-2 h-4 w-4" />
-                  Gửi tin nhắn
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Hỗ trợ 24/7</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Emergency Contact */}
-          <Card className="border-red-200 bg-red-50/50">
-            <CardHeader>
-              <CardTitle className="text-red-600 flex items-center gap-2">
-                <Phone className="h-5 w-5" />
-                Liên hệ khẩn cấp
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">1900 xxxx</div>
-                <div className="text-sm text-muted-foreground">
-                  Hotline 24/7
-                </div>
-              </div>
-              <Button variant="destructive" className="w-full">
-                <Phone className="mr-2 h-4 w-4" />
-                Gọi ngay
-              </Button>
-            </CardContent>
-          </Card>
+     
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Hành động nhanh</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Calendar className="mr-2 h-4 w-4" />
-                Đặt lịch hẹn
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Chat trực tuyến
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <User className="mr-2 h-4 w-4" />
-                Tạo tài khoản
-              </Button>
-            </CardContent>
-          </Card>
+      {/* FAQs Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Câu hỏi thường gặp</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Những câu hỏi phổ biến về dịch vụ của chúng tôi
+            </p>
+          </div>
 
-          {/* FAQs */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Câu hỏi thường gặp</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {faqs.map((faq, index) => (
-                <div key={index} className="space-y-2">
-                  <h4 className="font-medium text-sm">{faq.question}</h4>
-                  <p className="text-xs text-muted-foreground">{faq.answer}</p>
-                  {index < faqs.length - 1 && <hr className="my-3" />}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {faqs.map((faq, index) => (
+              <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg text-gray-900">{faq.question}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">{faq.answer}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Office Locations */}
-      <div className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Văn phòng của chúng tôi</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hệ thống văn phòng trên toàn quốc để phục vụ bạn tốt nhất
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {offices.map((office, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building className="h-5 w-5" />
-                      {office.city}
-                    </CardTitle>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{office.address}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{office.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{office.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{office.hours}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      </section>
 
       {/* Map Section */}
-      <div className="bg-muted/50 rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Tìm đường đến văn phòng</h2>
-        <p className="text-muted-foreground mb-6">
-          Sử dụng Google Maps để tìm đường đến văn phòng gần bạn nhất
-        </p>
-        <div className="bg-white rounded-lg p-8 border-2 border-dashed border-border">
-          <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            Bản đồ tương tác sẽ được hiển thị ở đây
-          </p>
-          <Button variant="outline" className="mt-4">
-            Xem trên Google Maps
-          </Button>
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Tìm đường đến văn phòng</h2>
+            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+              Sử dụng Google Maps để tìm đường đến văn phòng gần bạn nhất
+            </p>
+            <div className="bg-white rounded-xl p-8 border-2 border-dashed border-purple-200 shadow-lg">
+              <MapPin className="h-16 w-16 text-purple-400 mx-auto mb-6" />
+              <p className="text-gray-600 mb-6">
+                Bản đồ tương tác sẽ được hiển thị ở đây
+              </p>
+              <Button variant="outline" className="hover:bg-purple-50 hover:border-purple-300">
+                Xem trên Google Maps
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+     
     </div>
   );
 }

@@ -31,6 +31,7 @@ import {
   ContactPage,
   ProfilePage,
 } from "@/pages";
+import GoogleCallback from "@/pages/auth/GoogleCallback";
 
 // Admin Pages
 import {
@@ -191,6 +192,15 @@ export const authRoutes: RouteConfig[] = [
     component: RegisterPage,
     title: "Đăng ký", // Corrected "Dăng ký" to "Đăng ký"
     description: "Đăng ký tài khoản hệ thống mới", // Corrected description
+    layout: "AUTH",
+    icon: LogIn,
+    showInNav: false,
+  },
+  {
+    path: "/auth/google/callback",
+    component: GoogleCallback,
+    title: "Google Callback",
+    description: "Xử lý callback từ Google OAuth",
     layout: "AUTH",
     icon: LogIn,
     showInNav: false,

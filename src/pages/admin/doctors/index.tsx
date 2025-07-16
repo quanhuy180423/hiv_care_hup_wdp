@@ -74,14 +74,7 @@ export default function DoctorManagement() {
   const meta = doctorsData?.meta;
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 0;
 
-  // Debug logs
-  console.log('doctorsData:', doctorsData);
-  console.log('doctors array:', doctors);
-  console.log('doctors length:', doctors.length);
-  console.log('meta:', meta);
-  console.log('pageSize:', pageSize);
-  console.log('currentPage:', currentPage);
-
+  
   
 
   const { data: weeklyData, isLoading: isWeeklyLoading } = useWeeklySchedule({
@@ -94,7 +87,7 @@ export default function DoctorManagement() {
   const { mutate: generateSchedule, isPending: isGenerating } =
     useGenerateSchedule();
   const { mutate: swapShifts, isPending: isSwapping } = useSwapShifts();
-  const { mutate: assignDoctorsManually, isPending: isManualAssigning } =
+  const { mutate: assignDoctorsManually} =
     useAssignDoctorsManually();
 
   const {
