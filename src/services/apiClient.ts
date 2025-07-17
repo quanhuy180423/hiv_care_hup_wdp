@@ -1,7 +1,6 @@
 // lib/api.ts
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
 class ApiClient {
@@ -30,9 +29,8 @@ class ApiClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config) => {
-        // Thử lấy token từ localStorage trước (theo authService hiện tại)
-        const token =
-          localStorage.getItem("auth_token") || Cookies.get("accessToken");
+        // Get token from localStorage with consistent naming
+        const token = localStorage.getItem("accessToken");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -109,18 +107,15 @@ class ApiClient {
           this.isRefreshing = true;
 
           try {
-            // Thử refresh token từ localStorage hoặc cookies
-            const refreshToken =
-              localStorage.getItem("refresh_token") ||
-              Cookies.get("refreshToken");
+            // Get refresh token from localStorage with consistent naming
+            const refreshToken = localStorage.getItem("refreshToken");
             if (refreshToken) {
               console.log("🔄 Refreshing token...");
               const response = await this.refreshToken(refreshToken);
               const { accessToken } = response.data.data;
 
-              // Lưu token mới vào cả localStorage và cookies
-              localStorage.setItem("auth_token", accessToken);
-              Cookies.set("accessToken", accessToken, { expires: 1 });
+              // Save new token to localStorage with consistent naming
+              localStorage.setItem("accessToken", accessToken);
 
               this.processQueue(null);
               return this.client(originalRequest);
@@ -157,13 +152,13 @@ class ApiClient {
 
   private logout() {
     console.log("🚪 Logging out user...");
-    // Xóa tokens từ cả localStorage và cookies
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("refresh_token");
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
+    // Clear tokens from localStorage with consistent naming
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userProfile");
 
-    // Redirect tới đúng route login
+    // Redirect to login page
     window.location.href = "/login";
   }
 

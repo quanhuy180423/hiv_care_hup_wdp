@@ -147,9 +147,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setLoading: (isLoading) => set({ isLoading }),
 
       reset: () => {
-        set(initialState);
+        set({
+          userProfile: null,
+          user: null,
+          tokens: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
         // Clear localStorage
-
         localStorage.removeItem("user");
         localStorage.removeItem("userProfile");
         localStorage.removeItem("accessToken");

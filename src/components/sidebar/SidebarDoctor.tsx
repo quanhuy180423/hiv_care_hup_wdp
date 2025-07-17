@@ -9,14 +9,21 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Calendar, CalendarClock, LogOut, Stethoscope, User } from "lucide-react";
+import {
+  Calendar,
+  CalendarClock,
+  LogOut,
+  Stethoscope,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Assets } from "@/assets";
-import authService from "@/services";
 import { Link, Outlet } from "react-router-dom";
 import type { ReactNode } from "react";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface DoctorLayoutProps {
   children?: ReactNode;
@@ -40,11 +47,17 @@ const sidebarNav = [
 
 export default function SidebarDoctor({ children }: DoctorLayoutProps) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-
+  // Auth state from useAuth hook
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   return (
@@ -54,7 +67,7 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
         <Sidebar>
           <SidebarContent>
             {/* Logo & Title */}
-            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Link to={"/"} className="flex items-center gap-3 px-4 pt-4 pb-2">
               <img
                 src={Assets.logoHIV}
                 alt="Logo"
@@ -66,7 +79,7 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                   Doctor Panel
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* Sidebar Group */}
             <SidebarGroup>

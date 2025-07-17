@@ -6,7 +6,6 @@ import type {
   RegisterRequest,
   ChangePasswordRequest,
   UpdateProfileRequest,
-  RegisterRequest,
 } from "@/services/authService";
 
 export const useAuth = () => {
@@ -112,6 +111,7 @@ export const useAuth = () => {
       setLoading(true);
       await authService.logout();
       reset();
+      window.location.href = "/login"; // Redirect to login page
     } finally {
       setLoading(false);
     }

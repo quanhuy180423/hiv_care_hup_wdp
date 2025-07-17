@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
 import {
   Calendar,
   FileHeart,
@@ -22,8 +22,9 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { authService } from "@/services";
 import { Assets } from "@/assets";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface StaffLayoutProps {
   children?: ReactNode;
@@ -43,11 +44,17 @@ const sidebarNav = [
 
 export default function SidebarStaff({ children }: StaffLayoutProps) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-
+  // Auth state from useAuth hook
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   return (
@@ -57,7 +64,7 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
         <Sidebar>
           <SidebarContent>
             {/* Logo & Title */}
-            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Link to={"/"} className="flex items-center gap-3 px-4 pt-4 pb-2">
               <img
                 src={Assets.logoHIV}
                 alt="Logo"
@@ -69,7 +76,7 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                   Staff Panel
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* Sidebar Group */}
             <SidebarGroup>

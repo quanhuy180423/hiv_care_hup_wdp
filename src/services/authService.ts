@@ -105,8 +105,8 @@ export const authService = {
 
       if (response.data && response.data.data) {
         // Store tokens in localStorage
-        localStorage.setItem("auth_token", response.data.data.accessToken);
-        localStorage.setItem("refresh_token", response.data.data.refreshToken);
+        localStorage.setItem("accessToken", response.data.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.data.refreshToken);
         return response.data;
       }
       // throw new Error(response.data.message || "Đăng nhập thất bại");
@@ -141,7 +141,7 @@ export const authService = {
     expiresIn: number;
   }> => {
     try {
-      const refreshToken = localStorage.getItem("refresh_token");
+      const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {
         throw new Error("Không tìm thấy refresh token");
       }
@@ -152,15 +152,15 @@ export const authService = {
       }>(AUTH_ENDPOINTS.REFRESH, { refreshToken });
 
       if (response.data) {
-        localStorage.setItem("auth_token", response.data.accessToken);
+        localStorage.setItem("accessToken", response.data.accessToken);
         return response.data;
       }
 
       throw new Error("Refresh token thất bại");
     } catch (error) {
       // Clear tokens if refresh fails
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       throw new Error(handleApiError(error));
     }
   },
@@ -239,22 +239,26 @@ export const authService = {
   // Logout user
   logout: async (): Promise<void> => {
     try {
-      const refreshToken = localStorage.getItem("refresh_token");
+      const refreshToken = localStorage.getItem("refreshToken");
       if (refreshToken) {
-        const res = await apiClient.post(AUTH_ENDPOINTS.LOGOUT, {
+        await apiClient.post(AUTH_ENDPOINTS.LOGOUT, {
           refreshToken,
         });
-        return res.data;
       }
+      // Always clear local storage regardless of API call result
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     } catch (error) {
       console.error("🌐 authService.logout error:", error);
-      throw new Error(handleApiError(error));
+      // Even if logout API fails, clear local storage
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     }
   },
 
   // Check if user is authenticated (has valid token)
   isAuthenticated: (): boolean => {
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem("accessToken");
     if (!token) return false;
 
     try {
@@ -262,21 +266,21 @@ export const authService = {
       // or check if it's expired by decoding the JWT
       return true;
     } catch {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       return false;
     }
   },
 
   // Get stored auth token
   getToken: (): string | null => {
-    return localStorage.getItem("auth_token");
+    return localStorage.getItem("accessToken");
   },
 
   // Clear all auth data
   clearAuth: (): void => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   },
 };
 

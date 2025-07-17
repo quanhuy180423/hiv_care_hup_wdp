@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -23,9 +23,10 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { authService } from "@/services";
 import { Assets } from "@/assets";
 import type { ReactNode } from "react";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 const sidebarNav = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/admin" },
@@ -35,7 +36,11 @@ const sidebarNav = [
   { name: "Quản lý bác sĩ", icon: UserCog, path: "/admin/doctors" },
   { name: "Quản lý thuốc", icon: BarChart3, path: "/admin/medicines" },
   { name: "Quản lý dịch vụ", icon: BarChart3, path: "/admin/services" },
-  { name: "Protocols điều trị", icon: Activity, path: "/admin/treatment-protocols" },
+  {
+    name: "Protocols điều trị",
+    icon: Activity,
+    path: "/admin/treatment-protocols",
+  },
   { name: "Cài đặt", icon: Settings, path: "/admin/settings" },
 ];
 
@@ -45,11 +50,18 @@ interface AdminLayoutProps {
 
 export default function SidebarAdmin({ children }: AdminLayoutProps) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
 
+  // Auth state from useAuth hook
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   return (
@@ -59,7 +71,7 @@ export default function SidebarAdmin({ children }: AdminLayoutProps) {
         <Sidebar>
           <SidebarContent>
             {/* Logo & Title */}
-            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+            <Link to={"/"} className="flex items-center gap-3 px-4 pt-4 pb-2">
               <img
                 src={Assets.logoHIV}
                 alt="Logo"
@@ -71,7 +83,7 @@ export default function SidebarAdmin({ children }: AdminLayoutProps) {
                   Admin Panel
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* Sidebar Group */}
             <SidebarGroup>
