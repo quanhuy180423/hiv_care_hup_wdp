@@ -92,6 +92,16 @@ export interface DoctorScheduleResponse {
   message: string;
 }
 
+export interface WeeklyScheduleResponse {
+  data: {
+    startDate: string;
+    endDate: string;
+    doctors: Doctor[];
+  };
+  statusCode: number;
+  message: string;
+}
+
 export interface DoctorSwapFromValues {
   doctor1: {
     id: number;
