@@ -14,6 +14,7 @@ import type {
   ActivePatientTreatmentsSummary,
   PaginatedActiveTreatmentsResult,
   PaginationMeta,
+  PatientTreatmentsResponse,
 } from "@/types/patientTreatment";
 
 const API_URL = "/patient-treatments";
@@ -72,14 +73,15 @@ export const patientTreatmentService = {
     patientId: number | string,
     params: PatientTreatmentQueryParams,
     token: string
-  ) {
-    return apiClient.get<{
-      data: PatientTreatmentType[];
-      meta: PaginationMeta;
-    }>(`${API_URL}/patient/${patientId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      params,
-    });
+  ): Promise<PatientTreatmentsResponse> {
+    const res = await apiClient.get<PatientTreatmentsResponse>(
+      `${API_URL}/patient/${patientId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      }
+    );
+    return res.data;
   },
 
   // Get all treatments for a specific doctor (with filters)

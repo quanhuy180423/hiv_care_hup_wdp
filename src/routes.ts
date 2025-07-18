@@ -70,6 +70,7 @@ import ProfileDoctorPage from "./pages/doctor/profile";
 import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import TestResultPage from "./pages/doctor/testResult/TestResultPage";
 import TestManagement from "./pages/admin/test";
+import TreatmentSchedule from "./pages/user/treatment-schedule";
 
 // Route definition interface
 export interface RouteConfig {
@@ -228,6 +229,17 @@ export const userRoutes: RouteConfig[] = [
     component: AppointmentHistory,
     title: "Lịch sử cuộc hẹn",
     description: "Xem lịch sử cuộc hẹn của bạn",
+    protected: true,
+    layout: "USER_PROFILE",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"],
+  },
+  {
+    path: "/user/treatment-schedule",
+    component: TreatmentSchedule,
+    title: "Lịch điều trị",
+    description: "Xem lịch điều trị của bạn",
     protected: true,
     layout: "USER_PROFILE",
     icon: Calendar,
