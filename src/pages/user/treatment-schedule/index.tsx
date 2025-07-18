@@ -24,10 +24,11 @@ import {
   FlaskConical,
   ClipboardCheck,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/utils/numbers/formatCurrency';
+import { formatDate, formatUtcDateManually } from '@/lib/utils/dates/formatDate';
 
 export default function TreatmentSchedule() {
   const user = useAuthStore((s) => s.user);
@@ -98,7 +99,7 @@ export default function TreatmentSchedule() {
                     </Badge>
                     <Badge variant="outline" className="flex items-center gap-1">
                       <ClipboardCheck className="w-3 h-3" />
-                      Tổng chi phí: {treatment.total.toLocaleString()} VND
+                      Tổng chi phí: {formatCurrency(treatment.total || 0)}
                     </Badge>
                   </div>
                 </div>
@@ -145,7 +146,7 @@ export default function TreatmentSchedule() {
                       <div>
                         <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
                         <p className="font-medium">
-                          {format(new Date(treatment.startDate), 'dd/MM/yyyy')}
+                          {formatDate(treatment.startDate, 'dd/MM/yyyy')}
                         </p>
                       </div>
                     </div>
@@ -175,7 +176,7 @@ export default function TreatmentSchedule() {
                           {treatment.createdBy?.name || 'Hệ thống'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(treatment.createdAt), 'dd/MM/yyyy HH:mm')}
+                          {formatUtcDateManually(treatment.createdAt)}
                         </p>
                       </div>
                     </div>
