@@ -7,11 +7,12 @@ import {
   type TestResult,
   type ReqTestResultUpdate,
 } from "@/services/testResultService";
+import type { Query } from "@/services/testService";
 
-export const useTestResults = () => {
+export const useTestResults = (query?: Query) => {
   return useQuery<ResTestResult>({
-    queryKey: ["testResults"],
-    queryFn: testResultService.getAll,
+    queryKey: ["testResults", query],
+    queryFn: () => testResultService.getAll(query),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
@@ -70,7 +71,7 @@ export const useTestResultsByPatientTreatmentId = (
       const res = await testResultService.getByPatientTreatmentId(
         patientTreatmentId
       );
-      return res.data;
+      return res.data?.data || [];
     },
     enabled: !!patientTreatmentId,
   });
@@ -81,7 +82,7 @@ export const useTestResultsByStatus = (status: string) => {
     queryKey: ["testResults", "status", status],
     queryFn: async () => {
       const res = await testResultService.getByStatus(status);
-      return res.data;
+      return res.data?.data || [];
     },
     enabled: !!status,
   });
