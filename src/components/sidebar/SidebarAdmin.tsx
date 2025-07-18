@@ -9,6 +9,7 @@ import {
   LogOut,
   Shield,
   UserLock,
+  FlaskConical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,9 +24,10 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { authService } from "@/services";
 import { Assets } from "@/assets";
 import type { ReactNode } from "react";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 const sidebarNav = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/admin" },
@@ -35,7 +37,16 @@ const sidebarNav = [
   { name: "Quản lý bác sĩ", icon: UserCog, path: "/admin/doctors" },
   { name: "Quản lý thuốc", icon: BarChart3, path: "/admin/medicines" },
   { name: "Quản lý dịch vụ", icon: BarChart3, path: "/admin/services" },
-  { name: "Protocols điều trị", icon: Activity, path: "/admin/treatment-protocols" },
+  {
+    name: "Protocols điều trị",
+    icon: Activity,
+    path: "/admin/treatment-protocols",
+  },
+  {
+    name: "Xét nghiệm",
+    icon: FlaskConical,
+    path: "/admin/test",
+  },
   { name: "Cài đặt", icon: Settings, path: "/admin/settings" },
 ];
 
@@ -46,10 +57,17 @@ interface AdminLayoutProps {
 export default function SidebarAdmin({ children }: AdminLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   return (

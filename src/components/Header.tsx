@@ -1,9 +1,15 @@
-import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Settings, LogIn, ChevronDown, Bell, Search } from "lucide-react";
-import { Assets } from "@/assets";
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  Settings,
+  ChevronDown,
+  Bell,
+  Search,
+} from "lucide-react";
 import { useState } from "react";
-import { navigationRoutes } from "@/routes";
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 
@@ -16,32 +22,7 @@ export default function Header() {
   // Auth state from useAuth hook
   const { isAuthenticated, user, logout } = useAuth();
 
-  // Filter navigation items based on user role
-  const navItems = navigationRoutes
-    .filter((route) => {
-      // If route has allowedRoles, check if user's role is included
-      if (route.allowedRoles && user) {
-        return route.allowedRoles.includes(user.role);
-      }
-      // If no allowedRoles specified, show to everyone
-      if (!route.allowedRoles) {
-        return true;
-      }
-      // If user is not authenticated, only show public routes
-      return !route.protected;
-    })
-    .map((route) => ({
-      path: route.path,
-      label: route.title,
-      icon: route.icon!,
-    }));
-
   const isActive = (path: string) => location.pathname === path;
-
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    setIsMobileMenuOpen(false);
-  };
 
   const handleLogout = () => {
     logout()
@@ -85,64 +66,66 @@ export default function Header() {
             {/* Logo and Navigation */}
             <div className="flex items-center space-x-8">
               {/* Logo */}
-              <div 
+              <div
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => navigate("/")}
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">H</span>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">HIV Care Hub</h1>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  HIV Care Hub
+                </h1>
               </div>
-              
+
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex space-x-8">
-                <a 
-                  href="/" 
+                <a
+                  href="/"
                   className={`font-medium transition-colors ${
-                    isActive("/") 
-                      ? "text-purple-600" 
+                    isActive("/")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Trang chủ
                 </a>
-                <a 
-                  href="/services" 
+                <a
+                  href="/services"
                   className={`font-medium transition-colors ${
-                    isActive("/services") 
-                      ? "text-purple-600" 
+                    isActive("/services")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Dịch vụ
                 </a>
-                <a 
-                  href="/about" 
+                <a
+                  href="/about"
                   className={`font-medium transition-colors ${
-                    isActive("/about") 
-                      ? "text-purple-600" 
+                    isActive("/about")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Giới thiệu
                 </a>
-                <a 
-                  href="/contact" 
+                <a
+                  href="/contact"
                   className={`font-medium transition-colors ${
-                    isActive("/contact") 
-                      ? "text-purple-600" 
+                    isActive("/contact")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Liên hệ
                 </a>
                 {isAuthenticated && (
-                  <a 
-                    href="/services/appointment/register" 
+                  <a
+                    href="/services/appointment/register"
                     className={`font-medium transition-colors ${
-                      isActive("/services/appointment/register") 
-                        ? "text-purple-600" 
+                      isActive("/services/appointment/register")
+                        ? "text-purple-600"
                         : "text-gray-700 hover:text-purple-600"
                     }`}
                   >
@@ -244,7 +227,11 @@ export default function Header() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-2 text-gray-600 hover:text-purple-600 transition-colors"
               >
-                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isMobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
               </button>
             </div>
           </div>
@@ -253,52 +240,52 @@ export default function Header() {
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-gray-200">
               <nav className="flex flex-col space-y-4 pt-4">
-                <a 
-                  href="/" 
+                <a
+                  href="/"
                   className={`font-medium transition-colors ${
-                    isActive("/") 
-                      ? "text-purple-600" 
+                    isActive("/")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Trang chủ
                 </a>
-                <a 
-                  href="/services" 
+                <a
+                  href="/services"
                   className={`font-medium transition-colors ${
-                    isActive("/services") 
-                      ? "text-purple-600" 
+                    isActive("/services")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Dịch vụ
                 </a>
-                <a 
-                  href="/about" 
+                <a
+                  href="/about"
                   className={`font-medium transition-colors ${
-                    isActive("/about") 
-                      ? "text-purple-600" 
+                    isActive("/about")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Giới thiệu
                 </a>
-                <a 
-                  href="/contact" 
+                <a
+                  href="/contact"
                   className={`font-medium transition-colors ${
-                    isActive("/contact") 
-                      ? "text-purple-600" 
+                    isActive("/contact")
+                      ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
                   }`}
                 >
                   Liên hệ
                 </a>
                 {isAuthenticated && (
-                  <a 
-                    href="/services/appointment/register" 
+                  <a
+                    href="/services/appointment/register"
                     className={`font-medium transition-colors ${
-                      isActive("/services/appointment/register") 
-                        ? "text-purple-600" 
+                      isActive("/services/appointment/register")
+                        ? "text-purple-600"
                         : "text-gray-700 hover:text-purple-600"
                     }`}
                   >

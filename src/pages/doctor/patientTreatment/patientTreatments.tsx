@@ -41,7 +41,7 @@ const DoctorPatientTreatments = () => {
     };
   }, [search]);
 
-  const token = useMemo(() => localStorage.getItem("accessToken") || "", []);
+  const token = useMemo(() => localStorage.getItem("auth_token") || "", []);
   // Lấy danh sách thuốc cho form (autocomplete/select)
   const { data: medicines, isLoading: isLoadingMedicines } = useMedicines(
     { page: 1, limit: 100 },
