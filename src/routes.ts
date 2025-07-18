@@ -68,7 +68,7 @@ import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
-import TestResultPage from "./pages/doctor/testResult/TestResultPage";
+import TestResultPage from "./pages/doctor/testResult";
 import TestManagement from "./pages/admin/test";
 
 // Route definition interface

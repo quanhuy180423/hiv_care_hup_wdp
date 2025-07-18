@@ -1,4 +1,5 @@
 import { apiClient } from "@/services/apiClient";
+import type { Query, Test } from "./testService";
 
 export enum TestInterpretation {
   POSITIVE = "POSITIVE",
@@ -7,22 +8,38 @@ export enum TestInterpretation {
   DETECTED = "DETECTED",
   NOT_DETECTED = "NOT_DETECTED",
 }
+export interface TestUser {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string | null;
+}
+export interface LabTech {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string | null;
+}
 export interface TestResult {
   id: number;
   testId: number;
   userId: number;
+  test?: Test;
+  user?: TestUser;
+  status: string; // Status of the test result
+  labTech?: LabTech;
   patientTreatmentId: number;
   rawResultValue: number;
   unit: string | null;
   interpretation: TestInterpretation;
   cutOffValueUsed: number | null;
   labTechId: number;
-  resultDate: Date;
+  resultDate: string;
   notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
-export interface ResTestResult {
+export interface ResTestResultMeta {
   data: TestResult[];
   meta: {
     total: number;
@@ -33,6 +50,13 @@ export interface ResTestResult {
     hasPreviousPage: boolean;
   };
 }
+
+export interface ResTestResult {
+  data?: ResTestResultMeta;
+  message: string;
+  statusCode: number;
+}
+
 export interface ReqTestResult {
   testId: number;
   userId: number;
@@ -40,17 +64,19 @@ export interface ReqTestResult {
 }
 
 export interface ReqTestResultUpdate {
-  rawResultValue: number;
-  notes: string;
-  resultDate: string;
+  rawResultValue?: number;
+  notes?: string;
 }
+
 export const testResultService = {
   async createByDoctor(data: ReqTestResult): Promise<ResTestResult> {
     const response = await apiClient.post<ResTestResult>("/test-results", data);
     return response.data;
   },
-  async getAll(): Promise<ResTestResult> {
-    const response = await apiClient.get<ResTestResult>("/test-results");
+  async getAll(query?: Query): Promise<ResTestResult> {
+    const response = await apiClient.get<ResTestResult>(
+      `/test-results?page=${query?.page || 1}&limit=${query?.limit || 10}`
+    );
     return response.data;
   },
   async getById(id: number): Promise<TestResult> {
