@@ -9,14 +9,22 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Calendar, CalendarClock, LogOut, Stethoscope, User } from "lucide-react";
+import {
+  Calendar,
+  CalendarClock,
+  FlaskConical,
+  LogOut,
+  Stethoscope,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Assets } from "@/assets";
-import authService from "@/services";
 import { Link, Outlet } from "react-router-dom";
 import type { ReactNode } from "react";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface DoctorLayoutProps {
   children?: ReactNode;
@@ -36,15 +44,27 @@ const sidebarNav = [
     icon: Stethoscope,
     path: "/doctor/treatment-protocols",
   },
+  {
+    name: "Kết quả xét nghiệm",
+    icon: FlaskConical,
+    path: "/doctor/test-results",
+  },
 ];
 
 export default function SidebarDoctor({ children }: DoctorLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   return (
