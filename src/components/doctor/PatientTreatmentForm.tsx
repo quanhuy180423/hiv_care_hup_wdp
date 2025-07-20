@@ -1,8 +1,13 @@
-import useAuth from "@/hooks/useAuth";
-import { patientTreatmentSchema } from "@/schemas/patientTreatment";
+import {
+  patientTreatmentSchema,
+  type PatientTreatmentFormValues,
+} from "@/schemas/patientTreatment";
 import { appointmentService } from "@/services/appointmentService";
+import { medicineService } from "@/services/medicineService";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
 import { treatmentProtocolService } from "@/services/treatmentProtocolService";
+import useAuthStore from "@/store/authStore";
+import type { Appointment } from "@/types/appointment";
 import type { ErrorResponse } from "@/types/common";
 import type { Medicine } from "@/types/medicine";
 import type { PatientTreatmentFormSubmit } from "@/types/patientTreatment";
@@ -47,13 +52,12 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
   const [openCustomMed, setOpenCustomMed] = useState(false);
   const [openNotes, setOpenNotes] = useState(false);
 
-  const { user } = useAuth();
-  const doctorIdFromUser =
-    user && typeof user.id === "number"
-      ? user.id
-      : user && typeof user.id === "string"
-      ? Number(user.id)
-      : undefined;
+  const doctorIdFromUser = useAuthStore((s) => {
+    const docId = s.userProfile?.doctorId ?? s.userProfile?.doctorId;
+    if (typeof docId === "string") return Number(docId);
+    if (typeof docId === "number") return docId;
+    return undefined;
+  });
 
   const {
     control,
@@ -62,7 +66,7 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<import("@/schemas/patientTreatment").PatientTreatmentFormValues>({
+  } = useForm<PatientTreatmentFormValues>({
     resolver: zodResolver(patientTreatmentSchema),
     defaultValues: {
       patientId: undefined,
@@ -113,14 +117,14 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     const list: TreatmentProtocol[] = res.data.data || [];
     return list.map((p) => ({ id: p.id, name: p.name }));
   }, []);
+
   const searchPatients = useCallback(async () => {
-    if (!user?.id) return [];
+    if (!doctorIdFromUser) return [];
     const res = await appointmentService.getAppointmentByDoctorId(
-      Number(user.id),
+      Number(doctorIdFromUser),
       { limit: 10 }
     );
-    const appointments: import("@/types/appointment").Appointment[] =
-      res.data?.data || [];
+    const appointments: Appointment[] = res.data?.data || [];
     const uniquePatients: Record<number, { id: number; name: string }> = {};
     appointments.forEach((appt) => {
       if (appt.user && appt.userId && !uniquePatients[appt.userId]) {
@@ -131,7 +135,7 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
       }
     });
     return Object.values(uniquePatients);
-  }, [user]);
+  }, [doctorIdFromUser]);
 
   // ===== Doctor info =====
   const doctorNameFromStorage = (() => {
@@ -159,33 +163,46 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
       return;
     }
     let ignore = false;
+
     const fetchAll = async () => {
       // Lấy danh sách thuốc
       try {
-        const { medicineService } = await import("@/services/medicineService");
         const res = await medicineService.getMedicines({ limit: 10000 });
         if (!ignore) setMedicines(res.data.data || []);
       } catch {
         if (!ignore) setMedicines([]);
       }
 
-      // Kiểm tra điều trị hiện tại
-      if (typeof watchedPatientId === "number") {
+      // Kiểm tra điều trị hiện tại chỉ cho đúng doctorId và patientId
+      if (
+        typeof watchedPatientId === "number" &&
+        typeof doctorIdFromUser === "number"
+      ) {
         try {
           const res = await patientTreatmentService.getByPatient(
             String(watchedPatientId),
-            {}
+            { doctorId: doctorIdFromUser }
           );
-          const treatments = res.data.data || [];
-          if (treatments.length > 0) {
-            const t = treatments[0];
-            setExistingTreatment({ id: t.id, patientId: t.patientId });
+          const treatments =
+            res && res.data && Array.isArray(res.data.data)
+              ? res.data.data
+              : [];
+          if (
+            treatments.length > 0 &&
+            treatments[0]?.id &&
+            treatments[0]?.patientId
+          ) {
+            setExistingTreatment({
+              id: treatments[0].id,
+              patientId: treatments[0].patientId,
+            });
             setShowEditDialog(true);
           } else {
             setExistingTreatment(null);
           }
-        } catch {
+        } catch (err) {
           setExistingTreatment(null);
+          console.error("Lỗi lấy hồ sơ điều trị bệnh nhân:", err);
         }
       }
 
@@ -268,7 +285,7 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     return () => {
       ignore = true;
     };
-  }, [watchedProtocolId, watchedPatientId, setValue]);
+  }, [watchedProtocolId, watchedPatientId, doctorIdFromUser, setValue]);
 
   return (
     <div className="w-full mx-auto">
