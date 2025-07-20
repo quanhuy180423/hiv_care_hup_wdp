@@ -16,7 +16,8 @@ import {
   Calendar, // Added from second block
   FileHeart, // Added from second block
   FileText,
-  User, // Added from second block
+  User,
+  FlaskConical, // Added from second block
 } from "lucide-react";
 
 import {
@@ -67,6 +68,9 @@ import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
+import TestResultPage from "./pages/doctor/testResult";
+import TestManagement from "./pages/admin/test";
+import TreatmentSchedule from "./pages/user/treatment-schedule";
 
 // Route definition interface
 export interface RouteConfig {
@@ -231,6 +235,17 @@ export const userRoutes: RouteConfig[] = [
     showInNav: false,
     allowedRoles: ["PATIENT", "DOCTOR"],
   },
+  {
+    path: "/user/treatment-schedule",
+    component: TreatmentSchedule,
+    title: "Lịch điều trị",
+    description: "Xem lịch điều trị của bạn",
+    protected: true,
+    layout: "USER_PROFILE",
+    icon: Calendar,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "DOCTOR"],
+  },
 ];
 
 // Admin routes
@@ -378,6 +393,17 @@ export const adminRoutes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
+  {
+    path: "/admin/test",
+    component: TestManagement,
+    title: "Quản lý xét nghiệm",
+    description: "Quản lý các loại xét nghiệm",
+    protected: true,
+    layout: "ADMIN",
+    icon: FlaskConical,
+    showInNav: true,
+    allowedRoles: ["ADMIN"],
+  },
 ];
 
 // Staff routes
@@ -485,6 +511,17 @@ export const doctorRoutes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["DOCTOR"],
   },
+  {
+    path: "/doctor/test-results",
+    component: TestResultPage,
+    title: "Kết quả xét nghiệm",
+    description: "Quản lý kết quả xét nghiệm",
+    protected: true,
+    layout: "DOCTOR",
+    icon: FlaskConical,
+    showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
 ];
 
 // Combine all routes
@@ -551,6 +588,7 @@ export const ROUTES = {
   ADMIN_TREATMENT_PROTOCOLS: "/admin/treatment-protocols", // Corrected name for clarity
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_SETTINGS: "/admin/settings",
+  ADMIN_TEST_MANAGEMENT: "/admin/test", // Added for test management
 
   // Staff routes
   STAFF_APPOINTMENTS: "/staff/appointments",
@@ -562,6 +600,7 @@ export const ROUTES = {
   DOCTOR_SCHEDULE: "/doctor/schedule",
   DOCTOR_PATIENT_TREATMENTS: "/doctor/patient-treatments",
   DOCTOR_TREATMENT_PROTOCOLS: "/doctor/treatment-protocols",
+  DOCTOR_TEST_RESULTS: "/doctor/test-results",
 } as const;
 
 // Helper function to get route config by path

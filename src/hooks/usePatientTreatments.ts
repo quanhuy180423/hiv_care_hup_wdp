@@ -9,9 +9,10 @@ import {
   updatePatientTreatment,
 } from "@/services/patientTreatmentService";
 import type {
-  PatientTreatmentFormSubmit,
-  PatientTreatmentQuery,
-  UpdatePatientTreatmentInput,
+  PatientTreatmentType,
+  PatientTreatmentFormValues,
+  PatientTreatmentQueryParams,
+  PatientTreatmentsResponse,
 } from "@/types/patientTreatment";
 import {
   useMutation,
@@ -94,18 +95,41 @@ export const useSearchPatientTreatments = (
       const res = await searchPatientTreatments(params);
       return res.data;
     },
-    ...options,
-  });
-
-export const useActivePatientTreatments = (
-  params: PatientTreatmentQuery,
-  options?: UseQueryOptions
-) =>
-  useQuery({
-    queryKey: ["activePatientTreatments", params],
-    queryFn: async () => {
-      const res = await getActivePatientTreatments(params);
-      return res.data;
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({
+        queryKey: ["patient-treatment-detail", id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["patient-treatments"] });
     },
-    ...options,
   });
+};
+
+// Lấy tất cả hồ sơ điều trị của bệnh nhân theo patientId
+export const usePatientTreatmentsByPatient = (
+  patientId?: number,
+  params: PatientTreatmentQueryParams = {}
+) => {
+  const getAccessToken = useAuthStore((s) => s.getAccessToken);
+  const token = getAccessToken();
+
+  return useQuery<PatientTreatmentsResponse>({
+    queryKey: ["patient-treatments", "by-patient", patientId, params],
+    queryFn: async () => {
+      if (!patientId || !token) {
+        throw new Error("Missing patientId or access token");
+      }
+
+      const response = await patientTreatmentService.getByPatient(
+        patientId,
+        params,
+        token
+      );
+
+      return response;
+    },
+    enabled: !!patientId && !!token,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+};

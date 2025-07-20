@@ -24,7 +24,12 @@ export interface PatientTreatmentType {
   patientId: number;
   protocolId: number;
   doctorId: number;
-  customMedications?: Record<string, unknown> | null;
+  customMedications?: Array<{
+    id: number;
+    note: string;
+    dosage: string;
+    schedule: string;
+  }>;
   notes?: string | null;
   startDate: string;
   endDate?: string | null;
@@ -52,7 +57,9 @@ export interface PatientTreatmentType {
       protocolId: number;
       medicineId: number;
       dosage: string;
-      duration: string;
+      durationValue: number;
+      durationUnit: string;
+      schedule: string;
       notes: string;
       createdAt: string;
       updatedAt: string;
@@ -89,6 +96,15 @@ export interface PatientTreatmentType {
   };
 }
 
+export interface PatientTreatmentsResponse {
+  data: {
+    data: PatientTreatmentType[];
+    meta: PaginationMeta;
+  };
+  statusCode: number;
+  message: string;
+}
+
 export interface PatientTreatmentQueryParams {
   page?: number;
   limit?: number;
@@ -100,6 +116,7 @@ export interface PatientTreatmentQueryParams {
   protocolId?: number;
   startDate?: string;
   endDate?: string;
+  includeCompleted?: boolean;
 }
 
 export interface PatientTreatmentStats {

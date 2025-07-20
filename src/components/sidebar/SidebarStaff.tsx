@@ -21,8 +21,9 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { authService } from "@/services";
 import { Assets } from "@/assets";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface StaffLayoutProps {
   children?: ReactNode;
@@ -38,11 +39,19 @@ const sidebarNav = [
 export default function SidebarStaff({ children }: StaffLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
+
 
   return (
     <SidebarProvider>

@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Calendar, LogOut, Shield, User } from "lucide-react";
+import { Calendar, LogOut, Shield, Syringe, User } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { authService } from "@/services";
 import type { ReactNode } from "react";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface SidebarUserProfileProps {
   children?: ReactNode;
@@ -28,15 +29,24 @@ const sidebarNav = [
     icon: Calendar,
     path: "/user/appointments",
   },
+  { id: "treatment-schedule", name: "Lịch điều trị", icon: Syringe, path: "/user/treatment-schedule" },
 ];
 
 export default function SidebarUser({ children }: SidebarUserProfileProps) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
 
   return (
