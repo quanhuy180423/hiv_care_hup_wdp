@@ -1,53 +1,53 @@
-import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import type { UserRole } from "./store/authStore";
 import {
-  Home,
-  Info,
-  DollarSign,
-  Stethoscope,
   BookOpen,
-  Phone,
-  LogIn,
-  Users,
   Calculator,
-  UserCog,
-  UserLock,
-  Calendar, // Added from second block
+  Calendar,
+  DollarSign, // Added from second block
   FileHeart, // Added from second block
   FileText,
+  FlaskConical,
+  Home,
+  Info,
+  LogIn,
+  Phone,
+  Stethoscope,
   User,
-  FlaskConical, // Added from second block
+  UserCog,
+  UserLock,
+  Users,
 } from "lucide-react";
+import type { ComponentType } from "react";
+import type { UserRole } from "./store/authStore";
 
 import {
-  HomePage,
-  LoginPage,
-  RegisterPage,
-  NotFoundPage,
   AboutPage,
-  PricingPage,
-  ServicesPage,
-  KnowledgePage,
   ContactPage,
+  HomePage,
+  KnowledgePage,
+  LoginPage,
+  NotFoundPage,
+  PricingPage,
   ProfilePage,
+  RegisterPage,
+  ServicesPage,
 } from "@/pages";
 import GoogleCallback from "@/pages/auth/GoogleCallback";
 
 // Admin Pages
 import {
-  AdminUserManagementPage,
-  AdminDoctorManagementPage,
   AdminAppointmentManagementPage,
-  AdminPatientRecordsPage,
   AdminARVProtocolPage,
+  AdminDoctorManagementPage,
+  AdminPatientRecordsPage,
   AdminReportsPage,
   AdminSettingsPage,
+  AdminUserManagementPage,
 } from "@/pages/admin";
 import DashboardPage from "./pages/admin/dashboad/DashboardPage";
-import RoleManagement from "./pages/admin/roles";
-import PermissionManagement from "./pages/admin/permissions";
 import MedicineManagement from "./pages/admin/medicines";
+import PermissionManagement from "./pages/admin/permissions";
+import RoleManagement from "./pages/admin/roles";
 import ServicesManagement from "./pages/admin/services";
 import TreatmentProtocolsManagement from "./pages/admin/treatment-protocols";
 
@@ -58,18 +58,19 @@ import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 
 // Doctor Pages
 import DoctorAppointments from "./pages/doctor/appointments";
-import DoctorPatientTreatments from "./pages/doctor/patientTreatment/patientTreatments";
+import DoctorPatientTreatments from "./pages/doctor/patientTreatment";
 import DoctorSchedule from "./pages/doctor/schedule";
 import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 
 // User specific pages
+import TestManagement from "./pages/admin/test";
+import CreateDoctorPatientTreatmentPage from "./pages/doctor/patientTreatment/pages/create";
+import ProfileDoctorPage from "./pages/doctor/profile";
+import TestResultPage from "./pages/doctor/testResult";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
+import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
-import ProfileDoctorPage from "./pages/doctor/profile";
-import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
-import TestResultPage from "./pages/doctor/testResult";
-import TestManagement from "./pages/admin/test";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
 
 // Route definition interface
@@ -323,7 +324,7 @@ export const adminRoutes: RouteConfig[] = [
     description: "Quản lý hồ sơ và lịch sử điều trị",
     protected: true,
     layout: "ADMIN",
-    icon: Users, // Consider changing this icon to something more specific for patient records
+    icon: Users,
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
@@ -498,6 +499,16 @@ export const doctorRoutes: RouteConfig[] = [
     layout: "DOCTOR",
     icon: FileHeart,
     showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/patient-treatments/create",
+    component: CreateDoctorPatientTreatmentPage,
+    title: "Tạo hồ sơ bệnh án",
+    description: "Tạo mới hồ sơ bệnh án cho bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    showInNav: false,
     allowedRoles: ["DOCTOR"],
   },
   {

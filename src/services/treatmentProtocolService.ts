@@ -1,26 +1,28 @@
 import { apiClient } from "@/services/apiClient";
 import type {
-  TreatmentProtocol,
-  TreatmentProtocolType,
-  TreatmentProtocolsResponse,
-  CreateTreatmentProtocol,
-  UpdateTreatmentProtocol,
-  QueryTreatmentProtocol,
   AdvancedSearchTreatmentProtocol,
-  CloneTreatmentProtocol,
   BulkCreateTreatmentProtocol,
-  FindTreatmentProtocolByName,
-  UsageStatsQuery,
-  PopularProtocolsQuery,
+  CloneTreatmentProtocol,
   CreateCustomProtocolFromTreatment,
-  ProtocolComparison,
-  ProtocolTrendAnalysis,
-  ProtocolEffectivenessMetrics,
-  ProtocolUsageStats,
-  PopularProtocol,
-  ProtocolWithCustomVariations,
-  ProtocolCostEstimation,
+  CreateTreatmentProtocol,
+  FindTreatmentProtocolByName,
   PaginatedResponse,
+  PopularProtocol,
+  PopularProtocolsQuery,
+  ProtocolComparison,
+  ProtocolCostEstimation,
+  ProtocolEffectivenessMetrics,
+  ProtocolTrendAnalysis,
+  ProtocolUsageStats,
+  ProtocolWithCustomVariations,
+  QueryTreatmentProtocol,
+  TreatmentProtocol,
+  TreatmentProtocolGetAllServiceResponse,
+  TreatmentProtocolType,
+  TreatmentProtocolsGetByIdResponse,
+  TreatmentProtocolsResponse,
+  UpdateTreatmentProtocol,
+  UsageStatsQuery,
 } from "@/types/treatmentProtocol";
 
 const BASE_URL = "/treatment-protocols";
@@ -29,17 +31,14 @@ export const treatmentProtocolService = {
   // Basic CRUD operations
   async getAllTreatmentProtocols(
     params?: QueryTreatmentProtocol
-  ): Promise<PaginatedResponse<TreatmentProtocol>> {
+  ): Promise<TreatmentProtocolGetAllServiceResponse> {
     const response = await apiClient.get(BASE_URL, { params });
-    // Transform the nested response structure to match PaginatedResponse
-    const apiResponse = response.data;
-    return {
-      data: apiResponse.data.data,
-      meta: apiResponse.data.meta,
-    };
+    return response.data;
   },
 
-  async getTreatmentProtocolById(id: number): Promise<TreatmentProtocol> {
+  async getTreatmentProtocolById(
+    id: number
+  ): Promise<TreatmentProtocolsGetByIdResponse> {
     const response = await apiClient.get(`${BASE_URL}/${id}`);
     return response.data;
   },
@@ -314,3 +313,15 @@ export const treatmentProtocolsService = {
     return results;
   },
 };
+
+export interface TreatmentProtocolCreateInput {
+  name: string;
+  description: string;
+  targetDisease: string;
+  medicines: Array<{
+    id: number;
+    dosage: string;
+    schedule: string;
+    notes?: string;
+  }>;
+}

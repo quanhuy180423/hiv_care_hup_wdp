@@ -7,9 +7,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useMedicines } from "@/hooks/useMedicine";
-import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useMedicines } from "@/hooks/useMedicines";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import type { TreatmentProtocolCreateInput } from "@/services/treatmentProtocolService";
 import { useFieldArray, useForm } from "react-hook-form";
 
 const DISEASES = [
@@ -27,28 +35,8 @@ const SCHEDULES = [
 interface ProtocolFormModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (values: {
-    name: string;
-    description: string;
-    targetDisease: string;
-    medicines: Array<{
-      id: number;
-      dosage: string;
-      schedule: string;
-      notes: string;
-    }>;
-  }) => void;
-  initialData?: {
-    name: string;
-    description: string;
-    targetDisease: string;
-    medicines: Array<{
-      id: number;
-      dosage: string;
-      schedule: string;
-      notes: string;
-    }>;
-  } | null;
+  onSubmit: (values: TreatmentProtocolCreateInput) => void;
+  initialData?: TreatmentProtocolCreateInput | null;
   isPending?: boolean;
 }
 
@@ -59,6 +47,8 @@ export function ProtocolFormModal({
   initialData,
   isPending,
 }: ProtocolFormModalProps) {
+  // State for confirm dialog when removing last medicine
+  const [confirmRemoveIdx, setConfirmRemoveIdx] = useState<number | null>(null);
   const {
     register,
     handleSubmit,
@@ -84,14 +74,8 @@ export function ProtocolFormModal({
     name: "medicines",
   });
 
-  // Lấy danh sách thuốc thực tế từ API
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("accessToken") || ""
-      : "";
   const { data: medicinesData, isLoading: isLoadingMedicines } = useMedicines(
-    {},
-    token
+    {}
   );
   // Đảm bảo ALL_MEDICINES luôn là mảng
   const ALL_MEDICINES = useMemo(
@@ -124,6 +108,7 @@ export function ProtocolFormModal({
         medicines: normalizeMedicines(initialData?.medicines),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isLoadingMedicines, initialData, reset]);
 
   // Tự động focus input tên khi mở modal
@@ -230,14 +215,14 @@ export function ProtocolFormModal({
                   </div>
                   <div className="flex flex-wrap md:flex-nowrap gap-2 items-center border-b border-gray-100 last:border-b-0 pb-3 last:pb-0 relative">
                     {/* Medicine select */}
-                    <div className="flex-1 min-w-[120px]">
+                    <div className="flex-1 min-w-[120px] relative">
                       <select
                         {...register(`medicines.${idx}.id`, {
                           required: true,
                         })}
                         className={`w-full border rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-primary/50 ${
                           errors.medicines?.[idx]?.id ? "border-red-500" : ""
-                        }`}
+                        } ${isLoadingMedicines ? "pr-8" : ""}`}
                         required
                         aria-label="Chọn thuốc"
                         disabled={isLoadingMedicines}
@@ -261,6 +246,11 @@ export function ProtocolFormModal({
                             )
                           )}
                       </select>
+                      {isLoadingMedicines && (
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 animate-spin">
+                          <Loader2 className="w-4 h-4" />
+                        </span>
+                      )}
                       {errors.medicines?.[idx]?.id && (
                         <div className="text-xs text-red-500 mt-1">
                           Vui lòng chọn thuốc
@@ -315,22 +305,67 @@ export function ProtocolFormModal({
                       />
                     </div>
                     {/* Remove button */}
-                    <button
-                      type="button"
-                      className="ml-1 flex items-center justify-center text-destructive bg-destructive/10 hover:bg-destructive/20 rounded-full p-2 transition disabled:opacity-50"
-                      onClick={() => remove(idx)}
-                      tabIndex={-1}
-                      aria-label="Xoá thuốc"
-                      disabled={fields.length === 1}
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="ml-1 flex items-center justify-center w-8 h-8 text-destructive bg-destructive/10 hover:bg-destructive/20 rounded-full transition disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-destructive/40"
+                          onClick={() => {
+                            if (fields.length === 1) {
+                              setConfirmRemoveIdx(idx);
+                            } else {
+                              remove(idx);
+                            }
+                          }}
+                          tabIndex={0}
+                          aria-label="Xoá thuốc"
+                          disabled={
+                            fields.length === 1 && confirmRemoveIdx === null
+                          }
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Xoá thuốc</TooltipContent>
+                    </Tooltip>
+                    {/* Confirm dialog for removing last medicine */}
+                    {confirmRemoveIdx !== null && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                        <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full">
+                          <div className="font-semibold text-lg mb-2 text-destructive">
+                            Xác nhận xoá thuốc cuối cùng?
+                          </div>
+                          <div className="text-gray-700 mb-4 text-sm">
+                            Bạn không thể tạo phác đồ mà không có thuốc nào.
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setConfirmRemoveIdx(null)}
+                            >
+                              Huỷ
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => {
+                                remove(confirmRemoveIdx);
+                                setConfirmRemoveIdx(null);
+                              }}
+                            >
+                              Xoá
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
-              <button
+              <Button
                 type="button"
-                className="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium px-3 py-2 rounded-lg border border-primary bg-primary/5 hover:bg-primary/10 transition mt-1"
+                className="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium px-3 py-2 rounded-lg border border-primary bg-primary/5 hover:bg-primary/10 transition mt-1 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 onClick={() =>
                   append({
                     id: 0,
@@ -339,9 +374,11 @@ export function ProtocolFormModal({
                     notes: "",
                   })
                 }
+                tabIndex={0}
+                aria-label="Thêm thuốc"
               >
-                <Plus className="size-4" /> Thêm thuốc
-              </button>
+                <Plus className="w-4 h-4" /> <span>Thêm thuốc</span>
+              </Button>
               {typeof errors.medicines === "object" &&
                 !Array.isArray(errors.medicines) &&
                 errors.medicines?.message && (
