@@ -10,8 +10,8 @@ import {
 } from "../ui/drawer";
 import {
   PatientTreatmentForm,
-  type PatientTreatmentFormValues,
 } from "./PatientTreatmentForm";
+import type { PatientTreatmentFormValues } from "@/schemas/patientTreatment";
 
 interface AppointmentDetailDrawerProps {
   appointment: Appointment;

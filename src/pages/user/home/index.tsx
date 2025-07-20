@@ -1,12 +1,6 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
-  Search,
   Calendar,
-  Phone,
-  ChevronDown,
-  Facebook,
-  Twitter,
-  Instagram,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";

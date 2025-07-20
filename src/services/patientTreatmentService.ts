@@ -1,6 +1,6 @@
 import { apiClient } from "@/services/apiClient";
 import type {
-  ActivePatientTreatmentType,
+  ActivePatientTreatmentsResponse,
   ActivePatientTreatmentsSummary,
   BulkPatientTreatmentInput,
   CustomMedicationStats,
@@ -11,6 +11,7 @@ import type {
   PatientTreatmentQueryParams,
   PatientTreatmentResponse,
   PatientTreatmentType,
+  PatientTreatmentsResponse,
   TreatmentComplianceStats,
   TreatmentCostAnalysis,
 } from "@/types/patientTreatment";
@@ -19,10 +20,7 @@ const API_URL = "/patient-treatments";
 
 export const patientTreatmentService = {
   // Create a new patient treatment
-  async create(
-    data: PatientTreatmentFormSubmit,
-    autoEndExisting?: boolean
-  ) {
+  async create(data: PatientTreatmentFormSubmit, autoEndExisting?: boolean) {
     return apiClient.post(API_URL, data, {
       params: autoEndExisting !== undefined ? { autoEndExisting } : undefined,
     });
@@ -57,8 +55,8 @@ export const patientTreatmentService = {
   async getByPatient(
     patientId: number | string,
     params: PatientTreatmentQueryParams
-  ): Promise<PatientTreatmentResponse> {
-    const res = await apiClient.get<PatientTreatmentResponse>(
+  ): Promise<PatientTreatmentsResponse> {
+    const res = await apiClient.get<PatientTreatmentsResponse>(
       `${API_URL}/patient/${patientId}`,
       {
         params,
@@ -200,11 +198,14 @@ export const patientTreatmentService = {
   // ===============================
 
   // Get active treatments for a specific patient (enhanced)
-  async getActiveByPatient(patientId: number | string) {
-    return apiClient.get<ActivePatientTreatmentType[]>(
+  async getActiveByPatient(
+    patientId: number | string
+  ): Promise<ActivePatientTreatmentsResponse> {
+    const res = await apiClient.get<ActivePatientTreatmentsResponse>(
       `${API_URL}/active/patient/${patientId}`,
       {}
     );
+    return res.data;
   },
 
   // Get comprehensive active treatment summary (optionally patient-specific)

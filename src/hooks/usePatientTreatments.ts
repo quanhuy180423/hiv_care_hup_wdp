@@ -11,6 +11,7 @@ import {
 } from "@/services/patientTreatmentService";
 import useAuthStore from "@/store/authStore";
 import type {
+  ActivePatientTreatmentsResponse,
   PatientTreatmentFormSubmit,
   PatientTreatmentQuery,
   PatientTreatmentQueryParams,
@@ -152,6 +153,31 @@ export const usePatientTreatmentsByPatient = (
       const response = await patientTreatmentService.getByPatient(
         patientId,
         params
+      );
+
+      return response;
+    },
+    enabled: !!patientId && !!token,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Lấy hồ sơ đang điều trị của bệnh nhân theo patientId
+export const useActivePatientTreatmentsByPatient = (patientId?: number) => {
+  const getAccessToken = useAuthStore((s) => s.getAccessToken);
+  const token = getAccessToken();
+
+  return useQuery<ActivePatientTreatmentsResponse>({
+    queryKey: ["patient-treatments", "active-by-patient", patientId],
+    queryFn: async () => {
+      if (!patientId || !token) {
+        throw new Error("Missing patientId or access token");
+      }
+
+      const response = await patientTreatmentService.getActiveByPatient(
+        patientId
       );
 
       return response;

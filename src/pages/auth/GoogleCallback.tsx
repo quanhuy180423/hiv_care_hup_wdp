@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 export const GoogleCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { handleGoogleCallback, isLoading } = useAuth();
+  const { handleGoogleCallback } = useAuth();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
