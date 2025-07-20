@@ -51,7 +51,9 @@ export interface ProtocolMedicineInfo {
   protocolId: number;
   medicineId: number;
   dosage: string;
-  duration: string;
+  durationValue: number;
+  durationUnit: string;
+  schedule: string;
   notes: string;
   createdAt: string;
   updatedAt: string;
@@ -99,6 +101,7 @@ export interface PatientTreatmentType {
   protocol?: ProtocolInfo;
   doctor?: DoctorInfo;
   createdBy?: UserInfo;
+  testResults: [];
 }
 
 export interface PatientTreatmentsResponse {
@@ -174,6 +177,36 @@ export interface ActivePatientTreatmentType {
   doctorId: number;
   startDate: string;
   endDate?: string;
+}
+
+export interface ActivePatientTreatment {
+  id: number;
+  patientId: number;
+  protocolId: number;
+  doctorId: number;
+  customMedications: CustomMedicationItem[];
+  notes: string;
+  startDate: string;
+  endDate?: string;
+  createdById: number;
+  total: number;
+  status: boolean;
+  createdAt: string;
+  updatedAt: string;
+  patient: PatientInfo;
+  protocol: ProtocolInfo;
+  doctor: DoctorInfo;
+  createdBy: UserInfo;
+  isCurrent: boolean;
+  isStarted: boolean;
+  daysRemaining: number | null;
+  treatmentStatus: string;
+}
+
+export interface ActivePatientTreatmentsResponse {
+  data: ActivePatientTreatment[];
+  statusCode: number;
+  message: string;
 }
 
 export interface ActivePatientTreatmentsSummary {

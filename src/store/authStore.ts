@@ -85,6 +85,7 @@ export interface AuthActions {
   getRefreshToken: () => string | null;
   isLoggedIn: () => boolean;
   checkIsAuthenticated: () => boolean;
+  refetchProfile: () => Promise<void>;
 }
 
 export interface AuthState {
@@ -465,6 +466,19 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       checkIsAuthenticated: () => {
         const state = get();
         return state.isAuthenticated;
+      },
+      refetchProfile: async () => {
+        try {
+          set({ isLoading: true });
+          const userProfile = await authService.getUserProfile();
+          set({ userProfile: userProfile.data });
+          localStorage.setItem("userProfile", JSON.stringify(userProfile.data));
+        } catch (error) {
+          console.error("Failed to refetch profile:", error);
+          throw error;
+        } finally {
+          set({ isLoading: false });
+        }
       },
     }),
     {

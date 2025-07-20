@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
-import { MedicationSchedule } from "@/types/treatmentProtocol";
 
 interface TreatmentProtocolColumnsProps {
   onEdit?: (protocol: TreatmentProtocol) => void;
