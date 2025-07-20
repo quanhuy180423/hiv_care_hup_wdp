@@ -45,7 +45,7 @@ const sidebarNav = [
     path: "/doctor/treatment-protocols",
   },
   {
-    name: "Kết quả xét nghiệm",
+    name: "Xét nghiệm",
     icon: FlaskConical,
     path: "/doctor/test-results",
   },

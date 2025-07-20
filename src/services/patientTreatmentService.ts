@@ -29,8 +29,8 @@ export const patientTreatmentService = {
   // Get all patient treatments with advanced filtering, sorting, search, pagination
   async getAll(
     params: PatientTreatmentQueryParams
-  ): Promise<PatientTreatmentResponse> {
-    const res = await apiClient.get<PatientTreatmentResponse>(API_URL, {
+  ): Promise<PatientTreatmentsResponse> {
+    const res = await apiClient.get<PatientTreatmentsResponse>(API_URL, {
       params,
     });
     return res.data;
