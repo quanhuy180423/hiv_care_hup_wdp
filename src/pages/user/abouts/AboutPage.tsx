@@ -1,18 +1,13 @@
-import React from "react";
 import {
-  Users,
   Heart,
   Target,
   Award,
   ShieldCheck,
-  Globe,
   Activity,
   Calendar,
   MapPin,
   Phone,
   Mail,
-  ChevronRight,
-  Star,
   CheckCircle,
   ArrowRight,
 } from "lucide-react";

@@ -21,6 +21,7 @@ export const useAuth = () => {
     getRefreshToken,
     isLoggedIn,
     checkIsAuthenticated,
+    refetchProfile,
   } = useAuthStore();
 
   return {
@@ -43,6 +44,7 @@ export const useAuth = () => {
     getRefreshToken,
     isLoggedIn,
     checkIsAuthenticated,
+    refetchProfile,
   };
 };
 

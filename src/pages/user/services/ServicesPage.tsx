@@ -1,11 +1,10 @@
 import { useActiveServices } from "@/hooks/useServices";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Link } from "react-router-dom";
 import { 
   Stethoscope, 
-  Heart, 
   Shield, 
   Users, 
   Calendar, 
@@ -21,13 +20,9 @@ import {
   Target,
   Activity,
   Microscope,
-  Pill,
   Brain,
   Eye,
-  TestTube,
   FileText,
-  Globe,
-  Lock
 } from "lucide-react";
 
 export default function ServicesPage() {

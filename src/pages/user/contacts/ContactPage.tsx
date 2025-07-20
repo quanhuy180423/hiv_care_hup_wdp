@@ -18,13 +18,8 @@ import {
   CheckCircle,
   Calendar,
   User,
-  Building,
   Shield,
-  Heart,
-  Users,
-  Star,
   ArrowRight,
-  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -73,33 +68,6 @@ export function ContactPage() {
         { label: "Thứ 2 - Thứ 6", value: "8:00 - 18:00" },
         { label: "Cuối tuần", value: "9:00 - 17:00" },
       ],
-    },
-  ];
-
-  const offices = [
-    {
-      city: "TP. Hồ Chí Minh",
-      address: "123 Đường Nguyễn Văn Cừ, Quận 1",
-      phone: "(028) 3xxx xxxx",
-      email: "hcm@hivcarehub.vn",
-      hours: "8:00 - 18:00 (T2-T6)",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop",
-    },
-    {
-      city: "Hà Nội",
-      address: "456 Đường Láng, Đống Đa",
-      phone: "(024) 3xxx xxxx",
-      email: "hanoi@hivcarehub.vn",
-      hours: "8:00 - 18:00 (T2-T6)",
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop",
-    },
-    {
-      city: "Đà Nẵng",
-      address: "789 Đường Trần Phú, Hải Châu",
-      phone: "(0236) 3xxx xxxx",
-      email: "danang@hivcarehub.vn",
-      hours: "8:00 - 17:00 (T2-T6)",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=300&fit=crop",
     },
   ];
 
