@@ -41,7 +41,7 @@ export const usePatientTreatments = (
         };
       }
       // Fallback for array response
-      if (Array.isArray(res.data)) {
+      if (Array.isArray(res.data) ) {
         return {
           data: res.data,
           meta: {

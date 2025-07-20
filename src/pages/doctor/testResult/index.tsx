@@ -13,11 +13,14 @@ import {
 import TestResultDetail from "./components/TestResultDetail";
 import type { TestResult } from "@/services/testResultService";
 import TestResultEditForm from "./components/TestResultEditForm";
+import TestResultCreate from "./components/TestResultCreate";
+import { Button } from "@/components/ui/button";
 // import TestResultEditForm from "./components/TestResultEditForm";
 
 const TestResultPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenDetail, setIsModalOpenDetail] = useState(false);
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
   const [defaultValues, setDefaultValues] = useState<TestResult | null>(null);
@@ -52,9 +55,17 @@ const TestResultPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Kết quả xét nghiệm</h1>
-        <p className="text-gray-600 mt-1">Danh sách kết quả xét nghiệm</p>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Kết quả xét nghiệm
+          </h1>
+          <p className="text-gray-600 mt-1">Danh sách kết quả xét nghiệm</p>
+        </div>
+
+        <Button onClick={() => setIsModalOpenCreate(true)} variant="outline">
+          Tạo yêu cầu xét nghiệm
+        </Button>
       </div>
 
       <Card>
@@ -78,6 +89,21 @@ const TestResultPage = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Modal for create test result */}
+      <Dialog open={isModalOpenCreate} onOpenChange={setIsModalOpenCreate}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Tạo yêu cầu xét nghiệm</DialogTitle>
+            <DialogDescription>
+              Thông tin chi tiết về yêu cầu xét nghiệm.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogContent className="max-w-7xl min-w-4xl bg-white">
+            <TestResultCreate onClose={() => setIsModalOpenCreate(false)} />
+          </DialogContent>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal for viewing test result details */}
       <Dialog open={isModalOpenDetail} onOpenChange={setIsModalOpenDetail}>

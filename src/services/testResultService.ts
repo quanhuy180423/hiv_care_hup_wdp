@@ -61,6 +61,7 @@ export interface ReqTestResult {
   testId: number;
   userId: number;
   patientTreatmentId: number;
+  notes?: string;
 }
 
 export interface ReqTestResultUpdate {

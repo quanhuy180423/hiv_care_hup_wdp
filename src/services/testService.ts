@@ -43,6 +43,7 @@ export interface ResTest {
 export interface Query {
   page?: number;
   limit?: number;
+  search?: string;
 }
 export const testService = {
   async create(data: ReqTest): Promise<Test> {
@@ -52,7 +53,9 @@ export const testService = {
 
   async getAll(query?: Query): Promise<ResTest> {
     const response = await apiClient.get<ResTest>(
-      `/tests?page=${query?.page || 1}&limit=${query?.limit || 10}`
+      `/tests?page=${query?.page || 1}&limit=${query?.limit || 10}&search=${
+        query?.search || ""
+      }`
     );
     return response.data;
   },
