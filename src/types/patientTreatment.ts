@@ -1,15 +1,21 @@
 import type { PaginatedResponse } from "./common";
 
-export interface CustomMedication {
-  id: number;
-  name: string;
-  unit: string;
-  dose: string;
-  price: string;
-  createdAt: string;
-  updatedAt: string;
-  duration?: string;
+export interface CustomMedicationItem {
+  medicineId?: number;
+  medicineName: string;
+  dosage: string;
+  unit?: string;
+  frequency?: string;
+  time?: string;
+  durationValue?: number;
+  durationUnit?: string;
+  schedule?: string;
   notes?: string;
+  price?: number;
+}
+
+export interface CustomMedications {
+  additionalMeds: CustomMedicationItem[];
 }
 
 export type TreatmentMedicineSubmit = {
@@ -19,17 +25,68 @@ export type TreatmentMedicineSubmit = {
   notes?: string;
 };
 
+export interface UserInfo {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface PatientInfo extends UserInfo {
+  phoneNumber: string;
+}
+
+export interface MedicineInfo {
+  id: number;
+  name: string;
+  description: string;
+  unit: string;
+  dose: string;
+  price: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProtocolMedicineInfo {
+  id: number;
+  protocolId: number;
+  medicineId: number;
+  dosage: string;
+  duration: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  medicine: MedicineInfo;
+}
+
+export interface ProtocolInfo {
+  id: number;
+  name: string;
+  description: string;
+  targetDisease: string;
+  createdById: number;
+  updatedById: number;
+  createdAt: string;
+  updatedAt: string;
+  medicines: ProtocolMedicineInfo[];
+}
+
+export interface DoctorInfo {
+  id: number;
+  userId: number;
+  specialization: string;
+  certifications: string[];
+  isAvailable: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user: UserInfo;
+}
+
 export interface PatientTreatmentType {
   id: number;
   patientId: number;
   protocolId: number;
   doctorId: number;
-  customMedications?: Array<{
-    id: number;
-    note: string;
-    dosage: string;
-    schedule: string;
-  }>;
+  customMedications?: CustomMedicationItem[];
   notes?: string | null;
   startDate: string;
   endDate?: string | null;
@@ -37,63 +94,11 @@ export interface PatientTreatmentType {
   total: number;
   createdAt: string;
   updatedAt: string;
-  patient?: {
-    id: number;
-    name: string;
-    email: string;
-    phoneNumber: string;
-  };
-  protocol?: {
-    id: number;
-    name: string;
-    description: string;
-    targetDisease: string;
-    createdById: number;
-    updatedById: number;
-    createdAt: string;
-    updatedAt: string;
-    medicines: Array<{
-      id: number;
-      protocolId: number;
-      medicineId: number;
-      dosage: string;
-      durationValue: number;
-      durationUnit: string;
-      schedule: string;
-      notes: string;
-      createdAt: string;
-      updatedAt: string;
-      medicine: {
-        id: number;
-        name: string;
-        description: string;
-        unit: string;
-        dose: string;
-        price: string;
-        createdAt: string;
-        updatedAt: string;
-      };
-    }>;
-  };
-  doctor?: {
-    id: number;
-    userId: number;
-    specialization: string;
-    certifications: string[];
-    isAvailable: boolean;
-    createdAt: string;
-    updatedAt: string;
-    user: {
-      id: number;
-      name: string;
-      email: string;
-    };
-  };
-  createdBy?: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  status?: boolean;
+  patient?: PatientInfo;
+  protocol?: ProtocolInfo;
+  doctor?: DoctorInfo;
+  createdBy?: UserInfo;
 }
 
 export interface PatientTreatmentsResponse {
@@ -192,9 +197,9 @@ export interface PaginationMeta {
 
 export type PatientTreatmentFormSubmit = {
   patientId: number;
-  protocolId: number;
+  protocolId: number | undefined;
   doctorId: number;
-  customMedications?: Record<string, unknown>;
+  customMedications?: CustomMedicationItem[];
   notes?: string;
   startDate: string;
   endDate?: string;

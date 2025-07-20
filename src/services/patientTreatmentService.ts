@@ -21,7 +21,6 @@ export const patientTreatmentService = {
   // Create a new patient treatment
   async create(
     data: PatientTreatmentFormSubmit,
-
     autoEndExisting?: boolean
   ) {
     return apiClient.post(API_URL, data, {

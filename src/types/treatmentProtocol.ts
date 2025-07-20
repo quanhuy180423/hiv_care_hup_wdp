@@ -20,6 +20,7 @@ export interface ProtocolMedicine {
   dosage: string;
   duration: MedicationSchedule;
   notes?: string;
+  frequency?: string;
   medicine?: {
     id: number;
     name: string;
@@ -52,12 +53,20 @@ export interface TreatmentProtocol {
     name: string;
     email: string;
   };
+  durationValue?: number;
+  durationUnit?: string; // Nếu có enum DurationUnit thì dùng kiểu đó
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface CreateTreatmentProtocol {
   name: string;
   description?: string;
   targetDisease: string;
+  durationValue?: number;
+  durationUnit?: string;
+  startDate?: string;
+  endDate?: string;
   medicines: ProtocolMedicine[];
 }
 

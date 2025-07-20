@@ -1,10 +1,7 @@
 import { PatientTreatmentDetailDialog } from "@/components/doctor/PatientTreatmentDetailDialog";
-import { PatientTreatmentForm } from "@/components/doctor/PatientTreatmentForm";
 import { PatientTreatmentTable } from "@/components/doctor/PatientTreatmentTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileX2, Loader2, Plus, Search } from "lucide-react";
-
 import {
   useCreatePatientTreatment,
   useDeletePatientTreatment,
@@ -12,26 +9,63 @@ import {
   useUpdatePatientTreatment,
 } from "@/hooks/usePatientTreatments";
 import type { PatientTreatmentType } from "@/types/patientTreatment";
-import { useEffect, useState } from "react";
+import { FileX2, Loader2, Plus, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const DoctorPatientTreatments = () => {
   const [search, setSearch] = useState("");
   const [selectedTreatment, setSelectedTreatment] =
     useState<PatientTreatmentType | null>(null);
-  const [openForm, setOpenForm] = useState(false);
+  const navigate = useNavigate();
+
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const {
-    data: treatmentsData,
+    data: treatmentsDataRaw,
     isLoading: isLoadingPatientTreatments,
     refetch: refetchTreatments,
   } = usePatientTreatments({
-    page: 1,
-    limit: 100,
+    page,
+    limit: pageSize,
     search,
     sortBy: "startDate",
     sortOrder: "desc",
   });
+
+  // Transform the raw data into a format suitable for the table
+  const treatmentsData = useMemo(() => {
+    if (
+      treatmentsDataRaw &&
+      typeof treatmentsDataRaw === "object" &&
+      Array.isArray((treatmentsDataRaw as { data?: unknown }).data)
+    ) {
+      const { data, meta } = treatmentsDataRaw as {
+        data: PatientTreatmentType[];
+        meta?: { total: number };
+      };
+      return {
+        data,
+        meta: meta ?? { total: 0 },
+      };
+    }
+    return { data: [], meta: { total: 0 } };
+  }, [treatmentsDataRaw]);
+
+  useEffect(() => {
+    if (
+      !isLoadingPatientTreatments &&
+      (!treatmentsDataRaw ||
+        typeof treatmentsDataRaw !== "object" ||
+        !("data" in treatmentsDataRaw))
+    ) {
+      toast.error(
+        "Không thể tải danh sách hồ sơ bệnh nhân. Vui lòng kiểm tra lại kết nối hoặc liên hệ quản trị viên."
+      );
+    }
+  }, [isLoadingPatientTreatments, treatmentsDataRaw]);
 
   const createMutation = useCreatePatientTreatment();
   const updateMutation = useUpdatePatientTreatment();
@@ -52,11 +86,8 @@ const DoctorPatientTreatments = () => {
     refetchTreatments,
   ]);
 
-  console.log(treatmentsData);
-
   const handleAdd = () => {
-    setSelectedTreatment(null);
-    setOpenForm(true);
+    navigate("/doctor/patient-treatments/create");
   };
 
   const handleDelete = (id: number) => {
@@ -73,8 +104,12 @@ const DoctorPatientTreatments = () => {
   };
 
   const handleEdit = (treatment: PatientTreatmentType) => {
-    setSelectedTreatment(treatment);
-    setOpenForm(true);
+    navigate(`/doctor/patient-treatments/${treatment.id}/edit`);
+  };
+
+  const handleRefresh = () => {
+    refetchTreatments();
+    toast.success("Đã làm mới danh sách hồ sơ bệnh nhân!");
   };
 
   return (
@@ -91,8 +126,8 @@ const DoctorPatientTreatments = () => {
           Thêm hồ sơ
         </Button>
       </div>
-      <div className="mb-6 max-w-xs">
-        <div className="relative">
+      <div className="mb-6 flex items-center justify-between w-full">
+        <div className="relative w-full max-w-xs">
           <Input
             placeholder="Tìm kiếm theo tên bệnh nhân..."
             value={search}
@@ -104,6 +139,32 @@ const DoctorPatientTreatments = () => {
             <Search className="w-4 h-4" />
           </span>
         </div>
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={handleRefresh}
+          aria-label="Làm mới danh sách"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 4v6h6M20 20v-6h-6"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M20 4a8.1 8.1 0 0 0-15.9 2M4 20a8.1 8.1 0 0 0 15.9-2"
+            />
+          </svg>
+          Làm mới
+        </Button>
       </div>
       <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-8 border border-gray-100">
         <h2 className="text-lg font-semibold mb-4 text-primary">
@@ -114,7 +175,7 @@ const DoctorPatientTreatments = () => {
             <Loader2 className="w-8 h-8 text-primary animate-spin mb-1" />
             <span className="text-gray-500">Đang tải dữ liệu...</span>
           </div>
-        ) : Array.isArray(treatmentsData) && treatmentsData.length === 0 ? (
+        ) : treatmentsData.data.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-gray-400 text-base">
             <FileX2 className="w-12 h-12 mb-2" />
             Không tìm thấy kết quả phù hợp.
@@ -122,89 +183,55 @@ const DoctorPatientTreatments = () => {
         ) : (
           <>
             <PatientTreatmentTable
-              treatments={Array.isArray(treatmentsData) ? treatmentsData : []}
+              treatments={treatmentsData.data}
               onShowDetail={handleShowDetail}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onRefresh={handleRefresh}
             />
             {/* Pagination UI */}
-            {/* {meta && meta.totalPages > 1 && (
-              <div className="flex justify-center mt-4 gap-2">
-                <Button
-                  variant="outline"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Trang trước
-                </Button>
-                <span className="flex items-center gap-2">
-                  Trang {meta.page} / {meta.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={page >= meta.totalPages}
-                  onClick={() =>
-                    setPage((p) => Math.min(meta.totalPages, p + 1))
-                  }
-                >
-                  Trang sau
-                </Button>
-              </div>
-            )} */}
+            {(() => {
+              const totalPages = Math.max(
+                1,
+                Math.ceil(treatmentsData.meta.total / pageSize)
+              );
+              return totalPages > 1 ? (
+                <div className="flex justify-center mt-4 gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Trang trước
+                  </Button>
+                  <span className="flex items-center gap-2">
+                    Trang {page} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Trang sau
+                  </Button>
+                </div>
+              ) : null;
+            })()}
           </>
         )}
       </div>
 
       {/* Dialog chi tiết hồ sơ */}
       <PatientTreatmentDetailDialog
-        open={!!selectedTreatment && !openForm}
+        open={!!selectedTreatment}
         appointment={null}
         treatment={selectedTreatment ?? undefined}
         onClose={() => setSelectedTreatment(null)}
-        onShowForm={() => setOpenForm(true)}
+        onShowForm={() => {}}
         onJoinMeet={() => {}}
       />
 
-      {/* Form tạo/sửa hồ sơ bệnh án */}
-      {openForm && (
-        <PatientTreatmentForm
-          open={openForm}
-          onClose={() => {
-            setOpenForm(false);
-            setSelectedTreatment(null);
-          }}
-          onSubmit={async (data) => {
-            if (selectedTreatment?.id) {
-              updateMutation.mutate(
-                {
-                  id: selectedTreatment.id,
-                  data: data,
-                },
-                {
-                  onSuccess: () => {
-                    toast.success("Đã cập nhật hồ sơ bệnh án!");
-                    setOpenForm(false);
-                    setSelectedTreatment(null);
-                  },
-                  onError: () => {
-                    toast.error("Cập nhật thất bại.");
-                  },
-                }
-              );
-            } else {
-              createMutation.mutate(data, {
-                onSuccess: () => {
-                  toast.success("Đã tạo hồ sơ bệnh án mới!");
-                  setOpenForm(false);
-                },
-                onError: () => {
-                  toast.error("Tạo thất bại.");
-                },
-              });
-            }
-          }}
-        />
-      )}
+      {/* Form tạo/sửa hồ sơ bệnh án chỉ dùng trang riêng để tạo mới */}
     </div>
   );
 };

@@ -29,15 +29,35 @@ export const usePatientTreatments = (
     queryKey: ["patientTreatments", query],
     queryFn: async () => {
       const res = await getPatientTreatments(query);
-      return res.data.data;
+      // Always return { data, meta } for pagination
+      if (res && res.data && res.data.data && res.data.meta) {
+        return {
+          data: res.data.data,
+          meta: res.data.meta,
+        };
+      }
+      // Fallback for array response
+      if (Array.isArray(res.data)) {
+        return {
+          data: res.data,
+          meta: {
+            page: 1,
+            limit: res.data.length,
+            total: res.data.length,
+            totalPages: 1,
+          },
+        };
+      }
+      // Fallback for empty
+      return {
+        data: [],
+        meta: { page: 1, limit: 0, total: 0, totalPages: 1 },
+      };
     },
     ...(options ?? {}),
   });
 
-export const usePatientTreatment = (
-  id: number,
-  options?: UseQueryOptions
-) =>
+export const usePatientTreatment = (id: number, options?: UseQueryOptions) =>
   useQuery({
     queryKey: ["patientTreatment", id],
     queryFn: async () => {

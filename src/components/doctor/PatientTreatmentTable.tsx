@@ -14,6 +14,7 @@ export interface PatientTreatmentTableProps {
   onShowDetail: (treatment: PatientTreatmentType) => void;
   onEdit: (treatment: PatientTreatmentType) => void;
   onDelete: (id: number) => void;
+  onRefresh?: () => void;
 }
 
 export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
@@ -24,6 +25,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
 }) => {
   return (
     <div className="overflow-x-auto">
+      <div className="flex items-center justify-between mb-2"></div>
       <table className="w-full text-sm border rounded-xl overflow-hidden">
         <thead>
           <tr className="bg-gray-50 text-gray-700">
@@ -31,6 +33,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
             <th className="p-3 border-b font-medium">Mã Bác sĩ</th>
             <th className="p-3 border-b font-medium">Mã Phác đồ</th>
             <th className="p-3 border-b font-medium">Ngày bắt đầu</th>
+            {/* <th className="p-3 border-b font-medium">Lịch uống</th> */}
             <th className="p-3 border-b font-medium">Trạng thái</th>
             <th className="p-3 border-b font-medium">Thao tác</th>
           </tr>
@@ -54,15 +57,22 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
                 <td className="p-3 text-gray-900 font-medium">
                   {t.patient?.name || t.patientId}
                   {t.createdAt &&
-                    Date.now() - new Date(t.createdAt).getTime() <
-                      1000 * 60 * 60 * 24 && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-2 animate-bounce shadow-lg border-2 border-blue-500 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold"
-                      >
-                        Tạo mới
-                      </Badge>
-                    )}
+                    (() => {
+                      const createdDate = new Date(t.createdAt);
+                      const now = new Date();
+                      const isToday =
+                        createdDate.getFullYear() === now.getFullYear() &&
+                        createdDate.getMonth() === now.getMonth() &&
+                        createdDate.getDate() === now.getDate();
+                      return isToday ? (
+                        <Badge
+                          variant="secondary"
+                          className="ml-2 animate-bounce shadow-lg border-2 border-blue-500 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold"
+                        >
+                          Tạo mới
+                        </Badge>
+                      ) : null;
+                    })()}
                 </td>
                 <td className="p-3 text-gray-700">
                   {t.doctor?.user?.name || t.doctorId}
@@ -73,14 +83,47 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
                 <td className="p-3 text-gray-700">
                   {t.startDate?.slice(0, 10)}
                 </td>
-                <td className="p-3">
-                  {t.endDate ? (
-                    <span className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-500 text-xs">
-                      Đã kết thúc
-                    </span>
+                {/* <td className="p-3 text-gray-700">
+                  {Array.isArray(t.customMedications) &&
+                  t.customMedications.length > 0 ? (
+                    <div className="flex flex-col gap-1 items-start">
+                      {(
+                        t.customMedications as Array<{
+                          id: number;
+                          name: string;
+                          duration?: string;
+                          durationUnit?: string;
+                          durationValue?: string | number;
+                        }>
+                      ).map((med, i) => {
+                        const durationText = [
+                          med.durationValue,
+                          med.durationUnit,
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+                        return (
+                          <span
+                            key={med.id || i}
+                            className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs"
+                          >
+                            {durationText || "-"}
+                          </span>
+                        );
+                      })}
+                    </div>
                   ) : (
+                    <span className="text-gray-400 text-xs">-</span>
+                  )}
+                </td> */}
+                <td className="p-3">
+                  {t.status ? (
                     <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
                       Đang điều trị
+                    </span>
+                  ) : (
+                    <span className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-500 text-xs">
+                      Đã kết thúc
                     </span>
                   )}
                 </td>
