@@ -26,10 +26,13 @@ export interface PatientTreatmentType {
   protocolId: number;
   doctorId: number;
   customMedications?: Array<{
-    id: number;
-    note: string;
+    price: number;
     dosage: string;
     schedule: string;
+    frequency: string;
+    durationUnit: string;
+    medicineName: string;
+    durationValue: number;
   }>;
   notes?: string | null;
   startDate: string;
@@ -95,6 +98,7 @@ export interface PatientTreatmentType {
     name: string;
     email: string;
   };
+  testResults: [];
 }
 
 export interface PatientTreatmentsResponse {
