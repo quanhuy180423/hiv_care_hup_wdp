@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import {
   useCreatePatientTreatment,
   useDeletePatientTreatment,
-  usePatientTreatments,
+  usePatientTreatmentsByDoctor,
   useUpdatePatientTreatment,
 } from "@/hooks/usePatientTreatments";
+import useAuthStore from "@/store/authStore";
 import type { PatientTreatmentType } from "@/types/patientTreatment";
 import { FileX2, Loader2, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -15,6 +16,13 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const DoctorPatientTreatments = () => {
+  // Lấy doctorId từ store
+  const doctorIdFromUser = useAuthStore((s) => {
+    const docId = s.userProfile?.doctorId ?? s.userProfile?.doctorId;
+    if (typeof docId === "string") return Number(docId);
+    if (typeof docId === "number") return docId;
+    return undefined;
+  });
   const [search, setSearch] = useState("");
   const [selectedTreatment, setSelectedTreatment] =
     useState<PatientTreatmentType | null>(null);
@@ -27,13 +35,15 @@ const DoctorPatientTreatments = () => {
     data: treatmentsDataRaw,
     isLoading: isLoadingPatientTreatments,
     refetch: refetchTreatments,
-  } = usePatientTreatments({
-    page,
-    limit: pageSize,
-    search,
-    sortBy: "startDate",
-    sortOrder: "desc",
-  });
+  } = usePatientTreatmentsByDoctor(
+    doctorIdFromUser !== undefined ? doctorIdFromUser : "",
+    {
+      page,
+      limit: pageSize,
+      sortBy: "startDate",
+      sortOrder: "desc",
+    }
+  );
 
   // Transform the raw data into a format suitable for the table
   const treatmentsData = useMemo(() => {

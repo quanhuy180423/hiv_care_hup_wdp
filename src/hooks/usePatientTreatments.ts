@@ -188,3 +188,38 @@ export const useActivePatientTreatmentsByPatient = (patientId?: number) => {
     refetchOnWindowFocus: false,
   });
 };
+
+export const usePatientTreatmentsByDoctor = (
+  doctorId: number | string,
+  query: PatientTreatmentQueryParams = {},
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["patientTreatmentsByDoctor", doctorId, query],
+    queryFn: async () => {
+      const res = await patientTreatmentService.getByDoctor(doctorId, query);
+      // Xử lý trả về giống các hook khác
+      if (res && res.data && res.data.data && res.data.meta) {
+        return {
+          data: res.data.data,
+          meta: res.data.meta,
+        };
+      }
+      if (Array.isArray(res.data)) {
+        return {
+          data: res.data,
+          meta: {
+            page: 1,
+            limit: res.data.length,
+            total: res.data.length,
+            totalPages: 1,
+          },
+        };
+      }
+      return {
+        data: [],
+        meta: { page: 1, limit: 0, total: 0, totalPages: 1 },
+      };
+    },
+    ...(options ?? {}),
+  });

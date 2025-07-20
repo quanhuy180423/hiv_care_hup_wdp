@@ -69,13 +69,14 @@ export const patientTreatmentService = {
   async getByDoctor(
     doctorId: number | string,
     params: PatientTreatmentQueryParams
-  ) {
-    return apiClient.get<PatientTreatmentResponse>(
+  ): Promise<PatientTreatmentResponse> {
+    const res = await apiClient.get<PatientTreatmentResponse>(
       `${API_URL}/doctor/${doctorId}`,
       {
         params,
       }
     );
+    return res.data;
   },
 
   // Search patient treatments (by patient/doctor/protocol/notes)

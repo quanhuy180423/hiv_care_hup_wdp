@@ -1,7 +1,7 @@
+import useAuthStore from "@/store/authStore";
 import type { PatientTreatmentType } from "@/types/patientTreatment";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import React from "react";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
@@ -23,31 +23,36 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { userProfile } = useAuthStore();
+
   return (
     <div className="overflow-x-auto">
       <div className="flex items-center justify-between mb-2"></div>
       <table className="w-full text-sm border rounded-xl overflow-hidden">
         <thead>
           <tr className="bg-gray-50 text-gray-700">
-            <th className="p-3 border-b font-medium">Mã BN</th>
-            <th className="p-3 border-b font-medium">Mã Bác sĩ</th>
-            <th className="p-3 border-b font-medium">Mã Phác đồ</th>
+            <th className="p-3 border-b font-medium">Tên bệnh nhân</th>
+            <th className="p-3 border-b font-medium">Tên Bác sĩ</th>
+            <th className="p-3 border-b font-medium">Phác đồ</th>
             <th className="p-3 border-b font-medium">Ngày bắt đầu</th>
-            {/* <th className="p-3 border-b font-medium">Lịch uống</th> */}
             <th className="p-3 border-b font-medium">Trạng thái</th>
             <th className="p-3 border-b font-medium">Thao tác</th>
           </tr>
         </thead>
         <tbody>
-          {treatments.map(
-            (
-              t: PatientTreatmentType & {
-                patient?: { name?: string };
-                doctor?: { user?: { name?: string } };
-                protocol?: { name?: string };
-              },
-              idx: number
-            ) => (
+          {treatments.map((t, idx) => {
+            let doctorName = "-";
+            if (t.doctor?.user?.name) {
+              doctorName = t.doctor.user.name;
+            } else if (
+              t.doctorId &&
+              userProfile?.doctorId &&
+              Number(t.doctorId) === Number(userProfile.doctorId) &&
+              userProfile?.name
+            ) {
+              doctorName = userProfile.name;
+            }
+            return (
               <tr
                 key={t.id}
                 className={`border-b transition hover:bg-primary/5 text-center ${
@@ -55,67 +60,13 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
                 }`}
               >
                 <td className="p-3 text-gray-900 font-medium">
-                  {t.patient?.name || t.patientId}
-                  {t.createdAt &&
-                    (() => {
-                      const createdDate = new Date(t.createdAt);
-                      const now = new Date();
-                      const isToday =
-                        createdDate.getFullYear() === now.getFullYear() &&
-                        createdDate.getMonth() === now.getMonth() &&
-                        createdDate.getDate() === now.getDate();
-                      return isToday ? (
-                        <Badge
-                          variant="secondary"
-                          className="ml-2 animate-bounce shadow-lg border-2 border-blue-500 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold"
-                        >
-                          Tạo mới
-                        </Badge>
-                      ) : null;
-                    })()}
+                  {t.patient?.name || "-"}
                 </td>
+                <td className="p-3 text-gray-700">{doctorName}</td>
+                <td className="p-3 text-gray-700">{t.protocol?.name || "-"}</td>
                 <td className="p-3 text-gray-700">
-                  {t.doctor?.user?.name || t.doctorId}
+                  {t.startDate ? t.startDate.slice(0, 10) : "-"}
                 </td>
-                <td className="p-3 text-gray-700">
-                  {t.protocol?.name || t.protocolId}
-                </td>
-                <td className="p-3 text-gray-700">
-                  {t.startDate?.slice(0, 10)}
-                </td>
-                {/* <td className="p-3 text-gray-700">
-                  {Array.isArray(t.customMedications) &&
-                  t.customMedications.length > 0 ? (
-                    <div className="flex flex-col gap-1 items-start">
-                      {(
-                        t.customMedications as Array<{
-                          id: number;
-                          name: string;
-                          duration?: string;
-                          durationUnit?: string;
-                          durationValue?: string | number;
-                        }>
-                      ).map((med, i) => {
-                        const durationText = [
-                          med.durationValue,
-                          med.durationUnit,
-                        ]
-                          .filter(Boolean)
-                          .join(" ");
-                        return (
-                          <span
-                            key={med.id || i}
-                            className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs"
-                          >
-                            {durationText || "-"}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <span className="text-gray-400 text-xs">-</span>
-                  )}
-                </td> */}
                 <td className="p-3">
                   {t.status ? (
                     <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
@@ -169,8 +120,8 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
                   </Tooltip>
                 </td>
               </tr>
-            )
-          )}
+            );
+          })}
         </tbody>
       </table>
     </div>
