@@ -50,7 +50,7 @@ export default function TreatmentProtocolsManagement() {
     targetDisease: searchParams.targetDisease,
   });
   const protocols = protocolsData?.data || [];
-  const meta = protocolsData?.meta;
+  const meta = protocolsData?.data.meta;
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 0;
 
   const createProtocolMutation = useCreateTreatmentProtocol();

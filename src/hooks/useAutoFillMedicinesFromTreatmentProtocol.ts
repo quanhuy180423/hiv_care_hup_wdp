@@ -1,11 +1,11 @@
-import type { CustomMedication } from "@/types/patientTreatment";
+import type { CustomMedications } from "@/types/patientTreatment";
 import type { TreatmentProtocolType } from "@/types/treatmentProtocol";
 import { useEffect } from "react";
 
 type AutoFillMedicinesFromTreatmentProtocol = {
   protocols: TreatmentProtocolType[];
   selectedProtocolId: string | number;
-  replaceMedicine: (value: CustomMedication[]) => void;
+  replaceMedicine: (value: CustomMedications[]) => void;
 };
 
 export function useAutoFillMedicinesFromTreatmentProtocol({
@@ -24,20 +24,20 @@ export function useAutoFillMedicinesFromTreatmentProtocol({
       selected.medicines.length > 0
     ) {
       // Fill medicines using replace
-      const newMeds: CustomMedication[] = selected.medicines.map((med) => ({
-        id: med.medicine?.id || Date.now(),
-        name: med.medicine?.name || "",
-        unit: med.medicine?.unit || "",
-        dose: med.medicine?.dose || med.dosage || "",
-        price: med.medicine?.price || "",
+      const additionalMeds = selected.medicines.map((med) => ({
+        id: med.medicine?.id ?? Date.now(),
+        name: med.medicine?.name ?? "",
+        unit: med.medicine?.unit ?? "",
+        dose: med.medicine?.dose ?? med.dosage ?? "",
+        price: med.medicine?.price ?? "",
         createdAt:
-          med.medicine?.createdAt || new Date().toISOString().slice(0, 16),
+          med.medicine?.createdAt ?? new Date().toISOString().slice(0, 16),
         updatedAt:
-          med.medicine?.updatedAt || new Date().toISOString().slice(0, 16),
-        duration: med.duration || "",
-        notes: med.notes || "",
+          med.medicine?.updatedAt ?? new Date().toISOString().slice(0, 16),
+        duration: med.duration ?? "",
+        notes: med.notes ?? "",
       }));
-      replaceMedicine(newMeds);
+      replaceMedicine([{ additionalMeds }]);
     }
   }, [protocols, replaceMedicine, selectedProtocolId]);
 }
