@@ -5,14 +5,17 @@ import {
   getActivePatientTreatments,
   getPatientTreatmentById,
   getPatientTreatments,
+  patientTreatmentService,
   searchPatientTreatments,
   updatePatientTreatment,
 } from "@/services/patientTreatmentService";
+import useAuthStore from "@/store/authStore";
 import type {
-  PatientTreatmentType,
-  PatientTreatmentFormValues,
+  PatientTreatmentFormSubmit,
+  PatientTreatmentQuery,
   PatientTreatmentQueryParams,
   PatientTreatmentsResponse,
+  UpdatePatientTreatmentInput,
 } from "@/types/patientTreatment";
 import {
   useMutation,
@@ -115,14 +118,21 @@ export const useSearchPatientTreatments = (
       const res = await searchPatientTreatments(params);
       return res.data;
     },
-    onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({
-        queryKey: ["patient-treatment-detail", id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["patient-treatments"] });
-    },
+    ...options,
   });
-};
+
+export const useActivePatientTreatments = (
+  params: PatientTreatmentQuery,
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["activePatientTreatments", params],
+    queryFn: async () => {
+      const res = await getActivePatientTreatments(params);
+      return res.data;
+    },
+    ...options,
+  });
 
 // Lấy tất cả hồ sơ điều trị của bệnh nhân theo patientId
 export const usePatientTreatmentsByPatient = (
@@ -141,8 +151,7 @@ export const usePatientTreatmentsByPatient = (
 
       const response = await patientTreatmentService.getByPatient(
         patientId,
-        params,
-        token
+        params
       );
 
       return response;

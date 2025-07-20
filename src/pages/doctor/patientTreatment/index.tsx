@@ -21,7 +21,7 @@ const DoctorPatientTreatments = () => {
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 10;
 
   const {
     data: treatmentsDataRaw,

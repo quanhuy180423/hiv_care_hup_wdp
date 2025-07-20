@@ -14,7 +14,8 @@ import {
   Stethoscope,
   User,
   UserCog,
-  UserLock
+  UserLock,
+  Users,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import type { UserRole } from "./store/authStore";
@@ -323,7 +324,7 @@ export const adminRoutes: RouteConfig[] = [
     description: "Quản lý hồ sơ và lịch sử điều trị",
     protected: true,
     layout: "ADMIN",
-    icon: Users, // Consider changing this icon to something more specific for patient records
+    icon: Users,
     showInNav: true,
     allowedRoles: ["ADMIN"],
   },
