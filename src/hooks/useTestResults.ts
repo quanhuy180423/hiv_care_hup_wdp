@@ -1,13 +1,18 @@
-import { testResultService } from "@/services/testResultService";
+import {
+  testResultService,
+  type TestResult,
+} from "@/services/testResultService";
 import { useQuery } from "@tanstack/react-query";
 
-export function useTestResults(patientTreatmentId?: number) {
-  return useQuery({
-    queryKey: ["testResults", patientTreatmentId],
-    queryFn: () =>
-      patientTreatmentId
-        ? testResultService.getByPatientTreatmentId(patientTreatmentId)
-        : [],
+export function useTestResults(patientTreatmentId: number) {
+  return useQuery<TestResult[]>({
+    queryKey: ["testResults", "patientTreatment", patientTreatmentId],
+    queryFn: async () => {
+      const res = await testResultService.getByPatientTreatmentId(
+        patientTreatmentId
+      );
+      return res.data?.data || [];
+    },
     enabled: !!patientTreatmentId,
   });
 }
