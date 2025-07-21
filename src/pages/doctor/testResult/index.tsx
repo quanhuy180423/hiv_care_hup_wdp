@@ -63,7 +63,7 @@ const TestResultPage = () => {
           <p className="text-gray-600 mt-1">Danh sách kết quả xét nghiệm</p>
         </div>
 
-        <Button onClick={() => setIsModalOpenCreate(true)} variant="outline">
+        <Button onClick={() => setIsModalOpenCreate(true)} variant="outline" className="cursor-pointer">
           Tạo yêu cầu xét nghiệm
         </Button>
       </div>

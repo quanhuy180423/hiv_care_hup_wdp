@@ -1,166 +1,309 @@
 import { formatDate } from "@/lib/utils/dates/formatDate";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  FileText, 
+  TestTube, 
+  User, 
+  UserCheck, 
+  Calendar,
+  Phone,
+  Mail,
+  Hash,
+  Activity,
+  Clock,
+  DollarSign,
+  AlertCircle,
+  CheckCircle,
+  Info
+} from "lucide-react";
 import type { TestResult } from "@/services/testResultService";
+import { translateInterpretation } from "@/types/testResult";
 
 const TestResultDetail = ({ TestResult }: { TestResult: TestResult }) => {
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'hoàn thành':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'pending':
+      case 'đang xử lý':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'abnormal':
+      case 'bất thường':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Info className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'hoàn thành':
+        return 'default';
+      case 'pending':
+      case 'đang xử lý':
+        return 'secondary';
+      case 'abnormal':
+      case 'bất thường':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm max-w-5xl">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl h-[80vh] overflow-auto">
       {/* General Result Information */}
-      <div className="col-span-2">
-        <h3 className="font-semibold text-base mb-2 border-b pb-1">
-          Thông tin kết quả
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          {/* Removed sensitive ID fields */}
-          <p>
-            <span className="font-medium">Giá trị thô:</span>{" "}
-            {TestResult.rawResultValue || "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Diễn giải:</span>{" "}
-            {TestResult.interpretation || "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Đơn vị:</span>{" "}
-            {TestResult.unit || "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Giá trị ngưỡng:</span>{" "}
-            {TestResult.cutOffValueUsed || "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Trạng thái:</span>{" "}
-            {TestResult.status || "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Ngày kết quả:</span>{" "}
-            {formatDate(TestResult.resultDate)}
-          </p>
-          <p>
-            <span className="font-medium">Ghi chú:</span>{" "}
-            {TestResult.notes || "Không có"}
-          </p>
-        </div>
-      </div>
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Thông tin kết quả
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Activity className="h-4 w-4" />
+                <span>Giá trị kết quả kiểm tra</span>
+              </div>
+              <p className="font-medium">{TestResult.rawResultValue || "N/A"}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Info className="h-4 w-4" />
+                <span>Diễn giải</span>
+              </div>
+              <p className="font-medium">{translateInterpretation(TestResult.interpretation) || "N/A"}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Hash className="h-4 w-4" />
+                <span>Đơn vị</span>
+              </div>
+              <p className="font-medium">{TestResult.unit || "N/A"}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="h-4 w-4" />
+                <span>Giá trị ngưỡng</span>
+              </div>
+              <p className="font-medium">{TestResult.cutOffValueUsed || "N/A"}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {getStatusIcon(TestResult.status)}
+                <span>Trạng thái</span>
+              </div>
+              <Badge variant={getStatusVariant(TestResult.status)}>
+                {TestResult.status == "Processing" ? "Đang xử lý" : "Hoàn thành"}
+              </Badge>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Ngày kết quả</span>
+              </div>
+              <p className="font-medium">{formatDate(TestResult.resultDate)}</p>
+            </div>
+          </div>
+          
+          {TestResult.notes && (
+            <>
+              <Separator className="my-4" />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <FileText className="h-4 w-4" />
+                  <span>Ghi chú</span>
+                </div>
+                <p className="text-sm bg-muted p-3 rounded-md">{TestResult.notes}</p>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Test Information */}
       {TestResult.test && (
-        <div className="col-span-2 mt-4">
-          <h3 className="font-semibold text-base mb-2 border-b pb-1">
-            Thông tin xét nghiệm
-          </h3>
-          <div className="grid grid-cols-2 gap-2">
-            {/* Removed sensitive ID fields */}
-            <p>
-              <span className="font-medium">Tên xét nghiệm:</span>{" "}
-              {TestResult.test.name || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Mô tả:</span>{" "}
-              {TestResult.test.description || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Phương pháp:</span>{" "}
-              {TestResult.test.method || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Danh mục:</span>{" "}
-              {TestResult.test.category || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Định lượng:</span>{" "}
-              {TestResult.test.isQuantitative ? "Có" : "Không"}
-            </p>
-            <p>
-              <span className="font-medium">Đơn vị xét nghiệm:</span>{" "}
-              {TestResult.test.unit || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Giá trị ngưỡng (Test):</span>{" "}
-              {TestResult.test.cutOffValue || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Giá tiền:</span>{" "}
-              {formatCurrency(TestResult.test.price, "VND")}
-            </p>
-          </div>
-        </div>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TestTube className="h-5 w-5" />
+              Thông tin xét nghiệm
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Tên xét nghiệm</div>
+                <p className="font-medium">{TestResult.test.name || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Mô tả</div>
+                <p className="font-medium">{TestResult.test.description || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Phương pháp</div>
+                <p className="font-medium">{TestResult.test.method || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Danh mục</div>
+                <Badge variant="outline">{TestResult.test.category || "N/A"}</Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Định lượng</div>
+                <Badge variant={TestResult.test.isQuantitative ? "default" : "secondary"}>
+                  {TestResult.test.isQuantitative ? "Có" : "Không"}
+                </Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Đơn vị xét nghiệm</div>
+                <p className="font-medium">{TestResult.test.unit || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Giá trị ngưỡng (Test)</div>
+                <p className="font-medium">{TestResult.test.cutOffValue || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
+                  <span>Giá tiền</span>
+                </div>
+                <p className="font-medium text-green-600">
+                  {formatCurrency(TestResult.test.price, "VND")}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* User Information */}
       {TestResult.user && (
-        <div className="col-span-1 mt-4">
-          <h3 className="font-semibold text-base mb-2 border-b pb-1">
-            Thông tin bệnh nhân
-          </h3>
-          <div className="space-y-1">
-            {/* Removed sensitive ID fields */}
-            <p>
-              <span className="font-medium">Tên:</span>{" "}
-              {TestResult.user.name || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Email:</span>{" "}
-              {TestResult.user.email || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">SĐT:</span>{" "}
-              {TestResult.user.phoneNumber || "N/A"}
-            </p>
-          </div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Thông tin bệnh nhân
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="h-4 w-4" />
+                <span>Tên</span>
+              </div>
+              <p className="font-medium">{TestResult.user.name || "N/A"}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <span>Email</span>
+              </div>
+              <p className="font-medium">{TestResult.user.email || "N/A"}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4" />
+                <span>Số điện thoại</span>
+              </div>
+              <p className="font-medium">{TestResult.user.phoneNumber || "N/A"}</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Lab Tech Information */}
-      {TestResult.labTech ? (
-        <div className="col-span-1 mt-4">
-          <h3 className="font-semibold text-base mb-2 border-b pb-1">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserCheck className="h-5 w-5" />
             Thông tin kỹ thuật viên
-          </h3>
-          <div className="space-y-1">
-            {/* Removed sensitive ID fields */}
-            <p>
-              <span className="font-medium">Tên:</span>{" "}
-              {TestResult.labTech.name || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Email:</span>{" "}
-              {TestResult.labTech.email || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">SĐT:</span>{" "}
-              {TestResult.labTech.phoneNumber || "N/A"}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="col-span-1 mt-4">
-          <h3 className="font-semibold text-base mb-2 border-b pb-1">
-            Thông tin kỹ thuật viên
-          </h3>
-          <p className="text-gray-500">Không có thông tin kỹ thuật viên.</p>
-        </div>
-      )}
-
-      {/* Created By Doctor Information */}
-      {/* Removed sensitive ID fields */}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {TestResult.labTech ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span>Tên</span>
+                </div>
+                <p className="font-medium">{TestResult.labTech.name || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span>Email</span>
+                </div>
+                <p className="font-medium">{TestResult.labTech.email || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  <span>Số điện thoại</span>
+                </div>
+                <p className="font-medium">{TestResult.labTech.phoneNumber || "N/A"}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <AlertCircle className="h-4 w-4" />
+              <span>Không có thông tin kỹ thuật viên.</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Timestamps */}
-      <div className="col-span-2 mt-4">
-        <h3 className="font-semibold text-base mb-2 border-b pb-1">
-          Thời gian
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          <p>
-            <span className="font-medium">Tạo lúc:</span>{" "}
-            {formatDate(TestResult.createdAt)}
-          </p>
-          <p>
-            <span className="font-medium">Cập nhật lúc:</span>{" "}
-            {formatDate(TestResult.updatedAt)}
-          </p>
-        </div>
-      </div>
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Thời gian
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Tạo lúc</span>
+              </div>
+              <p className="font-medium">{formatDate(TestResult.createdAt, "dd/MM/yyyy")}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Cập nhật lúc</span>
+              </div>
+              <p className="font-medium">{formatDate(TestResult.updatedAt, "dd/MM/yyyy")}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

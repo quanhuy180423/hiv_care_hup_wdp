@@ -397,10 +397,10 @@ const TestResultCreate = (props: TestResultCreateProps) => {
       )}
 
       <div className="flex justify-end m-4 gap-4">
-        <Button variant="outline" onClick={props.onClose}>
+        <Button variant="outline" onClick={props.onClose} className="cursor-pointer">
           Đóng
         </Button>
-        <Button variant="outline" onClick={() => handleSubmit()}>
+        <Button variant="outline" onClick={() => handleSubmit()} className="cursor-pointer">
           Tạo yêu cầu
         </Button>
       </div>
