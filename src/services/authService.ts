@@ -309,7 +309,7 @@ export const authService = {
   },
 
   // Logout user - chỉ call API
-  logout: async (refreshToken?: string): Promise<void> => {
+  logout: async (refreshToken: string): Promise<void> => {
     try {
       if (refreshToken) {
         await apiClient.post(AUTH_ENDPOINTS.LOGOUT, {

@@ -8,6 +8,7 @@ import type {
   UpdateProfileRequest,
   SentOtpRequest,
   ForgotPasswordRequest,
+  LoginResponse,
 } from "@/services/authService";
 
 export type UserRole = "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT";
@@ -69,7 +70,7 @@ export interface AuthActions {
   setLoggingIn: (isLoggingIn: boolean) => void;
   reset: () => void;
   // Authentication methods
-  login: (credentials: LoginRequest) => Promise<any>;
+  login: (credentials: LoginRequest) => Promise<LoginResponse>;
   register: (userData: RegisterRequest) => Promise<any>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;

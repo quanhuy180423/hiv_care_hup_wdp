@@ -92,13 +92,8 @@ export const LoginPage = () => {
         else if (res.data.user.role === "ADMIN") navigate("/admin/dashboard");
         else if (res.data.user.role === "STAFF")
           navigate("/staff/appointments");
-      } else {
-        toast.error(
-          res.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
-        );
-        return;
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("🌐 Login error:", err);
       // Handle 2FA requirement
       if (err.message?.includes("2FA") || err.message?.includes("TOTP")) {
@@ -109,8 +104,6 @@ export const LoginPage = () => {
         );
         return;
       }
-
-      toast.error(err instanceof Error ? err.message : "Đăng nhập thất bại");
     }
   };
 

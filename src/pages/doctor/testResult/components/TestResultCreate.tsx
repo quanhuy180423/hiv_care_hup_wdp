@@ -1,4 +1,6 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardContent, CardTitle, CardHeader, Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatientTreatments } from "@/hooks/usePatientTreatments";
@@ -159,9 +161,6 @@ const TestResultCreate = (props: TestResultCreateProps) => {
 
   return (
     <div className=" max-h-[80vh] overflow-y-auto scrollbar-hide">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Tạo yêu cầu xét nghiệm{" "}
-      </h2>
       {/* Search Inputs Layout */}
       <div className="flex gap-4 m-8">
         {/* Patient Treatment Search (Left Side) */}
@@ -293,57 +292,71 @@ const TestResultCreate = (props: TestResultCreateProps) => {
         </div>
       </div>
 
-      {/* Selected Information Display */}
+      {/* Selected Information Display with Shadcn Components */}
       {selectedTreatment && (
-        <div className="mt-6 p-4 border border-blue-200 bg-blue-50 rounded-md">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
-            Thông tin điều trị đã chọn:
-          </h3>
-          <p>
-            <span className="font-medium">Bệnh nhân:</span>{" "}
-            {selectedTreatment.patient?.name || "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Ngày khám:</span>{" "}
-            {selectedTreatment.startDate || "Chưa có thông tin"}
-          </p>
-          <p>
-            <span className="font-medium">Sdt/Email:</span>{" "}
-            {selectedTreatment.patient?.phoneNumber ||
-              selectedTreatment.patient?.email ||
-              "Chưa có thông tin"}
-          </p>
-        </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Thông tin điều trị đã chọn</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Bệnh nhân</Badge>
+                <span>{selectedTreatment.patient?.name || "N/A"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Ngày khám</Badge>
+                <span>
+                  {selectedTreatment.startDate || "Chưa có thông tin"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Sdt/Email</Badge>
+                <span>
+                  {selectedTreatment.patient?.phoneNumber ||
+                    selectedTreatment.patient?.email ||
+                    "Chưa có thông tin"}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {selectedTest && (
-        <div className="mt-6 p-4 border border-green-200 bg-green-50 rounded-md">
-          <h3 className="text-lg font-semibold text-green-800 mb-2">
-            Thông tin xét nghiệm đã chọn:
-          </h3>
-          <p>
-            <span className="font-medium">Tên xét nghiệm:</span>{" "}
-            {selectedTest.name}
-          </p>
-          <p>
-            <span className="font-medium">Mô tả:</span>{" "}
-            {selectedTest.description}
-          </p>
-          <p>
-            <span className="font-medium">Danh mục:</span>{" "}
-            {selectedTest.category}
-          </p>
-          <p>
-            <span className="font-medium">Đơn vị:</span> {selectedTest.unit}
-          </p>
-          <p>
-            <span className="font-medium">Giá tiền:</span> {selectedTest.price}
-          </p>
-          <p>
-            <span className="font-medium">ID Xét nghiệm:</span>{" "}
-            {selectedTest.id}
-          </p>
-        </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Thông tin xét nghiệm đã chọn</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Tên xét nghiệm</Badge>
+                <span>{selectedTest.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Mô tả</Badge>
+                <span>{selectedTest.description}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Danh mục</Badge>
+                <span>{selectedTest.category}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Đơn vị</Badge>
+                <span>{selectedTest.unit}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Giá tiền</Badge>
+                <span>{formatCurrency(selectedTest.price)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">ID Xét nghiệm</Badge>
+                <span>{selectedTest.id}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <div className="m-6">
@@ -357,22 +370,25 @@ const TestResultCreate = (props: TestResultCreateProps) => {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Ghi chú thêm..."
-          className=" w-full"
+          className="w-full"
         />
       </div>
 
       {/* Confirmation/Full Form Section */}
       {selectedTreatment && selectedTest ? (
-        <div className="mt-6 p-4 border border-red-200 bg-red-50 rounded-md">
-          <h3 className="text-lg font-semibold text-red-800 mb-4">
-            Kiểm tra lại thông tin trước khi tạo yêu cầu xét nghiệm
-          </h3>
-          {/* Add your form fields for rawResultValue, notes, etc. here */}
-          <p className="text-gray-700">
-            Bạn có thể thêm các trường nhập liệu khác như kết quả thô, ghi chú,
-            v.v., tại đây.
-          </p>
-        </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>
+              Kiểm tra lại thông tin trước khi tạo yêu cầu xét nghiệm
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700">
+              Bạn có thể thêm các trường nhập liệu khác như kết quả thô, ghi
+              chú, v.v., tại đây.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <p className="text-gray-500 text-center mt-8">
           Vui lòng tìm kiếm và chọn một bệnh nhân điều trị và một xét nghiệm để

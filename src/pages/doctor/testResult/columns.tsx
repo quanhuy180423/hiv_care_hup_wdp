@@ -87,7 +87,7 @@ export const getColumns = (
           <DropdownMenuItem
             onClick={() => onEdit(row.original, row.original.id)}
           >
-            Sửa
+            Cập nhập kết quả
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onDetail(row.original)}>
             Xem chi tiết
