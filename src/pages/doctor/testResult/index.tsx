@@ -63,7 +63,7 @@ const TestResultPage = () => {
           <p className="text-gray-600 mt-1">Danh sách kết quả xét nghiệm</p>
         </div>
 
-        <Button onClick={() => setIsModalOpenCreate(true)} variant="outline">
+        <Button onClick={() => setIsModalOpenCreate(true)} variant="outline" className="cursor-pointer">
           Tạo yêu cầu xét nghiệm
         </Button>
       </div>
@@ -92,58 +92,52 @@ const TestResultPage = () => {
 
       {/* Modal for create test result */}
       <Dialog open={isModalOpenCreate} onOpenChange={setIsModalOpenCreate}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-white max-w-7xl min-w-4xl">
           <DialogHeader>
             <DialogTitle>Tạo yêu cầu xét nghiệm</DialogTitle>
             <DialogDescription>
               Thông tin chi tiết về yêu cầu xét nghiệm.
             </DialogDescription>
           </DialogHeader>
-          <DialogContent className="max-w-7xl min-w-4xl bg-white">
-            <TestResultCreate onClose={() => setIsModalOpenCreate(false)} />
-          </DialogContent>
+          <TestResultCreate onClose={() => setIsModalOpenCreate(false)} />
         </DialogContent>
       </Dialog>
 
       {/* Modal for viewing test result details */}
       <Dialog open={isModalOpenDetail} onOpenChange={setIsModalOpenDetail}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-white max-w-7xl min-w-4xl">
           <DialogHeader>
             <DialogTitle>Chi tiết kết quả xét nghiệm</DialogTitle>
             <DialogDescription>
               Thông tin chi tiết về kết quả xét nghiệm.
             </DialogDescription>
           </DialogHeader>
-          <DialogContent className="max-w-7xl min-w-4xl bg-white">
-            {selectedTestResult ? (
-              <TestResultDetail TestResult={selectedTestResult} />
-            ) : (
-              <p>Không có thông tin chi tiết.</p>
-            )}
-          </DialogContent>
+          {selectedTestResult ? (
+            <TestResultDetail TestResult={selectedTestResult} />
+          ) : (
+            <p>Không có thông tin chi tiết.</p>
+          )}
         </DialogContent>
       </Dialog>
 
       {/* Modal for editing test result */}
       <Dialog open={isModalOpenEdit} onOpenChange={setIsModalOpenEdit}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-white max-w-7xl min-w-4xl">
           <DialogHeader>
             <DialogTitle>Kết quả xét nghiệm</DialogTitle>
             <DialogDescription>
               Cập nhật thông tin kết quả xét nghiệm.
             </DialogDescription>
           </DialogHeader>
-          <DialogContent className="max-w-7xl min-w-4xl bg-white">
-            {defaultValues ? (
-              <TestResultEditForm
-                onClose={() => setIsModalOpenEdit(false)}
-                refetch={refetch}
-                defaultValues={defaultValues}
-              />
-            ) : (
-              <p>Không có thông tin để chỉnh sửa.</p>
-            )}
-          </DialogContent>
+          {defaultValues ? (
+            <TestResultEditForm
+              onClose={() => setIsModalOpenEdit(false)}
+              refetch={refetch}
+              defaultValues={defaultValues}
+            />
+          ) : (
+            <p>Không có thông tin để chỉnh sửa.</p>
+          )}
         </DialogContent>
       </Dialog>
     </div>

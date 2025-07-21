@@ -79,17 +79,18 @@ export const getColumns = (
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button>
+          <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white">
           <DropdownMenuItem
             onClick={() => onEdit(row.original, row.original.id)}
+            className="cursor-pointer"
           >
-            Sửa
+            Cập nhập kết quả
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onDetail(row.original)}>
+          <DropdownMenuItem onClick={() => onDetail(row.original)} className="cursor-pointer">
             Xem chi tiết
           </DropdownMenuItem>
         </DropdownMenuContent>

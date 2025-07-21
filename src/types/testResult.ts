@@ -8,4 +8,31 @@ export interface TestResult {
   note?: string;
 }
 
+export enum TestInterpretation {
+  POSITIVE = "POSITIVE",
+  NEGATIVE = "NEGATIVE",
+  INDETERMINATE = "INDETERMINATE",
+  DETECTED = "DETECTED",
+  NOT_DETECTED = "NOT_DETECTED",
+}
+
+export function translateInterpretation(
+  status: TestInterpretation | string
+): string {
+  switch (status) {
+    case TestInterpretation.POSITIVE:
+      return "Dương tính";
+    case TestInterpretation.NEGATIVE:
+      return "Âm tính";
+    case TestInterpretation.INDETERMINATE:
+      return "Không xác định / Cần làm lại";
+    case TestInterpretation.DETECTED:
+      return "Phát hiện";
+    case TestInterpretation.NOT_DETECTED:
+      return "Không phát hiện";
+    default:
+      return "Không xác định";
+  }
+}
+
 export type TestResultCreate = Omit<TestResult, "id">;

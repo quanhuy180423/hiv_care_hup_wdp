@@ -83,6 +83,39 @@ export interface DoctorInfo {
   user: UserInfo;
 }
 
+export interface Test {
+  id: number;
+  name: string;
+  description: string;
+  method: string;
+  category: string;
+  isQuantitative: boolean;
+  unit: string;
+  cutOffValue: string;
+  price: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TestResult {
+  id: number;
+  testId: number;
+  rawResultValue: string;
+  interpretation: string;
+  unit: string;
+  cutOffValueUsed: string;
+  patientTreatmentId: number;
+  userId: number;
+  labTechId: number | null;
+  createdByDoctorId: number | null;
+  resultDate: string;
+  notes: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  test?: Test;
+}
+
 export interface PatientTreatmentType {
   id: number;
   patientId: number;
@@ -101,7 +134,7 @@ export interface PatientTreatmentType {
   protocol?: ProtocolInfo;
   doctor?: DoctorInfo;
   createdBy?: UserInfo;
-  testResults: [];
+  testResults: TestResult[];
 }
 
 export interface PatientTreatmentsResponse {
