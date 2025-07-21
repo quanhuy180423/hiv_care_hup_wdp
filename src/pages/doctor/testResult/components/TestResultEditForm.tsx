@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useUpdateTestResult } from "@/hooks/useTestResult";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type {
@@ -12,6 +16,18 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
+import { 
+  TestTube, 
+  Edit3, 
+  Save, 
+  X, 
+  DollarSign,
+  Hash,
+  Activity,
+  FileText,
+  Loader2
+} from "lucide-react";
+import { translateInterpretation } from "@/types/testResult";
 
 interface TestResultEditFormProps {
   onClose: () => void;
@@ -42,7 +58,7 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rawResultValue: 0, // Ensure it's a number
+      rawResultValue: defaultValues.rawResultValue || 0, // Use existing value or default to 0
       notes: defaultValues.notes || "",
     },
   });
@@ -56,122 +72,201 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
       refetch(); // Call refetch to update parent data
     } catch (error) {
       console.error("Update test result error:", error);
+      toast.error("Có lỗi xảy ra khi cập nhật kết quả!");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-        {/* Test Information (Read-only) */}
-        {defaultValues.test && (
-          <div className="col-span-2">
-            <h3 className="font-semibold text-base mb-2 border-b pb-1">
+    <div className="space-y-6 max-w-4xl mx-auto max-h-[80vh] overflow-y-auto">
+      {/* Test Information (Read-only) */}
+      {defaultValues.test && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TestTube className="h-5 w-5" />
               Thông tin xét nghiệm
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              <p>
-                <span className="font-medium">Tên xét nghiệm:</span>{" "}
-                {defaultValues.test.name || "N/A"}
-              </p>
-              <p>
-                <span className="font-medium">Mô tả:</span>{" "}
-                {defaultValues.test.description || "N/A"}
-              </p>
-              <p>
-                <span className="font-medium">Phương pháp:</span>{" "}
-                {defaultValues.test.method || "N/A"}
-              </p>
-              <p>
-                <span className="font-medium">Danh mục:</span>{" "}
-                {defaultValues.test.category || "N/A"}
-              </p>
-              <p>
-                <span className="font-medium">Định lượng:</span>{" "}
-                {defaultValues.test.isQuantitative ? "Có" : "Không"}
-              </p>
-              <p>
-                <span className="font-medium">Đơn vị xét nghiệm:</span>{" "}
-                {defaultValues.test.unit || "N/A"}
-              </p>
-              <p>
-                <span className="font-medium">Giá trị ngưỡng (Test):</span>{" "}
-                {defaultValues.test.cutOffValue || "N/A"}
-              </p>
-              <p>
-                <span className="font-medium">Giá tiền:</span>{" "}
-                {formatCurrency(defaultValues.test.price, "VND")}
-              </p>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Tên xét nghiệm</div>
+                <p className="font-medium">{defaultValues.test.name || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Mô tả</div>
+                <p className="font-medium">{defaultValues.test.description || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Phương pháp</div>
+                <p className="font-medium">{defaultValues.test.method || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Danh mục</div>
+                <Badge variant="outline">{defaultValues.test.category || "N/A"}</Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Định lượng</div>
+                <Badge variant={defaultValues.test.isQuantitative ? "default" : "secondary"}>
+                  {defaultValues.test.isQuantitative ? "Có" : "Không"}
+                </Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Hash className="h-4 w-4" />
+                  <span>Đơn vị xét nghiệm</span>
+                </div>
+                <p className="font-medium">{defaultValues.test.unit || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Giá trị ngưỡng (Test)</div>
+                <p className="font-medium">{defaultValues.test.cutOffValue || "N/A"}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
+                  <span>Giá tiền</span>
+                </div>
+                <p className="font-medium text-green-600">
+                  {formatCurrency(defaultValues.test.price, "VND")}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Editable Result Information */}
-        <div className="col-span-2 mt-4">
-          <h3 className="font-semibold text-base mb-2 border-b pb-1">
+      {/* Editable Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Edit3 className="h-5 w-5" />
             Cập nhật kết quả
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="rawResultValue"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Giá trị kết quả thô
-              </label>
-              <Input
-                id="rawResultValue"
-                type="number"
-                step="0.01"
-                {...register("rawResultValue")}
-                placeholder="Ví dụ: 0.8"
-              />
-              {errors.rawResultValue && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.rawResultValue.message}
-                </p>
-              )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Current Values Display */}
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Giá trị hiện tại
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Giá trị kết quả kiểm tra:</span>
+                  <p className="font-medium">{defaultValues.rawResultValue || "Chưa có"}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Đơn vị:</span>
+                  <p className="font-medium">{defaultValues.unit || "N/A"}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Diễn giải:</span>
+                  <p className="font-medium">{translateInterpretation(defaultValues.interpretation) || "Chưa có"}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Trạng thái:</span>
+                  <Badge variant="outline">{defaultValues.status == "Processing" ? "Đang xử lý" : "Hoàn thành"}</Badge>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="notes"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Ghi chú
-              </label>
-              <Textarea
-                id="notes"
-                {...register("notes")}
-                placeholder="Ví dụ: Kết quả xét nghiệm bình thường"
-              />
-              {errors.notes && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.notes.message}
+            <Separator />
+
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="rawResultValue" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Giá trị kết quả kiểm tra *
+                </Label>
+                <Input
+                  id="rawResultValue"
+                  type="number"
+                  step="0.01"
+                  placeholder="Ví dụ: 0.8"
+                  className={errors.rawResultValue ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  {...register("rawResultValue")}
+                />
+                {errors.rawResultValue && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <X className="h-3 w-3" />
+                    {errors.rawResultValue.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Nhập giá trị số chính xác của kết quả xét nghiệm
                 </p>
-              )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Ghi chú
+                </Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Ví dụ: Kết quả xét nghiệm bình thường, không có dấu hiệu bất thường..."
+                  className="min-h-[100px] resize-none"
+                  {...register("notes")}
+                />
+                {errors.notes && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <X className="h-3 w-3" />
+                    {errors.notes.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Thêm ghi chú hoặc nhận xét về kết quả (tùy chọn)
+                </p>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSubmit(onSubmit)}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 cursor-pointer"
+                variant="outline"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang cập nhật...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Cập nhật kết quả
+                  </>
+                )}
+              </Button>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="flex justify-end space-x-2 mt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onClose}
-          className="cursor-pointer hover:bg-gray-100"
-        >
-          Hủy
-        </Button>
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={isSubmitting}
-          className="cursor-pointer hover:bg-gray-100"
-        >
-          {isSubmitting ? "Đang cập nhật..." : "Cập nhật kết quả"}
-        </Button>
-      </div>
-    </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

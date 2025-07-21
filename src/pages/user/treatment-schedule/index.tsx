@@ -19,6 +19,8 @@ import {
   Loader,
   FlaskConical,
   ClipboardCheck,
+  Activity,
+  FileText,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -33,6 +35,20 @@ import type {
   ActivePatientTreatment,
   PatientTreatmentType,
 } from "@/types/patientTreatment";
+import { translateInterpretation } from "@/types/testResult";
+
+function translateTreatmentStatus(status: string) {
+  switch (status) {
+    case "upcoming":
+      return "Sắp diễn ra";
+    case "active":
+      return "Đang diễn ra";
+    case "ending_soon":
+      return "Sắp kết thúc";
+    default:
+      return "Không xác định";
+  }
+}
 
 export default function TreatmentSchedule() {
   const user = useAuthStore((s) => s.user);
@@ -87,7 +103,7 @@ export default function TreatmentSchedule() {
               {isActiveTreatment(treatment) && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {treatment.treatmentStatus}
+                  {translateTreatmentStatus(treatment.treatmentStatus)}
                 </Badge>
               )}
               <Badge variant="outline" className="flex items-center gap-1">
@@ -284,15 +300,103 @@ export default function TreatmentSchedule() {
 
           {/* Tests Section - Placeholder */}
           {hasTestResults && (
-            <div className="space-y-3">
-              <h3 className="font-medium flex items-center gap-2">
-                <FlaskConical className="w-4 h-4 text-primary" />
-                Xét nghiệm cần thực hiện
-              </h3>
-              <div className="p-3 bg-muted/30 rounded-lg">
-                <p className="text-sm">Không có xét nghiệm nào được yêu cầu</p>
+            <>
+              <Separator className="my-6" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg">
+                    <FlaskConical className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Kết quả xét nghiệm
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  {treatment.testResults?.map((result) => (
+                    <div
+                      key={result.id}
+                      className="p-5  rounded-xl border  space-y-4"
+                    >
+                      {/* Test Information */}
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-lg ">
+                          {result.test?.name || "Tên xét nghiệm không xác định"}
+                        </h4>
+                        {result.test?.description && (
+                          <p className=" text-sm">{result.test.description}</p>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                          <div className="flex justify-between p-2 bg-white/60 rounded-lg">
+                            <span className="text-sm font-medium ">
+                              Phương pháp:
+                            </span>
+                            <span className="text-sm ">
+                              {result.test?.method || "--"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between p-2 bg-white/60 rounded-lg">
+                            <span className="text-sm font-medium ">Loại:</span>
+                            <span className="text-sm ">
+                              {result.test?.category || "--"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Results Details */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex justify-between p-3 bg-white/60 rounded-lg">
+                          <span className="text-sm font-medium ">
+                            Giá trị xét nghiệm:
+                          </span>
+                          <span className="text-sm font-semibold ">
+                            {result.rawResultValue}{" "}
+                            {result.unit || result.test?.unit || ""}
+                          </span>
+                        </div>
+                        <div className="flex justify-between p-3 bg-white/60 rounded-lg">
+                          <span className="text-sm font-medium ">
+                            Giá trị ngưỡng:
+                          </span>
+                          <span className="text-sm ">
+                            {result.cutOffValueUsed}{" "}
+                            {result.unit || result.test?.unit || ""}
+                          </span>
+                        </div>
+                        <div className="flex justify-between p-3 bg-white/60 rounded-lg">
+                          <span className="text-sm font-medium ">Kết quả:</span>
+                          <span className="text-sm font-semibold ">
+                            {translateInterpretation(result.interpretation)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between p-3 bg-white/60 rounded-lg">
+                          <span className="text-sm font-medium ">
+                            Ngày nhận kết quả:
+                          </span>
+                          <span className="text-sm ">
+                            {formatUtcDateManually(result.resultDate)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      {result.notes && (
+                        <div className="p-3 bg-white/60 rounded-lg">
+                          <span className="text-sm font-medium  block mb-2">
+                            Ghi chú:
+                          </span>
+                          <p className="text-sm  whitespace-pre-line">
+                            {result.notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {treatment.notes && (
@@ -324,14 +428,22 @@ export default function TreatmentSchedule() {
       </div>
 
       <Tabs defaultValue="active" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="active" className="cursor-pointer">
-            Phác đồ hiện tại ({activeTreatmentList.length})
-          </TabsTrigger>
-          <TabsTrigger value="all" className="cursor-pointer">
-            Danh sách phác đồ ({treatmentList.length})
-          </TabsTrigger>
-        </TabsList>
+        <TabsList className="grid w-full grid-cols-2 h-12 bg-white shadow-sm border">
+            <TabsTrigger 
+              value="active" 
+              className="cursor-pointer flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              <Activity className="w-4 h-4" />
+              Phác đồ hiện tại ({activeTreatmentList.length})
+            </TabsTrigger>
+            <TabsTrigger 
+              value="all" 
+              className="cursor-pointer flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              <FileText className="w-4 h-4" />
+              Danh sách phác đồ ({treatmentList.length})
+            </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="active">
           {isLoadingActive ? (
