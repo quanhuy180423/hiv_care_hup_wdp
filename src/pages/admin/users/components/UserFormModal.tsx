@@ -87,11 +87,11 @@ export function UserFormModal({
     }
   }, [initialData, createForm, updateForm]);
 
-  const userStatuses = [
-    { value: "ACTIVE", label: "Hoạt động" },
-    { value: "INACTIVE", label: "Không hoạt động" },
-    { value: "SUSPENDED", label: "Tạm khóa" },
-  ];
+  // const userStatuses = [
+  //   { value: "ACTIVE", label: "Hoạt động" },
+  //   { value: "INACTIVE", label: "Không hoạt động" },
+  //   { value: "SUSPENDED", label: "Tạm khóa" },
+  // ];
 
   const renderCreateForm = () => (
     <Form {...createForm}>

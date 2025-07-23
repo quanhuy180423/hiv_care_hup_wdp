@@ -28,6 +28,8 @@ export interface ProtocolMedicine {
     unit: string;
     dose: string;
     price: number;
+    createdAt?: string;
+    updatedAt?: string;
   };
   createdAt?: string;
   updatedAt?: string;

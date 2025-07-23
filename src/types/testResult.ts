@@ -2,10 +2,10 @@
 export interface TestResult {
   id: number;
   patientTreatmentId: number;
-  testName: string;
-  result: string;
+  testName: string; // Name of the test
+  result: string; // Result of the test
   date: string; // ISO date string
-  note?: string;
+  note?: string; // Optional note for the test result
 }
 
 export enum TestInterpretation {

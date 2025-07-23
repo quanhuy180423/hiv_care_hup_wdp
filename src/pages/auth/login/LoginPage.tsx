@@ -23,8 +23,8 @@ type LoginRequest = Parameters<typeof authService.login>[0];
 
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [showTotpCode, setShowTotpCode] = useState(false);
-  const [showOtpCode, setShowOtpCode] = useState(false);
+  // const [showTotpCode, setShowTotpCode] = useState(false);
+  // const [showOtpCode, setShowOtpCode] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [emailFor2FA, setEmailFor2FA] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -52,8 +52,8 @@ export const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
+    // setValue,
+    // watch,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -65,7 +65,7 @@ export const LoginPage = () => {
     },
   });
 
-  const watchedEmail = watch("email");
+  // const watchedEmail = watch("email");
 
   const onSubmit = async (data: LoginFormData) => {
     console.log("🌐 onSubmit called with data:", data);
@@ -96,7 +96,7 @@ export const LoginPage = () => {
     } catch (err) {
       console.error("🌐 Login error:", err);
       // Handle 2FA requirement
-      if (err.message?.includes("2FA") || err.message?.includes("TOTP")) {
+      if (typeof err === "object" && err !== null && "message" in err && typeof err.message === "string" && (err.message.includes("2FA") || err.message.includes("TOTP"))) {
         setRequires2FA(true);
         setEmailFor2FA(data.email);
         toast.error(
@@ -114,9 +114,10 @@ export const LoginPage = () => {
         email: emailFor2FA,
         type: "LOGIN",
       });
-      setShowOtpCode(true);
+      // setShowOtpCode(true);
       toast.success("Mã OTP đã được gửi đến email của bạn!");
     } catch (error) {
+      console.error("🌐 Send OTP error:", error);
       toast.error("Không thể gửi mã OTP. Vui lòng thử lại.");
     } finally {
       setIsSendingOtp(false);

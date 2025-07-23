@@ -20,7 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Stethoscope, Loader2, X } from "lucide-react";
-import type { Doctor as DoctorType, DoctorFormValues, UpdateDoctorFormValues } from "@/types/doctor";
+import type {
+  Doctor as DoctorType,
+  DoctorFormValues,
+  UpdateDoctorFormValues,
+} from "@/types/doctor";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +55,7 @@ export function DoctorFormModal({
 }: DoctorFormModalProps) {
   const { data: usersData } = useUsers();
   const users = usersData?.data || [];
-  
+
   const createForm = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorFormSchema),
     defaultValues: {
@@ -69,8 +73,6 @@ export function DoctorFormModal({
     },
   });
 
-  const form = initialData ? updateForm : createForm;
-  
   useEffect(() => {
     if (initialData) {
       updateForm.reset({
@@ -88,26 +90,41 @@ export function DoctorFormModal({
 
   const [certificationInput, setCertificationInput] = useState("");
 
-  const addCertification = (formType: 'create' | 'update') => {
+  const addCertification = (formType: "create" | "update") => {
     if (certificationInput.trim()) {
-      if (formType === 'create') {
+      if (formType === "create") {
         const currentCerts = createForm.getValues("certifications") || [];
-        createForm.setValue("certifications", [...currentCerts, certificationInput.trim()]);
+        createForm.setValue("certifications", [
+          ...currentCerts,
+          certificationInput.trim(),
+        ]);
       } else {
         const currentCerts = updateForm.getValues("certifications") || [];
-        updateForm.setValue("certifications", [...currentCerts, certificationInput.trim()]);
+        updateForm.setValue("certifications", [
+          ...currentCerts,
+          certificationInput.trim(),
+        ]);
       }
       setCertificationInput("");
     }
   };
 
-  const removeCertification = (index: number, formType: 'create' | 'update') => {
-    if (formType === 'create') {
+  const removeCertification = (
+    index: number,
+    formType: "create" | "update"
+  ) => {
+    if (formType === "create") {
       const currentCerts = createForm.getValues("certifications") || [];
-      createForm.setValue("certifications", currentCerts.filter((_, i) => i !== index));
+      createForm.setValue(
+        "certifications",
+        currentCerts.filter((_, i) => i !== index)
+      );
     } else {
       const currentCerts = updateForm.getValues("certifications") || [];
-      updateForm.setValue("certifications", currentCerts.filter((_, i) => i !== index));
+      updateForm.setValue(
+        "certifications",
+        currentCerts.filter((_, i) => i !== index)
+      );
     }
   };
 
@@ -117,10 +134,14 @@ export function DoctorFormModal({
         <FormField
           control={createForm.control}
           name="userId"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel className="text-sm font-medium">Người dùng</FormLabel>
-              <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+              <Select
+                onValueChange={(value) =>
+                  createForm.setValue("userId", Number(value))
+                }
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Chọn người dùng" />
@@ -156,7 +177,7 @@ export function DoctorFormModal({
         <FormField
           control={createForm.control}
           name="certifications"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel className="text-sm font-medium">Chứng chỉ</FormLabel>
               <div className="space-y-2">
@@ -165,19 +186,30 @@ export function DoctorFormModal({
                     placeholder="Thêm chứng chỉ..."
                     value={certificationInput}
                     onChange={(e) => setCertificationInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCertification('create'))}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" &&
+                      (e.preventDefault(), addCertification("create"))
+                    }
                   />
-                  <Button type="button" onClick={() => addCertification('create')} variant="outline">
+                  <Button
+                    type="button"
+                    onClick={() => addCertification("create")}
+                    variant="outline"
+                  >
                     Thêm
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {createForm.watch("certifications")?.map((cert, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
                       {cert}
                       <X
                         className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeCertification(index, 'create')}
+                        onClick={() => removeCertification(index, "create")}
                       />
                     </Badge>
                   ))}
@@ -189,10 +221,20 @@ export function DoctorFormModal({
         />
 
         <DialogFooter className="pt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} type="button" className="cursor-pointer">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            type="button"
+            className="cursor-pointer"
+          >
             Hủy
           </Button>
-          <Button type="submit" disabled={isPending} variant="outline" className="cursor-pointer">
+          <Button
+            type="submit"
+            disabled={isPending}
+            variant="outline"
+            className="cursor-pointer"
+          >
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -224,7 +266,7 @@ export function DoctorFormModal({
         <FormField
           control={updateForm.control}
           name="certifications"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel className="text-sm font-medium">Chứng chỉ</FormLabel>
               <div className="space-y-2">
@@ -233,19 +275,30 @@ export function DoctorFormModal({
                     placeholder="Thêm chứng chỉ..."
                     value={certificationInput}
                     onChange={(e) => setCertificationInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCertification('update'))}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" &&
+                      (e.preventDefault(), addCertification("update"))
+                    }
                   />
-                  <Button type="button" onClick={() => addCertification('update')} variant="outline">
+                  <Button
+                    type="button"
+                    onClick={() => addCertification("update")}
+                    variant="outline"
+                  >
                     Thêm
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {updateForm.watch("certifications")?.map((cert, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
                       {cert}
                       <X
                         className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeCertification(index, 'update')}
+                        onClick={() => removeCertification(index, "update")}
                       />
                     </Badge>
                   ))}
@@ -257,10 +310,20 @@ export function DoctorFormModal({
         />
 
         <DialogFooter className="pt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} type="button" className="cursor-pointer">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            type="button"
+            className="cursor-pointer"
+          >
             Hủy
           </Button>
-          <Button type="submit" disabled={isPending} variant="outline" className="cursor-pointer">
+          <Button
+            type="submit"
+            disabled={isPending}
+            variant="outline"
+            className="cursor-pointer"
+          >
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -293,4 +356,4 @@ export function DoctorFormModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}
