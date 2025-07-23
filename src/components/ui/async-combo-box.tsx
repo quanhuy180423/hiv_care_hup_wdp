@@ -35,18 +35,27 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
   const [showDropdown, setShowDropdown] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
+  // Effect 1: fetch options when query or onSearch changes
   React.useEffect(() => {
-    // Nếu có value và chưa có query, tự động fill query bằng tên option đã chọn
-    if (value !== undefined && value !== null && query === "") {
-      const selected = options.find((o) => o.id === value);
-      if (selected) setQuery(selected.name);
-    }
-    // Khi query rỗng, show tất cả item khả dụng (onSearch("") trả về all)
     setLoading(true);
     onSearch(query)
       .then((opts) => setOptions(opts))
       .finally(() => setLoading(false));
-  }, [query, onSearch, value]);
+  }, [query, onSearch]);
+
+  // Effect 2: fill query from value if needed, and clear value if input is cleared
+  React.useEffect(() => {
+    if (query === "") {
+      if (value !== undefined && value !== null) {
+        onChange(undefined);
+      }
+    } else if (value !== undefined && value !== null) {
+      const selected = options.find((o) => o.id === value);
+      if (selected && query !== selected.name) {
+        setQuery(selected.name);
+      }
+    }
+  }, [value, options, query, onChange]);
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (

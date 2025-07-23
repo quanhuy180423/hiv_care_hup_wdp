@@ -60,7 +60,6 @@ import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 import DoctorAppointments from "./pages/doctor/appointments";
 import DoctorPatientTreatments from "./pages/doctor/patientTreatment";
 import DoctorSchedule from "./pages/doctor/schedule";
-import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 
 // User specific pages
 import TestManagement from "./pages/admin/test";
@@ -512,17 +511,6 @@ export const doctorRoutes: RouteConfig[] = [
     allowedRoles: ["DOCTOR"],
   },
   {
-    path: "/doctor/treatment-protocols",
-    component: TreatmentProtocols,
-    title: "Phác đồ điều trị",
-    description: "Quản lý phác đồ điều trị",
-    protected: true,
-    layout: "DOCTOR",
-    icon: Stethoscope,
-    showInNav: true,
-    allowedRoles: ["DOCTOR"],
-  },
-  {
     path: "/doctor/test-results",
     component: TestResultPage,
     title: "Kết quả xét nghiệm",
@@ -610,7 +598,6 @@ export const ROUTES = {
   DOCTOR_APPOINTMENTS: "/doctor/appointments",
   DOCTOR_SCHEDULE: "/doctor/schedule",
   DOCTOR_PATIENT_TREATMENTS: "/doctor/patient-treatments",
-  DOCTOR_TREATMENT_PROTOCOLS: "/doctor/treatment-protocols",
   DOCTOR_TEST_RESULTS: "/doctor/test-results",
 } as const;
 

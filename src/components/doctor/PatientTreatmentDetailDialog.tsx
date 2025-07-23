@@ -11,6 +11,7 @@ import {
 } from "@/lib/utils/exportPatientTreatmentToPDF";
 import type { Appointment } from "@/types/appointment";
 
+import useAuthStore from "@/store/authStore";
 import { useEffect, useRef } from "react";
 import { TestResultList } from "./TestResultList";
 
@@ -32,6 +33,7 @@ export const PatientTreatmentDetailDialog = ({
   treatment,
 }: PatientTreatmentDetailDialogProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { userProfile } = useAuthStore();
 
   // Focus trap
   useEffect(() => {
@@ -50,9 +52,9 @@ export const PatientTreatmentDetailDialog = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
-  if (!appointment) return null;
-  
-  // Nếu có treatment, hiển thị danh sách test result
+  // Hiển thị dialog nếu có treatment hoặc appointment
+  if (!open || (!appointment && !treatment)) return null;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
@@ -63,27 +65,62 @@ export const PatientTreatmentDetailDialog = ({
         className="sm:max-w-[550px] md:max-w-[600px] lg:max-w-[650px] max-h-screen overflow-y-auto bg-white rounded-xl shadow-lg p-6 z-50"
       >
         <DialogHeader>
-          <DialogTitle>Chi tiết cuộc hẹn</DialogTitle>
+          <DialogTitle>
+            {appointment ? "Chi tiết cuộc hẹn" : "Chi tiết hồ sơ bệnh án"}
+          </DialogTitle>
         </DialogHeader>
-        <div className="mb-2">
-          <b>Bệnh nhân:</b> {appointment.user?.name} <br />
-          <b>Email:</b> {appointment.user?.email} <br />
-        </div>
-        <div className="mb-2">
-          <b>Giờ hẹn:</b>{" "}
-          {new Date(appointment.appointmentTime).toLocaleString()} <br />
-          <b>Loại:</b> {appointment.type} <br />
-          <b>Trạng thái:</b> {appointment.status}
-        </div>
-        <Button
-          onClick={onShowForm}
-          className="mt-2 w-full"
-          aria-label="Tạo hồ sơ bệnh án"
-        >
-          Tạo hồ sơ bệnh án
-        </Button>
+        {appointment && (
+          <>
+            <div className="mb-2">
+              <b>Bệnh nhân:</b> {appointment.user?.name} <br />
+              <b>Email:</b> {appointment.user?.email} <br />
+            </div>
+            <div className="mb-2">
+              <b>Giờ hẹn:</b>{" "}
+              {new Date(appointment.appointmentTime).toLocaleString()} <br />
+              <b>Loại:</b> {appointment.type} <br />
+              <b>Trạng thái:</b> {appointment.status}
+            </div>
+            <Button
+              onClick={onShowForm}
+              className="mt-2 w-full"
+              aria-label="Tạo hồ sơ bệnh án"
+            >
+              Tạo hồ sơ bệnh án
+            </Button>
+            {appointment.type === "ONLINE" && (
+              <Button
+                onClick={onJoinMeet}
+                className="mt-2 w-full"
+                variant="outline"
+                aria-label="Vào phòng tư vấn"
+              >
+                Vào phòng tư vấn
+              </Button>
+            )}
+          </>
+        )}
         {treatment && (
           <>
+            <div className="mb-2">
+              <b>Bệnh nhân:</b> {treatment.patient?.name || "-"} <br />
+              <b>Bác sĩ:</b> {userProfile?.name || "-"} <br />
+              <b>Phác đồ:</b> {treatment.protocol?.name || "-"} <br />
+              <b>Ngày bắt đầu:</b>{" "}
+              {treatment.startDate ? treatment.startDate.slice(0, 10) : "-"}{" "}
+              <br />
+              <b>Ngày kết thúc:</b>{" "}
+              {treatment.endDate ? treatment.endDate.slice(0, 10) : "-"} <br />
+              <b>Ghi chú:</b> {treatment.notes || "-"} <br />
+              <b>Trạng thái:</b>{" "}
+              {treatment.status ? "Đang điều trị" : "Đã kết thúc"} <br />
+              <b>Tổng chi phí:</b> {treatment.total?.toLocaleString() || "-"}{" "}
+              VNĐ <br />
+              <b>Người tạo:</b> {treatment.createdBy?.name || "-"} <br />
+              <b>Ngày tạo:</b>{" "}
+              {treatment.createdAt ? treatment.createdAt.slice(0, 10) : "-"}{" "}
+              <br />
+            </div>
             <Button
               onClick={() => exportPatientTreatmentToPDF(treatment)}
               className="mt-2 w-full"
@@ -97,16 +134,6 @@ export const PatientTreatmentDetailDialog = ({
               <TestResultList patientTreatmentId={treatment.id} />
             )}
           </>
-        )}
-        {appointment.type === "ONLINE" && (
-          <Button
-            onClick={onJoinMeet}
-            className="mt-2 w-full"
-            variant="outline"
-            aria-label="Vào phòng tư vấn"
-          >
-            Vào phòng tư vấn
-          </Button>
         )}
       </DialogContent>
     </Dialog>

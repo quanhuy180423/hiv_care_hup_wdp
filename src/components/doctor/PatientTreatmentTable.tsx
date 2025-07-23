@@ -25,12 +25,17 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
 }) => {
   const { userProfile } = useAuthStore();
 
+  console.log(treatments);
+
+  console.log(userProfile?.name);
+
   return (
     <div className="overflow-x-auto">
       <div className="flex items-center justify-between mb-2"></div>
       <table className="w-full text-sm border rounded-xl overflow-hidden">
         <thead>
           <tr className="bg-gray-50 text-gray-700">
+            <th className="p-3 border-b font-medium w-12">No</th>
             <th className="p-3 border-b font-medium">Tên bệnh nhân</th>
             <th className="p-3 border-b font-medium">Tên Bác sĩ</th>
             <th className="p-3 border-b font-medium">Phác đồ</th>
@@ -41,17 +46,6 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
         </thead>
         <tbody>
           {treatments.map((t, idx) => {
-            let doctorName = "-";
-            if (t.doctor?.user?.name) {
-              doctorName = t.doctor.user.name;
-            } else if (
-              t.doctorId &&
-              userProfile?.doctorId &&
-              Number(t.doctorId) === Number(userProfile.doctorId) &&
-              userProfile?.name
-            ) {
-              doctorName = userProfile.name;
-            }
             return (
               <tr
                 key={t.id}
@@ -59,10 +53,11 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = ({
                   idx % 2 === 1 ? "bg-gray-50" : ""
                 }`}
               >
+                <td className="p-3 text-gray-900 font-medium">{idx + 1}</td>
                 <td className="p-3 text-gray-900 font-medium">
                   {t.patient?.name || "-"}
                 </td>
-                <td className="p-3 text-gray-700">{doctorName}</td>
+                <td className="p-3 text-gray-700">{userProfile?.name}</td>
                 <td className="p-3 text-gray-700">{t.protocol?.name || "-"}</td>
                 <td className="p-3 text-gray-700">
                   {t.startDate ? t.startDate.slice(0, 10) : "-"}
