@@ -1,11 +1,8 @@
 import { useEffect } from "react";
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Link } from "react-router";
 
 // Doctor Card Component
 const DoctorCard = ({
@@ -109,11 +106,14 @@ const HomePage = () => {
               <div className="space-y-6">
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Chúng tôi quan tâm đến
-                  <span className="text-purple-600 block">sức khỏe của bạn</span>
+                  <span className="text-purple-600 block">
+                    sức khỏe của bạn
+                  </span>
                 </h1>
                 <p className="text-xl text-gray-600 max-w-lg">
                   Cung cấp dịch vụ y tế tốt nhất với cơ sở vật chất hiện đại và
-                  đội ngũ bác sĩ chuyên môn cao. Sức khỏe của bạn là ưu tiên của chúng tôi.
+                  đội ngũ bác sĩ chuyên môn cao. Sức khỏe của bạn là ưu tiên của
+                  chúng tôi.
                 </p>
               </div>
 
@@ -147,20 +147,18 @@ const HomePage = () => {
                       <path d="M8 5v14l11-7z" />
                     </svg>
                   </div>
-                  <span className="font-medium text-gray-700">
-                    Xem video
-                  </span>
+                  <span className="font-medium text-gray-700">Xem video</span>
                 </div>
 
                 {/* Sign Up Text */}
                 <p className="text-gray-600">
                   Trở thành thành viên của cộng đồng bệnh viện chúng tôi?
-                  <a
-                    href="#"
+                  <Link
+                    to="#"
                     className="text-purple-600 underline font-medium ml-1"
                   >
                     Đăng ký
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>
@@ -184,8 +182,8 @@ const HomePage = () => {
                 <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white p-10">
                   <div className="animate-fade-in-up">
                     <p className="text-lg mb-6 max-w-md">
-                      Gặp gỡ đội ngũ chuyên gia y tế tận tâm
-                      cam kết với sức khỏe của bạn
+                      Gặp gỡ đội ngũ chuyên gia y tế tận tâm cam kết với sức
+                      khỏe của bạn
                     </p>
 
                     {/* Doctor Team Stats */}
@@ -235,7 +233,9 @@ const HomePage = () => {
                         <h3 className="font-semibold text-gray-900">
                           Đặt Lịch Khám
                         </h3>
-                        <p className="text-sm text-gray-600">Nhanh Chóng & Dễ Dàng</p>
+                        <p className="text-sm text-gray-600">
+                          Nhanh Chóng & Dễ Dàng
+                        </p>
                       </div>
                     </div>
                     <button className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
@@ -543,8 +543,9 @@ const HomePage = () => {
                     Phá Vỡ Rào Cản Trong Điều Trị Lupus
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Tìm hiểu cách đấu tranh cho việc chăm sóc sức khỏe, tại sao đa dạng nghiên cứu
-                    quan trọng và cách lupus ảnh hưởng khác nhau đến người da màu.
+                    Tìm hiểu cách đấu tranh cho việc chăm sóc sức khỏe, tại sao
+                    đa dạng nghiên cứu quan trọng và cách lupus ảnh hưởng khác
+                    nhau đến người da màu.
                   </p>
                 </div>
               </div>
@@ -568,8 +569,8 @@ const HomePage = () => {
                     Hiểu Về MASLD Và MASH
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Tìm hiểu về các bệnh lý gan này, cách điều trị và
-                    cách làm việc với đội ngũ chăm sóc để có sức khỏe tốt hơn.
+                    Tìm hiểu về các bệnh lý gan này, cách điều trị và cách làm
+                    việc với đội ngũ chăm sóc để có sức khỏe tốt hơn.
                   </p>
                 </div>
               </div>
@@ -593,8 +594,9 @@ const HomePage = () => {
                     Câu Chuyện Về Thử Nghiệm Lâm Sàng
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Tìm hiểu cách thử nghiệm lâm sàng dẫn đến các phương pháp điều trị an toàn hơn, tốt hơn
-                    và những điều cần biết nếu bạn đang cân nhắc tham gia.
+                    Tìm hiểu cách thử nghiệm lâm sàng dẫn đến các phương pháp
+                    điều trị an toàn hơn, tốt hơn và những điều cần biết nếu bạn
+                    đang cân nhắc tham gia.
                   </p>
                 </div>
               </div>
@@ -618,8 +620,8 @@ const HomePage = () => {
                     Nhận Thức Về Sức Khỏe Tâm Thần
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Hiểu về tầm quan trọng của sức khỏe tâm thần và các chiến lược
-                    duy trì sức khỏe tinh thần trong thế giới ngày nay.
+                    Hiểu về tầm quan trọng của sức khỏe tâm thần và các chiến
+                    lược duy trì sức khỏe tinh thần trong thế giới ngày nay.
                   </p>
                 </div>
               </div>
@@ -643,8 +645,9 @@ const HomePage = () => {
                     Hướng Dẫn Dinh Dưỡng Lành Mạnh
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Khám phá các chất dinh dưỡng thiết yếu mà cơ thể bạn cần và cách
-                    tạo ra các bữa ăn cân bằng cho sức khỏe và sức khỏe tối ưu.
+                    Khám phá các chất dinh dưỡng thiết yếu mà cơ thể bạn cần và
+                    cách tạo ra các bữa ăn cân bằng cho sức khỏe và sức khỏe tối
+                    ưu.
                   </p>
                 </div>
               </div>
@@ -668,8 +671,8 @@ const HomePage = () => {
                     Tập Thể Dục Cho Sức Khỏe
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Tìm hiểu về lợi ích của việc tập thể dục thường xuyên và cách
-                    kết hợp hoạt động thể chất vào thói quen hàng ngày.
+                    Tìm hiểu về lợi ích của việc tập thể dục thường xuyên và
+                    cách kết hợp hoạt động thể chất vào thói quen hàng ngày.
                   </p>
                 </div>
               </div>
@@ -690,8 +693,6 @@ const HomePage = () => {
           <div className="swiper-pagination-blog flex justify-center mt-6"></div>
         </div>
       </section>
-
-    
 
       {/* Treatment Services & HIV Care Section */}
       <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
