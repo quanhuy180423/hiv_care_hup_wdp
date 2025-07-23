@@ -6,7 +6,7 @@ export const useBlogs = (params: BlogQueryParams) => {
   return useQuery({
     queryKey: ["blogs", params],
     queryFn: () => blogService.getAllBlogs(params),
-    select: (res) => res.data,
+    select: (res) => res,
   });
 };
 
@@ -15,6 +15,14 @@ export const useBlog = (id: number) => {
     queryKey: ["blog", id],
     queryFn: () => blogService.getBlogById(id),
     enabled: !!id,
+  });
+};
+
+export const useBlogBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ["blog", "slug", slug],
+    queryFn: () => blogService.getBlogBySlug(slug),
+    enabled: !!slug,
   });
 };
 

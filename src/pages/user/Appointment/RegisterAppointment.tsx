@@ -212,9 +212,9 @@ const RegisterAppointment = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-4xl shadow-xl rounded-2xl overflow-hidden border-0">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
+        <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6 rounded-t-lg">
           <div className="flex items-center space-x-3">
             <div className="bg-white/20 p-2 rounded-lg">
               <svg
@@ -236,7 +236,7 @@ const RegisterAppointment = () => {
               <CardTitle className="text-2xl font-bold">
                 Đăng Ký Lịch Hẹn Khám Bệnh
               </CardTitle>
-              <p className="text-blue-100 opacity-90">
+              <p className="text-purple-100 opacity-90">
                 Đặt lịch hẹn với các chuyên gia y tế của chúng tôi
               </p>
             </div>
@@ -250,7 +250,7 @@ const RegisterAppointment = () => {
               <Label className="text-gray-700 font-semibold flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-600"
+                  className="h-5 w-5 mr-2 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -264,22 +264,22 @@ const RegisterAppointment = () => {
                 </svg>
                 Thông Tin Bệnh Nhân
               </Label>
-              <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+              <div className="bg-purple-50/50 p-4 rounded-lg border border-purple-100">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="space-y-1">
-                    <p className="font-medium text-gray-500">Họ tên:</p>
+                    <p className="font-medium text-gray-500">Họ và tên</p>
                     <p className="font-semibold text-gray-800">
                       {userProfile?.name || "Chưa có"}
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium text-gray-500">Email:</p>
+                    <p className="font-medium text-gray-500">Email</p>
                     <p className="font-semibold text-gray-800">
                       {userProfile?.email || "Chưa có"}
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium text-gray-500">Số điện thoại:</p>
+                    <p className="font-medium text-gray-500">Số điện thoại</p>
                     <p className="font-semibold text-gray-800">
                       {userProfile?.phoneNumber || "Chưa có"}
                     </p>
@@ -296,7 +296,7 @@ const RegisterAppointment = () => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-600"
+                  className="h-5 w-5 mr-2 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -318,7 +318,7 @@ const RegisterAppointment = () => {
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? String(field.value) : ""}
                   >
-                    <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    <SelectTrigger className="w-full border-gray-300 focus:ring-purple-500 focus:border-purple-500">
                       <SelectValue placeholder="Chọn dịch vụ bạn cần" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -351,7 +351,7 @@ const RegisterAppointment = () => {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-blue-600"
+                    className="h-5 w-5 mr-2 text-purple-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -377,7 +377,7 @@ const RegisterAppointment = () => {
                         field.onChange(e.target.value);
                         handleDateChange(e.target.value);
                       }}
-                      className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
                     />
                   )}
                 />
@@ -396,7 +396,7 @@ const RegisterAppointment = () => {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-blue-600"
+                    className="h-5 w-5 mr-2 text-purple-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -422,7 +422,7 @@ const RegisterAppointment = () => {
                       <SelectTrigger
                         className={`w-full ${
                           !selectedDate ? "bg-gray-50 text-gray-400" : ""
-                        } border-gray-300 focus:ring-blue-500 focus:border-blue-500`}
+                        } border-gray-300 focus:ring-purple-500 focus:border-purple-500`}
                       >
                         <SelectValue
                           placeholder={
@@ -442,7 +442,7 @@ const RegisterAppointment = () => {
                             <SelectItem
                               key={index}
                               value={`${slot.start}-${slot.end}`}
-                              className="flex items-center hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ease-in-out"
+                              className="flex items-center hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 ease-in-out"
                             >
                               <span className="mr-2">⏰</span>
                               {slot.start} - {slot.end}
@@ -470,7 +470,7 @@ const RegisterAppointment = () => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-600"
+                  className="h-5 w-5 mr-2 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -492,7 +492,7 @@ const RegisterAppointment = () => {
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? String(field.value) : ""}
                   >
-                    <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    <SelectTrigger className="w-full border-gray-300 focus:ring-purple-500 focus:border-purple-500">
                       <SelectValue placeholder="Chọn bác sĩ" />
                     </SelectTrigger>
                     <SelectContent>
@@ -500,7 +500,7 @@ const RegisterAppointment = () => {
                         <SelectItem
                           key={doctor.id}
                           value={doctor.id.toString()}
-                          className="flex items-center bg-white hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ease-in-out"
+                          className="flex items-center bg-white hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 ease-in-out"
                         >
                           <span className="mr-2">👨‍⚕️</span>
                           BS. {doctor.user.name}
@@ -523,7 +523,7 @@ const RegisterAppointment = () => {
               <Label className="text-gray-700 font-semibold flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-600"
+                  className="h-5 w-5 mr-2 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -549,7 +549,7 @@ const RegisterAppointment = () => {
                     <SelectTrigger
                       className={`w-full ${
                         selectedService ? "bg-gray-50" : ""
-                      } border-gray-300 focus:ring-blue-500 focus:border-blue-500`}
+                      } border-gray-300 focus:ring-purple-500 focus:border-purple-500`}
                     >
                       <SelectValue placeholder="Chọn loại hình khám" />
                     </SelectTrigger>
@@ -567,7 +567,7 @@ const RegisterAppointment = () => {
                 )}
               />
               {selectedService && (
-                <p className="text-blue-600 text-sm mt-1">
+                <p className="text-purple-600 text-sm mt-1">
                   Loại hình khám được tự động thiết lập dựa trên dịch vụ đã chọn
                 </p>
               )}
@@ -575,7 +575,7 @@ const RegisterAppointment = () => {
 
             {/* Anonymous Checkbox */}
             {selectedService?.type === "CONSULT" && (
-              <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+              <div className="bg-purple-50/50 p-4 rounded-lg border border-purple-100">
                 <div className="flex items-center space-x-3">
                   <Controller
                     name="isAnonymous"
@@ -585,7 +585,7 @@ const RegisterAppointment = () => {
                         id="isAnonymous"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-blue-500 data-[state=checked]:bg-blue-600"
+                        className="border-purple-500 data-[state=checked]:bg-purple-600"
                       />
                     )}
                   />
@@ -596,7 +596,7 @@ const RegisterAppointment = () => {
                     Đăng ký ẩn danh
                   </Label>
                 </div>
-                <p className="text-blue-600 text-sm mt-1 ml-8">
+                <p className="text-purple-600 text-sm mt-1 ml-8">
                   Chỉ áp dụng cho dịch vụ tư vấn để bảo vệ quyền riêng tư
                 </p>
               </div>
@@ -610,7 +610,7 @@ const RegisterAppointment = () => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-blue-600"
+                  className="h-5 w-5 mr-2 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -633,7 +633,7 @@ const RegisterAppointment = () => {
                     value={field.value || ""}
                     onChange={(e) => field.onChange(e.target.value)}
                     placeholder="Các yêu cầu đặc biệt, triệu chứng hoặc ghi chú cho bác sĩ..."
-                    className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+                    className="border-gray-300 focus:ring-purple-500 focus:border-purple-500 min-h-[100px]"
                   />
                 )}
               />
@@ -643,7 +643,7 @@ const RegisterAppointment = () => {
             <div className="pt-4">
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-200"
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-200 cursor-pointer"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

@@ -20,6 +20,7 @@ export interface ProtocolMedicine {
   dosage: string;
   duration: MedicationSchedule;
   notes?: string;
+  frequency?: string;
   medicine?: {
     id: number;
     name: string;
@@ -52,12 +53,20 @@ export interface TreatmentProtocol {
     name: string;
     email: string;
   };
+  durationValue?: number;
+  durationUnit?: string; // Nếu có enum DurationUnit thì dùng kiểu đó
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface CreateTreatmentProtocol {
   name: string;
   description?: string;
   targetDisease: string;
+  durationValue?: number;
+  durationUnit?: string;
+  startDate?: string;
+  endDate?: string;
   medicines: ProtocolMedicine[];
 }
 
@@ -69,8 +78,8 @@ export interface UpdateTreatmentProtocol {
 }
 
 export interface QueryTreatmentProtocol {
-  page?: string;
-  limit?: string;
+  page?: string | number;
+  limit?: string | number;
   search?: string;
   targetDisease?: string;
   sortBy?: "name" | "targetDisease" | "createdAt";
@@ -177,3 +186,13 @@ export interface ProtocolCostEstimation {
 export type TreatmentProtocolType = TreatmentProtocol;
 
 export type TreatmentProtocolsResponse = PaginatedResponse<TreatmentProtocol>;
+
+export interface TreatmentProtocolsGetByIdResponse {
+  data: TreatmentProtocol;
+  statusCode: number;
+  message: string;
+}
+
+export type TreatmentProtocolGetAllServiceResponse = {
+  data: PaginatedResponse<TreatmentProtocol>;
+};

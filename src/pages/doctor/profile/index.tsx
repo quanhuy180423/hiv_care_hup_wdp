@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import {
   Camera,
   Save,
@@ -22,8 +21,6 @@ import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
 
 export default function ProfileDoctorPage() {
-  useDocumentTitle("Hồ sơ bác sĩ");
-
   const { userProfile, updateProfile, isLoading, refetchProfile } = useAuth();
   const { mutate: uploadFile } = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement>(null);

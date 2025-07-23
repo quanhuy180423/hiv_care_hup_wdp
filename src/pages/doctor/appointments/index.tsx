@@ -13,14 +13,16 @@ import { AppointmentFilters } from "@/pages/staff/appointments/components/Appoin
 import AppointmentFormDialog from "@/pages/staff/appointments/components/AppointmentFormDialog";
 import AppointmentDetailsDialog from "./components/AppointmentDetailsDialog";
 import type { AppointmentQueryParams } from "@/types/appointment";
+import useAuthStore from "@/store/authStore";
+import MeetingRecordDialog from "./components/MeetingRecordDialog";
 
 export default function DoctorAppointments() {
   const [params, setParams] = useState<AppointmentQueryParams>({
     page: 1,
     limit: 10,
   });
-  const doctorData = JSON.parse(localStorage.getItem("userProfile") || "{}");
-  const doctorId = doctorData.doctorId;
+  const { userProfile } = useAuthStore((state) => state);
+  const doctorId = Number(userProfile?.doctorId) || 0;
   const { data, isLoading } = useAppointmentsByDoctor(doctorId, params);
   const { isOpen: isModalOpen, closeModal } = useAppointmentModalStore();
   const { isOpen: isDrawerOpen, closeDrawer } = useAppointmentDrawerStore();
@@ -54,6 +56,7 @@ export default function DoctorAppointments() {
 
       <AppointmentFormDialog open={isModalOpen} onClose={closeModal} />
       <AppointmentDetailsDialog open={isDrawerOpen} onClose={closeDrawer} />
+      <MeetingRecordDialog />
     </div>
   );
 }

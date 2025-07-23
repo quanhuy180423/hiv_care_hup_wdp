@@ -17,6 +17,7 @@ import type { Appointment } from "@/types/appointment";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import type { AppointmentStatus } from "@/types/appointment";
 import { translateStatus } from "@/lib/utils/status/translateStatus";
+import { useMeetingRecordDialogStore } from "@/store/meetingRecordStore";
 
 const STATUS_FLOW: AppointmentStatus[] = [
   "PENDING",
@@ -45,6 +46,7 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
   const { openDrawer } = useAppointmentDrawerStore();
   const { openModal } = useAppointmentModalStore();
   const { mutate: changeStatus } = useChangeAppointmentStatus();
+  const { open: openMeetingRecordDialog } = useMeetingRecordDialogStore();
 
   const handleChangeStatus = () => {
     const nextStatus = getNextStatus(appointment.status);
@@ -84,6 +86,15 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
         >
           Cập nhật thông tin
         </DropdownMenuItem>
+
+        {appointment.type === "ONLINE" && (
+          <DropdownMenuItem
+            onClick={() => openMeetingRecordDialog(appointment)}
+            className="cursor-pointer"
+          >
+            Biên bản cuộc họp
+          </DropdownMenuItem>
+        )}
 
         {appointment.status !== "COMPLETED" &&
           appointment.status !== "CANCELLED" &&

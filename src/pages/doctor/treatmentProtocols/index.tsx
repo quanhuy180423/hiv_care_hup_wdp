@@ -2,7 +2,8 @@ import { ProtocolFormModal } from "@/components/treatmentProtocols/ProtocolFormM
 import { ProtocolsTable } from "@/components/treatmentProtocols/ProtocolsTable";
 import { Button } from "@/components/ui/button";
 import { useTreatmentProtocols } from "@/hooks/useTreatmentProtocols";
-import { treatmentProtocolsService } from "@/services/treatmentProtocolService";
+
+import { treatmentProtocolsService, type TreatmentProtocolCreateInput } from "@/services/treatmentProtocolService";
 import type { TreatmentProtocolType } from "@/types/treatmentProtocol";
 import { useState } from "react";
 
@@ -25,28 +26,23 @@ export default function TreatmentProtocols() {
     refetch,
   } = useTreatmentProtocols({
     page,
-    limit: 20,
+    limit: 5,
     search: "",
     targetDisease: "HIV",
-    token,
-    enabled: !!token,
   });
 
-  const protocols = Array.isArray(protocolsRaw?.data) ? protocolsRaw.data : [];
-  const meta = protocolsRaw?.meta;
+  const protocols = Array.isArray(protocolsRaw?.data?.data)
+    ? protocolsRaw.data.data
+    : [];
+  const meta = protocolsRaw?.data?.meta || {
+    page: 1,
+    totalPages: 1,
+    totalItems: 0,
+  };
+  console.log(`Meta data:`, meta);
 
   // Handle create or update protocol
-  const handleSubmit = async (values: {
-    name: string;
-    description: string;
-    targetDisease: string;
-    medicines: Array<{
-      id: number;
-      dosage: string;
-      schedule: string;
-      notes: string;
-    }>;
-  }) => {
+  const handleSubmit = async (values: TreatmentProtocolCreateInput) => {
     // Validate medicines before submit
     if (
       values.medicines.length === 0 ||
@@ -136,7 +132,7 @@ export default function TreatmentProtocols() {
         deleteId={deleteId ? Number(deleteId) : null}
       />
       {/* Pagination UI */}
-      {meta && (
+      {meta && meta.totalPages > 1 && (
         <div className="flex justify-center mt-4 gap-2">
           <Button
             variant="outline"
