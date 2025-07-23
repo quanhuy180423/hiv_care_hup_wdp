@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
 
 @layer base {
   :root {
@@ -65,5 +68,262 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+  }
+}
+
+/* Custom animations for hero section */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(12deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(12deg);
+  }
+}
+
+@keyframes floatDelayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-6deg);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 1s ease-out 0.5s both;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.8s ease-out both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: floatDelayed 3s ease-in-out infinite 1.5s;
+}
+
+/* Pulse animation delays */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+.delay-2000 {
+  animation-delay: 2s;
+}
+
+/* Doctor Swiper Specific Styles */
+.doctor-swiper {
+  width: 100%;
+  padding: 0 40px;
+  margin: 0 auto;
+}
+
+.doctor-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.doctor-swiper .swiper-slide > div {
+  width: 100%;
+  max-width: 300px;
+  height: 100%;
+}
+
+.doctor-swiper .swiper-button-next,
+.doctor-swiper .swiper-button-prev {
+  color: #7c3aed;
+  background: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.doctor-swiper .swiper-button-next:hover,
+.doctor-swiper .swiper-button-prev:hover {
+  background: #7c3aed;
+  color: white;
+  transform: scale(1.1);
+}
+
+.doctor-swiper .swiper-button-next:after,
+.doctor-swiper .swiper-button-prev:after {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.doctor-swiper .swiper-pagination {
+  position: relative;
+  margin-top: 20px;
+}
+
+.doctor-swiper .swiper-pagination-bullet {
+  background: #7c3aed;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.doctor-swiper .swiper-pagination-bullet-active {
+  background: #7c3aed;
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Responsive adjustments for doctor swiper */
+@media (max-width: 640px) {
+  .doctor-swiper {
+    padding: 0 20px;
+  }
+  
+  .doctor-swiper .swiper-button-next,
+  .doctor-swiper .swiper-button-prev {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .doctor-swiper .swiper-button-next:after,
+  .doctor-swiper .swiper-button-prev:after {
+    font-size: 16px;
+  }
+}
+
+/* Swiper Styles */
+.swiper-container {
+  width: 100%;
+  height: auto;
+  padding: 0 40px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.swiper-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 20px 10px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.swiper-slide > div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #7c3aed;
+  background: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: #7c3aed;
+  color: white;
+  transform: scale(1.1);
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.swiper-pagination {
+  position: relative;
+  margin-top: 20px;
+}
+
+.swiper-pagination-bullet {
+  background: #7c3aed;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+  background: #7c3aed;
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .swiper-container {
+    padding: 0 20px;
+  }
+  
+  .swiper-button-next,
+  .swiper-button-prev {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .swiper-button-next:after,
+  .swiper-button-prev:after {
+    font-size: 16px;
   }
 }

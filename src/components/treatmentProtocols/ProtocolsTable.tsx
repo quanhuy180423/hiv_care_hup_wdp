@@ -40,13 +40,34 @@ export function ProtocolsTable({
                 colSpan={8}
                 className="text-center p-6 text-gray-500 animate-pulse"
               >
-                Đang tải dữ liệu...
+                <span className="inline-flex items-center gap-2">
+                  <span className="loader border-2 border-gray-300 border-t-primary rounded-full w-5 h-5 animate-spin"></span>
+                  Đang tải dữ liệu...
+                </span>
               </td>
             </tr>
           ) : protocols.length === 0 ? (
             <tr>
               <td colSpan={8} className="text-center p-6 text-gray-400">
-                Không có dữ liệu
+                <span className="flex flex-col items-center gap-2">
+                  <svg
+                    width="32"
+                    height="32"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    className="mx-auto text-gray-300"
+                  >
+                    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M8 12h.01M12 12h.01M16 12h.01"
+                    />
+                  </svg>
+                  Không có dữ liệu
+                </span>
               </td>
             </tr>
           ) : (
@@ -70,7 +91,7 @@ export function ProtocolsTable({
                   {protocol.description}
                 </td>
                 <td className="p-3 text-gray-700">{protocol.targetDisease}</td>
-                <td className="p-3 text-center">{protocol.medicines.length}</td>
+                <td className="p-3 text-center">{protocol.medicines?.length ?? 0}</td>
                 <td className="p-3 text-gray-500">
                   {protocol.createdAt
                     ? new Date(protocol.createdAt).toLocaleString()
@@ -88,6 +109,7 @@ export function ProtocolsTable({
                     onClick={() => onEdit(protocol)}
                     className="transition-colors group-hover:border-primary group-hover:text-primary"
                   >
+                    <span className="sr-only">Sửa phác đồ</span>
                     Sửa
                   </Button>
                   <Button
@@ -97,7 +119,17 @@ export function ProtocolsTable({
                     disabled={deleteId === protocol.id}
                     className="text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {deleteId === protocol.id ? "Đang xoá..." : "Xoá"}
+                    {deleteId === protocol.id ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="loader border-2 border-red-300 border-t-red-600 rounded-full w-4 h-4 animate-spin"></span>
+                        Đang xoá...
+                      </span>
+                    ) : (
+                      <>
+                        <span className="sr-only">Xoá phác đồ</span>
+                        Xoá
+                      </>
+                    )}
                   </Button>
                 </td>
               </tr>

@@ -58,4 +58,6 @@ export type BlogQueryParams = {
   search?: string;
   sortBy?: string;
   orderBy?: string;
+  cateId?: number;
+  isPublished?: boolean;
 };

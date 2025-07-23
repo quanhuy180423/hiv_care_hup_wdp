@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, Phone } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  UserPlus,
+  Phone,
+  Shield,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,13 +25,24 @@ export const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
+  const [isOtpValid, setIsOtpValid] = useState(false);
+  const [currentEmail, setCurrentEmail] = useState("");
+  // const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const navigate = useNavigate();
-  const { register: registerUser, isLoading } = useAuth();
+  const { register: registerUser, sentOtp } = useAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -29,25 +51,134 @@ export const RegisterPage = () => {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
+      code: "",
     },
   });
+
+  const watchedEmail = watch("email");
+
+  // Check if email has changed
+  useEffect(() => {
+    if (watchedEmail !== currentEmail) {
+      setOtpSent(false);
+      setOtpCode(["", "", "", "", "", ""]);
+      setIsOtpValid(false);
+      setCountdown(0);
+      setVerifyMessage("");
+    }
+  }, [watchedEmail, currentEmail]);
+
+  // Check OTP validity
+  useEffect(() => {
+    const otpString = otpCode.join("");
+    setIsOtpValid(otpString.length === 6);
+    setValue("code", otpString);
+  }, [otpCode, setValue]);
+
+  const handleSendOtp = async () => {
+    if (!watchedEmail) {
+      toast.error("Vui lòng nhập email trước khi gửi mã OTP");
+      return;
+    }
+
+    try {
+      setIsSendingOtp(true);
+      setVerifyMessage("");
+
+      await sentOtp({
+        email: watchedEmail,
+        type: "REGISTER",
+      });
+
+      setCurrentEmail(watchedEmail);
+      setOtpSent(true);
+      setCountdown(60);
+      setVerifyMessage("Mã OTP đã được gửi đến email của bạn!");
+
+      // Show success toast
+      toast.success("Mã OTP đã được gửi đến email của bạn!");
+
+      // Auto focus first OTP input after a short delay
+      setTimeout(() => {
+        const firstOtpInput = document.getElementById("otp-0");
+        if (firstOtpInput) {
+          firstOtpInput.focus();
+        }
+      }, 100);
+
+      // Start countdown
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("🌐 Send OTP error:", error);
+      setVerifyMessage("Không thể gửi mã OTP. Vui lòng thử lại.");
+      toast.error("Không thể gửi mã OTP. Vui lòng thử lại.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) return; // Only allow single digit
+
+    const newOtp = [...otpCode];
+    newOtp[index] = value;
+    setOtpCode(newOtp);
+
+    // Auto focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Backspace" && !otpCode[index] && index > 0) {
+      // Move to previous input on backspace
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      if (prevInput) {
+        prevInput.focus();
+      }
+    }
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError("");
+      setIsRegistering(true);
       const res = await registerUser({
         name: data.name,
         email: data.email,
         phoneNumber: data.phoneNumber,
         password: data.password,
         confirmPassword: data.confirmPassword,
-        role: "user",
+        code: data.code,
       });
-      if (!res) {
-        toast.error(error);
+
+      if (res) {
+        toast.success(
+          "Đăng ký thành công! Chào mừng bạn đến với HIV Care Hub."
+        );
+        // Navigate to dashboard after successful registration
+        if (res.data.user.role === "PATIENT") navigate("/");
+        else if (res.data.user.role === "DOCTOR")
+          navigate("/doctor/appointments");
+        else if (res.data.user.role === "ADMIN") navigate("/admin/dashboard");
+        else if (res.data.user.role === "STAFF")
+          navigate("/staff/appointments");
       }
-      // Navigate to dashboard after successful registration
-      navigate("/dashboard");
     } catch (err) {
       toast.error(
         err instanceof Error
@@ -55,6 +186,8 @@ export const RegisterPage = () => {
           : "Đăng ký thất bại. Vui lòng thử lại."
       );
       setError(err instanceof Error ? err.message : "Đăng ký thất bại");
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -69,12 +202,12 @@ export const RegisterPage = () => {
         <p className="text-gray-600">Tạo tài khoản để bắt đầu</p>
       </div>
 
-      {/* Error Message
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600 text-center">{error}</p>
-          </div>
-        )} */}
+      {/* Error Message */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600 text-center">{error}</p>
+        </div>
+      )}
 
       {/* Register Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -95,7 +228,7 @@ export const RegisterPage = () => {
                 placeholder="Nguyễn Văn A"
                 className="pl-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 {...register("name")}
-                disabled={isLoading}
+                disabled={isRegistering}
               />
             </div>
             {errors.name && (
@@ -103,7 +236,7 @@ export const RegisterPage = () => {
             )}
           </div>
 
-          {/* Email Field */}
+          {/* Email Field with Verify Button */}
           <div className="space-y-2">
             <Label
               htmlFor="email"
@@ -111,21 +244,54 @@ export const RegisterPage = () => {
             >
               Email
             </Label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-gray-400" />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  className="pl-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  {...register("email")}
+                  disabled={isRegistering}
+                />
               </div>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                className="pl-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                {...register("email")}
-                disabled={isLoading}
-              />
+              <Button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={
+                  isSendingOtp ||
+                  !watchedEmail ||
+                  countdown > 0 ||
+                  watchedEmail === currentEmail
+                }
+                className="px-4 h-11 bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
+              >
+                {isSendingOtp ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : countdown > 0 ? (
+                  `${countdown}s`
+                ) : (
+                  "Verify"
+                )}
+              </Button>
             </div>
             {errors.email && (
               <p className="text-sm text-red-600">{errors.email.message}</p>
+            )}
+            {/* Verify Message */}
+            {verifyMessage && (
+              <p
+                className={`text-sm ${
+                  verifyMessage.includes("thành công")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {verifyMessage}
+              </p>
             )}
           </div>
         </div>
@@ -148,7 +314,7 @@ export const RegisterPage = () => {
               placeholder="0353366459"
               className="pl-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               {...register("phoneNumber")}
-              disabled={isLoading}
+              disabled={isRegistering}
             />
           </div>
           {errors.phoneNumber && (
@@ -176,13 +342,13 @@ export const RegisterPage = () => {
                 placeholder="••••••••"
                 className="pl-10 pr-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 {...register("password")}
-                disabled={isLoading}
+                disabled={isRegistering}
               />
               <button
                 type="button"
                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 onClick={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
+                disabled={isRegistering}
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -214,13 +380,13 @@ export const RegisterPage = () => {
                 placeholder="••••••••"
                 className="pl-10 pr-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 {...register("confirmPassword")}
-                disabled={isLoading}
+                disabled={isRegistering}
               />
               <button
                 type="button"
                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                disabled={isLoading}
+                disabled={isRegistering}
               >
                 {showConfirmPassword ? (
                   <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -237,13 +403,63 @@ export const RegisterPage = () => {
           </div>
         </div>
 
+        {/* Email Verification Section - Show at bottom when OTP is sent */}
+        {otpSent && (
+          <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-blue-800">
+                <Shield className="h-5 w-5" />
+                <span className="font-medium">Xác thực email</span>
+                {isOtpValid && (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                )}
+              </div>
+              {countdown > 0 && (
+                <span className="text-sm text-gray-500">
+                  Còn lại: {countdown}s
+                </span>
+              )}
+            </div>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">
+                Mã xác thực (OTP)
+              </Label>
+              <div className="flex gap-2 justify-center">
+                {otpCode.map((digit, index) => (
+                  <Input
+                    key={index}
+                    id={`otp-${index}`}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    className="w-12 h-12 text-center text-lg font-semibold border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    disabled={isRegistering}
+                  />
+                ))}
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-xs text-gray-600">
+                  Nhập mã 6 số đã được gửi đến email của bạn
+                </p>
+                {!isOtpValid && otpSent && (
+                  <p className="text-xs text-orange-600">
+                    Vui lòng nhập đủ 6 số để tiếp tục đăng ký
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Submit Button */}
         <Button
           type="submit"
           className="w-full h-11 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl mt-6"
-          disabled={isLoading}
+          disabled={isRegistering || !isOtpValid}
         >
-          {isLoading ? (
+          {isRegistering ? (
             <div className="flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               Đang đăng ký...

@@ -31,7 +31,6 @@ const BlogActionsCell = ({ blog }: Props) => {
         toast.success("Xoá bài viết thành công");
         setOpen(false);
       },
-      onError: () => toast.error("Xoá bài viết thất bại"),
     });
   };
 

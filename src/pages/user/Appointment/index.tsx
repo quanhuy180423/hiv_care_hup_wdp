@@ -1,4 +1,3 @@
-import React from "react";
 import RegisterAppointment from "./RegisterAppointment";
 
 const AppointmentPage = () => {

@@ -13,13 +13,13 @@ export const columns: ColumnDef<CategoryBlog>[] = [
   {
     accessorKey: "title",
     header: "Tiêu đề",
-    cell: ({ row }) => <div className="text-center">{row.original.title}</div>,
+    cell: ({ row }) => <div className="font-medium truncate max-w-[250px] block">{row.original.title}</div>,
   },
   {
     accessorKey: "description",
     header: "Mô tả",
     cell: ({ row }) => (
-      <div className="text-center">{row.original.description}</div>
+      <div className="truncate max-w-[350px] block">{row.original.description}</div>
     ),
   },
   {

@@ -3,8 +3,8 @@ import { UserLayout } from "./layouts/UserLayout";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { StaffLayout } from "./layouts/StaffLayout";
-import DoctorLayout from "./layouts/DoctorLayout";
 import { UserProfileLayout } from "./layouts/UserProfileLayout";
+import { DoctorLayout } from "./layouts/DoctorLayout";
 
 interface LayoutWrapperProps {
   children: ReactNode;

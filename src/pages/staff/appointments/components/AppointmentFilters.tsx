@@ -174,7 +174,7 @@ export const AppointmentFilters = ({ onChange }: Props) => {
           <Button
             type="button"
             variant="outline"
-            className="w-full flex items-center justify-center gap-2 text-gray-700  bg-white  border-gray-300  hover:bg-gray-100  transition-colors"
+            className="flex items-center justify-center gap-2 text-gray-700 bg-white border-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
             onClick={handleClearFilters}
           >
             <XCircle className="w-4 h-4" /> {/* Icon nhỏ hơn, phù hợp hơn */}

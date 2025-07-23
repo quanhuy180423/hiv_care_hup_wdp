@@ -1,18 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { serviceService } from "@/services/serviceService";
-import type { 
-  ServiceFormValues, 
+import type {
+  ServiceFormValues,
   UpdateServiceFormValues,
   QueryServiceFormValues,
-  ServicesResponse
+  ServicesResponse,
 } from "@/types/service";
-import { servicesAPI } from "../services/serviceService";
-import type { Service } from "../types/service";
 
 export const useServices = (params?: QueryServiceFormValues) => {
   return useQuery<ServicesResponse>({
     queryKey: ["services", params],
     queryFn: () => serviceService.getServices(params),
+  });
+};
+
+export const useServicesByAdmin = (params?: QueryServiceFormValues) => {
+  return useQuery<ServicesResponse>({
+    queryKey: ["services-by-admin", params],
+    queryFn: () => serviceService.getServicesByAdmin(params),
   });
 };
 
@@ -69,4 +74,4 @@ export const useActiveServices = (params?: QueryServiceFormValues) => {
     queryKey: ["active-services", params],
     queryFn: () => serviceService.getActiveServices(params),
   });
-}; 
+};

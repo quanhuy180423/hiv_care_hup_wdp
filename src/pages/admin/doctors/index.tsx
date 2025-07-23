@@ -6,7 +6,6 @@ import {
   Search,
   Calendar,
   RefreshCw,
-  Users,
   Table,
   ChevronLeft,
   ChevronRight,
@@ -50,7 +49,6 @@ import { SwapShiftsModal } from "./components/SwapShiftsModal";
 import { DoctorDetailsDrawer } from "./components/DoctorDetailsDrawer";
 import { GenerateScheduleModal } from "./components/GenerateScheduleModal";
 import { getColumns } from "./columns";
-import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function DoctorManagement() {
   const queryClient = useQueryClient();
@@ -76,14 +74,7 @@ export default function DoctorManagement() {
   const meta = doctorsData?.meta;
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 0;
 
-  // Debug logs
-  console.log('doctorsData:', doctorsData);
-  console.log('doctors array:', doctors);
-  console.log('doctors length:', doctors.length);
-  console.log('meta:', meta);
-  console.log('pageSize:', pageSize);
-  console.log('currentPage:', currentPage);
-
+  
   
 
   const { data: weeklyData, isLoading: isWeeklyLoading } = useWeeklySchedule({
@@ -96,7 +87,7 @@ export default function DoctorManagement() {
   const { mutate: generateSchedule, isPending: isGenerating } =
     useGenerateSchedule();
   const { mutate: swapShifts, isPending: isSwapping } = useSwapShifts();
-  const { mutate: assignDoctorsManually, isPending: isManualAssigning } =
+  const { mutate: assignDoctorsManually} =
     useAssignDoctorsManually();
 
   const {
@@ -141,7 +132,6 @@ export default function DoctorManagement() {
   const handleDelete = (id: number) => {
     deleteDoctor(id, {
       onSuccess: () => toast.success("Xóa bác sĩ thành công."),
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
@@ -156,7 +146,6 @@ export default function DoctorManagement() {
             toast.success("Cập nhật bác sĩ thành công.");
             closeModal();
           },
-          onError: (error: any) => toast.error(handleApiError(error)),
         }
       );
     } else {
@@ -165,7 +154,6 @@ export default function DoctorManagement() {
           toast.success("Tạo bác sĩ thành công.");
           closeModal();
         },
-        onError: (error: any) => toast.error(handleApiError(error)),
       });
     }
   };
@@ -180,7 +168,6 @@ export default function DoctorManagement() {
         closeGenerateScheduleModal();
         console.log("Generated schedule:", data);
       },
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
@@ -193,7 +180,6 @@ export default function DoctorManagement() {
         toast.success("Đổi ca thành công.");
         closeSwapModal();
       },
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
@@ -208,7 +194,6 @@ export default function DoctorManagement() {
         // Refresh weekly schedule data
         queryClient.invalidateQueries({ queryKey: ["weekly-schedule"] });
       },
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 

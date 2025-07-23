@@ -97,7 +97,7 @@ export function SearchAndFilter({
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Loại dịch vụ" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             <SelectItem value="all">Tất cả loại</SelectItem>
             {serviceTypeOptions.map((type) => (
               <SelectItem key={type.value} value={type.value}>
@@ -111,7 +111,7 @@ export function SearchAndFilter({
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             <SelectItem value="all">Tất cả trạng thái</SelectItem>
             {statusOptions.map((status) => (
               <SelectItem key={status.value} value={status.value}>
@@ -126,7 +126,7 @@ export function SearchAndFilter({
         </Button>
 
         {hasFilters && (
-          <Button onClick={handleReset} variant="ghost" size="sm">
+          <Button onClick={handleReset} variant="outline" size="sm">
             <X className="h-4 w-4 mr-1" />
             Xóa bộ lọc
           </Button>

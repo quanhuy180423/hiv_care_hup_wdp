@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ServiceFormModal } from "./components/ServiceFormModal";
 import { SearchAndFilter } from "./components/SearchAndFilter";
 import { createColumns } from "./columns";
-import { useServices, useCreateService, useUpdateService, useDeleteService } from "@/hooks/useServices";
+import { useCreateService, useUpdateService, useDeleteService, useServicesByAdmin } from "@/hooks/useServices";
 import { useServiceStore } from "@/store/serviceStore";
 import { toast } from "react-hot-toast";
 import type { Service, ServiceFormValues, UpdateServiceFormValues } from "@/types/service";
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";import { DataTable } from "@/compo
 export default function ServicesManagement() {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(10);
   const [searchParams, setSearchParams] = useState({
     type: undefined as ServiceType | undefined,
     isActive: undefined as boolean | undefined,
@@ -26,7 +26,7 @@ export default function ServicesManagement() {
   
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { data: servicesData, isLoading, refetch } = useServices({
+  const { data: servicesData, isLoading, refetch } = useServicesByAdmin({
     page: currentPage,
     limit: pageSize,
     search: searchText,

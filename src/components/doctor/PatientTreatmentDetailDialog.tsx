@@ -12,6 +12,7 @@ import {
 import type { Appointment } from "@/types/appointment";
 
 import { useEffect, useRef } from "react";
+import { TestResultList } from "./TestResultList";
 
 interface PatientTreatmentDetailDialogProps {
   open: boolean;
@@ -50,6 +51,8 @@ export const PatientTreatmentDetailDialog = ({
   }, [open, onClose]);
 
   if (!appointment) return null;
+  
+  // Nếu có treatment, hiển thị danh sách test result
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
@@ -80,14 +83,20 @@ export const PatientTreatmentDetailDialog = ({
           Tạo hồ sơ bệnh án
         </Button>
         {treatment && (
-          <Button
-            onClick={() => exportPatientTreatmentToPDF(treatment)}
-            className="mt-2 w-full"
-            variant="outline"
-            aria-label="Xuất PDF hồ sơ bệnh án"
-          >
-            Xuất PDF hồ sơ bệnh án
-          </Button>
+          <>
+            <Button
+              onClick={() => exportPatientTreatmentToPDF(treatment)}
+              className="mt-2 w-full"
+              variant="outline"
+              aria-label="Xuất PDF hồ sơ bệnh án"
+            >
+              Xuất PDF hồ sơ bệnh án
+            </Button>
+            {/* Danh sách test result */}
+            {typeof treatment.id === "number" && (
+              <TestResultList patientTreatmentId={treatment.id} />
+            )}
+          </>
         )}
         {appointment.type === "ONLINE" && (
           <Button

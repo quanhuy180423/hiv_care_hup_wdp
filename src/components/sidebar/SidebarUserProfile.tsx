@@ -1,75 +1,116 @@
-import React, { useState } from "react";
-import { User, Shield, Calendar } from "lucide-react";
-import { Card } from "../ui/card";
-import { Link } from "react-router";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Calendar, LogOut, Shield, Syringe, User } from "lucide-react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import type { ReactNode } from "react";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface SidebarUserProfileProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
-  children,
-}) => {
-  const [activeTab, setActiveTab] = useState<
-    "profile" | "security" | "appointments"
-  >("profile");
+const sidebarNav = [
+  { id: "profile", name: "Hồ sơ", icon: User, path: "/user/profile" },
+  { id: "security", name: "Bảo mật", icon: Shield, path: "/user/security" },
+  {
+    id: "appointments",
+    name: "Lịch hẹn",
+    icon: Calendar,
+    path: "/user/appointments",
+  },
+  { id: "treatment-schedule", name: "Lịch điều trị", icon: Syringe, path: "/user/treatment-schedule" },
+];
 
-  const tabs = [
-    {
-      id: "profile",
-      label: "Hồ sơ",
-      icon: <User className="w-5 h-5 mr-2" />,
-      link: "/user/profile",
-    },
-    {
-      id: "security",
-      label: "Bảo mật",
-      icon: <Shield className="w-5 h-5 mr-2" />,
-      link: "/user/security",
-    },
-    {
-      id: "appointments",
-      label: "Lịch hẹn",
-      icon: <Calendar className="w-5 h-5 mr-2" />,
-      link: "/user/appointments",
-    },
-  ];
+export default function SidebarUser({ children }: SidebarUserProfileProps) {
+  const { pathname } = useLocation();
+
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const handleLogout = () => {
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
+  };
 
   return (
-    <div className="flex min-h-screen min-w-7xl mx-auto">
-      {/* Main Content */}
-      <div className="w-2/3 p-4 space-y-6">
-        {activeTab === "profile" && <div>{children}</div>}
-        {activeTab === "security" && <div className="">{children}</div>}
-        {activeTab === "appointments" && <div className="">{children}</div>}
-      </div>
-      {/* Sidebar */}
-      <div className="w-1/3 bg-gray-50 p-4 space-y-6 sticky top-0 h-screen">
-        <Card className="bg-white rounded-lg shadow-sm p-4">
-          <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-            Tài khoản
-          </h2>
-          <nav className="space-y-2">
-            {tabs.map((tab) => (
-              <Link key={tab.id} to={tab.link}>
-                <button
-                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                  className={`flex items-center w-full rounded-lg p-2 text-left transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-blue-100 text-blue-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              </Link>
-            ))}
-          </nav>
-        </Card>
-      </div>
-    </div>
-  );
-};
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background text-foreground">
+        {/* Sidebar */}
+        <Sidebar>
+          <SidebarContent>
+            <Link to="/" className="no-underline">
+              <div className="flex items-center gap-3 px-2 pt-4">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-primary">Tài khoản</p>
+                  <p className="text-xs text-muted-foreground -mt-1">
+                    Khu vực người dùng
+                  </p>
+                </div>
+              </div>
+            </Link>
 
-export default SidebarUserProfile;
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {sidebarNav.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={item.path}
+                          className={cn(
+                            "flex items-center gap-3 text-sm",
+                            pathname === item.path &&
+                              "font-semibold text-primary"
+                          )}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.name}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <div className="p-4 mt-auto">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 cursor-pointer"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4" />
+                Đăng xuất
+              </Button>
+            </div>
+          </SidebarContent>
+        </Sidebar>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-auto">
+          {children ?? <Outlet />}
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+}

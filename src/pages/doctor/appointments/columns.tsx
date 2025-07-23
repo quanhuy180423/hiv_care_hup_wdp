@@ -1,15 +1,18 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Appointment } from "@/types/appointment";
 import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
-import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { translateStatus } from "@/lib/utils/status/translateStatus";
 import AppointmentActionsCell from "@/pages/staff/appointments/components/AppointmentActionsCell";
 
-export const columns: ColumnDef<Appointment>[] = [
+export const getColumns = (currentPage: number, pageSize: number): ColumnDef<Appointment>[] => [
   {
     accessorKey: "STT",
     header: () => <div className="text-center">STT</div>,
-    cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        {(currentPage - 1) * pageSize + row.index + 1}
+      </div>
+    ),
   },
   {
     accessorKey: "user.name",

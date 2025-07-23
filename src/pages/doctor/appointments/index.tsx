@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAppointmentsByDoctor } from "@/hooks/useAppointments";
 import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   useAppointmentDrawerStore,
@@ -12,11 +12,17 @@ import {
 import { AppointmentFilters } from "@/pages/staff/appointments/components/AppointmentFilters";
 import AppointmentFormDialog from "@/pages/staff/appointments/components/AppointmentFormDialog";
 import AppointmentDetailsDialog from "./components/AppointmentDetailsDialog";
+import type { AppointmentQueryParams } from "@/types/appointment";
+import useAuthStore from "@/store/authStore";
+import MeetingRecordDialog from "./components/MeetingRecordDialog";
 
 export default function DoctorAppointments() {
-  const [params, setParams] = useState({});
-  const doctorData = JSON.parse(localStorage.getItem("userProfile") || "{}");
-  const doctorId = doctorData.doctorId;
+  const [params, setParams] = useState<AppointmentQueryParams>({
+    page: 1,
+    limit: 10,
+  });
+  const { userProfile } = useAuthStore((state) => state);
+  const doctorId = Number(userProfile?.doctorId) || 0;
   const { data, isLoading } = useAppointmentsByDoctor(doctorId, params);
   const { isOpen: isModalOpen, closeModal } = useAppointmentModalStore();
   const { isOpen: isDrawerOpen, closeDrawer } = useAppointmentDrawerStore();
@@ -32,15 +38,25 @@ export default function DoctorAppointments() {
         </CardHeader>
         <CardContent>
           <DataTable
-            columns={columns}
-            data={data || []}
+            columns={getColumns(params.page || 1, params.limit || 10)}
+            data={data?.data || []}
             isLoading={isLoading}
+            enablePagination={true}
+            currentPage={params.page || 1}
+            pageSize={params.limit || 10}
+            pageCount={data?.meta.totalPages || 1}
+            totalItems={data?.meta.total || 0}
+            onPageChange={(page) => setParams((prev) => ({ ...prev, page }))}
+            onPageSizeChange={(limit) =>
+              setParams((prev) => ({ ...prev, page: 1, limit }))
+            }
           />
         </CardContent>
       </Card>
 
       <AppointmentFormDialog open={isModalOpen} onClose={closeModal} />
       <AppointmentDetailsDialog open={isDrawerOpen} onClose={closeDrawer} />
+      <MeetingRecordDialog />
     </div>
   );
 }

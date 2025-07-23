@@ -5,6 +5,7 @@ import {
   FileText,
   LogOut,
   Shield,
+  User,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -20,14 +21,16 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { authService } from "@/services";
 import { Assets } from "@/assets";
+import useAuth from "@/hooks/useAuth";
+import toast from "react-hot-toast";
 
 interface StaffLayoutProps {
   children?: ReactNode;
 }
 
 const sidebarNav = [
+  { name: "Thông tin cá nhân", icon: User, path: "/staff/profile" },
   { name: "Lịch hẹn", icon: Calendar, path: "/staff/appointments" },
   { name: "Tin tức", icon: FileHeart, path: "/staff/blog" },
   { name: "Danh mục tin tức", icon: FileText, path: "/staff/blog-categories" },
@@ -36,11 +39,19 @@ const sidebarNav = [
 export default function SidebarStaff({ children }: StaffLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
+  const { logout } = useAuth();
   const handleLogout = () => {
-    authService.clearAuth();
-    navigate("/login");
+    logout()
+      .then(() => {
+        toast.success("Đăng xuất thành công");
+        navigate("/login"); // Redirect to login page
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Đăng xuất thất bại");
+      });
   };
+
 
   return (
     <SidebarProvider>

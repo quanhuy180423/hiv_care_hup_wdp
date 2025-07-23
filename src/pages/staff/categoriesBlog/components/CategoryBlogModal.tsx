@@ -81,19 +81,14 @@ const CategoryBlogModal = ({ open, onClose }: Props) => {
             onClose();
             toast.success("Cập nhật danh mục thành công.");
           },
-          onError: () => {
-            toast.error("Cập nhật danh mục thất bại.");
-          },
         }
       );
     } else {
       createCategoryBlog(data, {
         onSuccess: () => {
           onClose();
+          reset();
           toast.success("Tạo danh mục thành công.");
-        },
-        onError: () => {
-          toast.error("Tạo danh mục thất bại.");
         },
       });
     }

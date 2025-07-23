@@ -1,34 +1,24 @@
+// Import actual admin pages
+import DoctorManagement from "./doctors";
+import UserManagement from "./users";
+import RoleManagement from "./roles";
+import PermissionManagement from "./permissions";
+import MedicineManagement from "./medicines";
+import ServicesManagement from "./services";
+import TreatmentProtocolsManagement from "./treatment-protocols";
+import DashboardPage from "./dashboad/DashboardPage";
+
+// Export with proper names for routes
+export const AdminUserManagementPage = UserManagement;
+export const AdminDoctorManagementPage = DoctorManagement;
+export const AdminRoleManagementPage = RoleManagement;
+export const AdminPermissionManagementPage = PermissionManagement;
+export const AdminMedicineManagementPage = MedicineManagement;
+export const AdminServicesManagementPage = ServicesManagement;
+export const AdminTreatmentProtocolsManagementPage = TreatmentProtocolsManagement;
+export const AdminDashboardPage = DashboardPage;
+
 // Temporary placeholder components - sẽ thay thế bằng components thật
-
-export function AdminDashboardPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-      <p className="text-muted-foreground">Welcome to the admin panel</p>
-      {/* Nội dung dashboard sẽ được thêm sau */}
-    </div>
-  );
-}
-
-export function AdminUserManagementPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Quản lý người dùng</h1>
-      <p className="text-muted-foreground">Quản lý người dùng hệ thống2</p>
-      {/* Nội dung quản lý user sẽ được thêm sau */}
-    </div>
-  );
-}
-
-export function AdminDoctorManagementPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Quản lý bác sĩ</h1>
-      <p className="text-muted-foreground">Quản lý thông tin bác sĩ</p>
-      {/* Nội dung quản lý doctor sẽ được thêm sau */}
-    </div>
-  );
-}
 
 export function AdminAppointmentManagementPage() {
   return (

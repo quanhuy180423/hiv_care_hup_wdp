@@ -2,15 +2,16 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 
 class ApiClient {
   private client: AxiosInstance;
   private isRefreshing = false;
   private failedQueue: Array<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolve: (value?: any) => void;
+    resolve: (value?: unknown) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    reject: (error?: any) => void;
+    reject: (error?: unknown) => void;
   }> = [];
 
   constructor() {
@@ -75,20 +76,6 @@ class ApiClient {
       async (error) => {
         const originalRequest = error.config;
 
-        // Log error trong development
-        if (import.meta.env.DEV) {
-          console.error(
-            `❌ API Error: ${originalRequest?.method?.toUpperCase()} ${
-              originalRequest?.url
-            }`,
-            {
-              status: error.response?.status,
-              message: error.message,
-              data: error.response?.data,
-            }
-          );
-        }
-
         if (error.response?.status === 401 && !originalRequest._retry) {
           console.log("🔐 401 Unauthorized - Attempting token refresh...");
 
@@ -104,19 +91,16 @@ class ApiClient {
           this.isRefreshing = true;
 
           try {
-            // Thử refresh token từ localStorage hoặc cookies
-            const refreshToken =
-              localStorage.getItem("refresh_token") ||
-              Cookies.get("refreshToken");
+            // Thử refresh token từ localStorage
+            const refreshToken = localStorage.getItem("refresh_token");
             if (refreshToken) {
-              console.log("🔄 Refreshing token...");
               const response = await this.refreshToken(refreshToken);
-              const { accessToken } = response.data.data;
+              const { accessToken, refreshToken: newRefreshToken } =
+                response.data.data;
 
               // Lưu token mới vào cả localStorage và cookies
               localStorage.setItem("auth_token", accessToken);
-              Cookies.set("accessToken", accessToken, { expires: 1 });
-
+              localStorage.setItem("refresh_token", newRefreshToken);
               this.processQueue(null);
               return this.client(originalRequest);
             } else {
@@ -126,11 +110,20 @@ class ApiClient {
           } catch (refreshError) {
             console.error("🔐 Token refresh failed:", refreshError);
             this.processQueue(refreshError);
+            toast.error("Token refresh failed. Please log in again.");
             this.logout();
             return Promise.reject(refreshError);
           } finally {
             this.isRefreshing = false;
           }
+        }
+
+        // Show toast for other errors
+        if (error.response?.status !== 401) {
+          toast.error(
+            error.response?.data?.message?.message ||
+              "Có lỗi xảy ra trong quá trình gửi yêu cầu."
+          );
         }
 
         return Promise.reject(error);
@@ -155,15 +148,13 @@ class ApiClient {
     // Xóa tokens từ cả localStorage và cookies
     localStorage.removeItem("auth_token");
     localStorage.removeItem("refresh_token");
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
 
     // Redirect tới đúng route login
     window.location.href = "/login";
   }
 
   private async refreshToken(refreshToken: string) {
-    return this.client.post("/auth/refresh", { refreshToken });
+    return this.client.post("/auth/refresh-token", { refreshToken });
   }
 
   // GET request
@@ -287,7 +278,8 @@ class ApiClient {
         errorMessage =
           error.message || "Có lỗi xảy ra trong quá trình gửi yêu cầu.";
       }
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
+      console.error("API Error:", errorMessage);
     }
   }
 }

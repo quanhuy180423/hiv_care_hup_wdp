@@ -23,7 +23,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -185,7 +184,7 @@ export function DataTable<TData, TValue>({
       {enablePagination && (
         <div className="flex items-center justify-between px-2">
           <div className="flex-1 text-sm text-muted-foreground">
-            {totalItems && `Tổng cộng ${totalItems} mục`}
+            {totalItems && `Tổng cộng ${totalItems} mục` || ""}
           </div>
           <div className="flex items-center space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">

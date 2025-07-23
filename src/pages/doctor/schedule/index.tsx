@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { DoctorSchedule } from "@/types/doctor";
 import SwapShiftDialog from "./components/SwapShiftDialog";
+import useAuthStore from "@/store/authStore";
 
 interface GroupedSchedule {
   [date: string]: {
@@ -35,8 +36,8 @@ interface GroupedSchedule {
 }
 
 export default function DoctorSchedule() {
-  const doctorData = JSON.parse(localStorage.getItem("userProfile") || "{}");
-  const doctorId = doctorData.doctorId;
+  const { userProfile } = useAuthStore((state) => state);
+  const doctorId = Number(userProfile?.doctorId) || 0;
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 

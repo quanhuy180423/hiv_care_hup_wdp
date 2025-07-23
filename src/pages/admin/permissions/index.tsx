@@ -19,7 +19,6 @@ import type { Permission, PermissionFormValues } from "@/types/permission";
 import { getColumns } from "./columns";
 import { PermissionFormModal } from "./components/PermissionFormModal";
 import { PermissionDetailsDrawer } from "./components/PermissionDetailsDrawer";
-import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function PermissionManagement() {
   const [searchText, setSearchText] = useState("");
@@ -36,8 +35,10 @@ export default function PermissionManagement() {
   const meta = permissionsData?.meta;
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 0;
 
-  const { mutate: createPermission, isPending: isCreating } = useCreatePermission();
-  const { mutate: updatePermission, isPending: isUpdating } = useUpdatePermission();
+  const { mutate: createPermission, isPending: isCreating } =
+    useCreatePermission();
+  const { mutate: updatePermission, isPending: isUpdating } =
+    useUpdatePermission();
   const { mutate: deletePermission } = useDeletePermission();
 
   const {
@@ -76,7 +77,6 @@ export default function PermissionManagement() {
   const handleDelete = (id: number) => {
     deletePermission(id, {
       onSuccess: () => toast.success("Xóa quyền thành công."),
-      onError: (error: any) => toast.error(handleApiError(error)),
     });
   };
 
@@ -91,7 +91,6 @@ export default function PermissionManagement() {
             toast.success("Cập nhật quyền thành công.");
             closeModal();
           },
-          onError: (error: any) => toast.error(handleApiError(error)),
         }
       );
     } else {
@@ -100,7 +99,6 @@ export default function PermissionManagement() {
           toast.success("Tạo quyền thành công.");
           closeModal();
         },
-        onError: (error: any) => toast.error(handleApiError(error)),
       });
     }
   };
@@ -110,7 +108,11 @@ export default function PermissionManagement() {
       {/* Tiêu đề và nút tạo */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Quản lý quyền hạn</h1>
-        <Button onClick={() => openModal()} className="cursor-pointer" variant="outline">
+        <Button
+          onClick={() => openModal()}
+          className="cursor-pointer"
+          variant="outline"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Thêm quyền hạn
         </Button>
@@ -130,12 +132,24 @@ export default function PermissionManagement() {
       {/* Bảng dữ liệu */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Danh sách quyền hạn</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Danh sách quyền hạn
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
-            columns={getColumns({ onView: handleView, onEdit: handleEdit, onDelete: handleDelete })}
-            data={Array.isArray(permissions) ? permissions.filter((permission: any) => permission?.deletedAt === null) : []}
+            columns={getColumns({
+              onView: handleView,
+              onEdit: handleEdit,
+              onDelete: handleDelete,
+            })}
+            data={
+              Array.isArray(permissions)
+                ? permissions.filter(
+                    (permission: any) => permission?.deletedAt === null
+                  )
+                : []
+            }
             isLoading={isLoading}
             enablePagination={true}
             pageCount={totalPages}

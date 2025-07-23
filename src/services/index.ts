@@ -15,3 +15,16 @@ export type {
 
 // Re-export auth service as default for backward compatibility
 export { authService as default } from "./authService";
+
+export interface ErrorResponse {
+  response: {
+    data: {
+      message: {
+        message: string;
+        statusCode: number;
+        error: string;
+      };
+      statusCode: number;
+    };
+  };
+}

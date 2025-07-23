@@ -51,8 +51,8 @@ export type UpdateMedicineFormValues = {
 
 export type QueryMedicineFormValues = {
   search?: string;
-  sortBy?: 'name' | 'price' | 'createdAt' | 'unit';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "name" | "price" | "createdAt" | "unit";
+  sortOrder?: "asc" | "desc";
   minPrice?: number;
   maxPrice?: number;
   unit?: string;
@@ -83,20 +83,13 @@ export type AdvancedSearchFormValues = {
   unit?: string;
   limit?: number;
   page?: number;
-}; 
-export type MedicineType = {
-  id: number;
-  name: string;
-  description?: string | null;
-  unit: string;
-  dose: string;
-  price: string; // decimal as string
-  createdAt: string;
-  updatedAt: string;
 };
 
+// Legacy types for backward compatibility
+export type MedicineType = Medicine;
+
 export type MedicineResponse = {
-  data: MedicineType[];
+  data: Medicine[];
   meta: {
     total: number;
     page: number;
