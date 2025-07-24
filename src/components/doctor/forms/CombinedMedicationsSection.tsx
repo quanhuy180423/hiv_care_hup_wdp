@@ -9,7 +9,7 @@ import React, { useEffect } from "react";
 
 import type { PatientTreatmentFormValues } from "@/schemas/patientTreatment";
 import type { Medicine } from "@/types/medicine";
-import type { CustomMedicationItem } from "@/types/patientTreatment";
+import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
@@ -25,6 +25,11 @@ interface CombinedMedicationsSectionProps {
   register: UseFormRegister<PatientTreatmentFormValues>;
   errors: FieldErrors<PatientTreatmentFormValues>;
   medicines: Medicine[];
+  onEditProtocolMedicine: (
+    protocolMedicineId: number,
+    newValues: Partial<Medicine & { dosage: string; notes: string }>
+  ) => void;
+  onDeleteProtocolMedicine: (protocolMedicineId: number) => void;
 }
 
 const CombinedMedicationsSection: React.FC<CombinedMedicationsSectionProps> = (

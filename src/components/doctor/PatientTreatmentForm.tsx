@@ -1,3 +1,4 @@
+import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import {
   patientTreatmentSchema,
   type PatientTreatmentFormValues,
@@ -65,6 +66,7 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<PatientTreatmentFormValues>({
     resolver: zodResolver(patientTreatmentSchema),
@@ -80,25 +82,6 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     },
     mode: "onChange",
   });
-  // ===== Handlers =====
-  // const handleCheckExisting = useCallback(async (patientId: number) => {
-  //   try {
-  //     const res = await patientTreatmentService.getByPatient(
-  //       String(patientId),
-  //       {}
-  //     );
-  //     const treatments = res.data.data || [];
-  //     if (treatments.length > 0) {
-  //       const t = treatments[0];
-  //       setExistingTreatment({ id: t.id, patientId: t.patientId });
-  //       setShowEditDialog(true);
-  //     } else {
-  //       setExistingTreatment(null);
-  //     }
-  //   } catch {
-  //     setExistingTreatment(null);
-  //   }
-  // }, []);
 
   const {
     fields: customMedFields,
@@ -109,6 +92,7 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     name: "customMedications",
   });
 
+  // ===== Search helpers =====
   const searchProtocols = useCallback(async (query: string) => {
     const res = await treatmentProtocolService.getAllTreatmentProtocols({
       search: query,
@@ -154,6 +138,7 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
   const watchedProtocolId = watch("protocolId");
   const watchedPatientId = watch("patientId");
 
+  // ===== Effects =====
   // Lấy thông tin phác đồ khi watchedProtocolId thay đổi
   useEffect(() => {
     if (typeof watchedProtocolId !== "number") {
@@ -162,130 +147,237 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
       setValue("endDate", undefined);
       return;
     }
-    let ignore = false;
-
     const fetchAll = async () => {
-      // Lấy danh sách thuốc
-      try {
-        const res = await medicineService.getMedicines({ limit: 10000 });
-        if (!ignore) setMedicines(res.data.data || []);
-      } catch {
-        if (!ignore) setMedicines([]);
-      }
-
-      // Kiểm tra điều trị hiện tại chỉ cho đúng doctorId và patientId
-      if (
-        typeof watchedPatientId === "number" &&
-        typeof doctorIdFromUser === "number"
-      ) {
-        try {
-          const res = await patientTreatmentService.getByPatient(
-            String(watchedPatientId),
-            { doctorId: doctorIdFromUser }
-          );
-          const treatments =
-            res && res.data && Array.isArray(res.data.data)
-              ? res.data.data
-              : [];
-          if (
-            treatments.length > 0 &&
-            treatments[0]?.id &&
-            treatments[0]?.patientId
-          ) {
-            setExistingTreatment({
-              id: treatments[0].id,
-              patientId: treatments[0].patientId,
-            });
-            setShowEditDialog(true);
-          } else {
-            setExistingTreatment(null);
-          }
-        } catch (err) {
-          setExistingTreatment(null);
-          console.error("Lỗi lấy hồ sơ điều trị bệnh nhân:", err);
-        }
-      }
-
-      // Lấy thông tin phác đồ
-      if (typeof watchedProtocolId === "number") {
-        try {
-          const res = await treatmentProtocolService.getTreatmentProtocolById(
-            watchedProtocolId
-          );
-          const protocol = {
-            ...res.data,
-            medicines: Array.isArray(res.data?.medicines)
-              ? res.data.medicines
-              : [],
-          };
-          setProtocolDetail(protocol);
-          if (protocol.medicines.length) {
-            const meds = protocol.medicines.map((med) => ({
-              medicineId:
-                typeof med.medicineId === "string"
-                  ? Number(med.medicineId)
-                  : med.medicineId,
-              medicineName: med.medicine?.name || "",
-              dosage: med.dosage || "",
-              unit: med.medicine?.unit || "",
-              price:
-                typeof med.medicine?.price === "string"
-                  ? Number(med.medicine?.price)
-                  : med.medicine?.price ?? 0,
-              schedule: med.duration || "MORNING",
-              frequency: med.frequency ?? "1",
-              time: "",
-              durationValue:
-                typeof protocol.durationValue === "string"
-                  ? Number(protocol.durationValue)
-                  : protocol.durationValue ?? 1,
-              durationUnit: protocol.durationUnit ?? "DAY",
-              notes: med.notes || "",
-            }));
-            setValue("customMedications", meds);
-          }
-          // Tính endDate
-          const startDateStr = protocol.startDate || new Date().toISOString();
-          let endDate = startDateStr;
-          if (protocol.durationValue && protocol.durationUnit) {
-            const start = new Date(startDateStr);
-            let addDays = 0;
-            switch (protocol.durationUnit) {
-              case "DAY":
-                addDays = protocol.durationValue;
-                break;
-              case "WEEK":
-                addDays = protocol.durationValue * 7;
-                break;
-              case "MONTH":
-                start.setMonth(start.getMonth() + protocol.durationValue);
-                break;
-              case "YEAR":
-                start.setFullYear(start.getFullYear() + protocol.durationValue);
-                break;
-              default:
-                addDays = protocol.durationValue;
-            }
-            if (addDays > 0) {
-              start.setDate(start.getDate() + addDays);
-            }
-            endDate = start.toISOString().slice(0, 16);
-          }
-          setValue("endDate", endDate);
-        } catch {
-          setProtocolDetail(null);
-        }
-      } else {
-        setProtocolDetail(null);
-        setValue("customMedications", []);
-        setValue("endDate", undefined);
-      }
+      await fetchMedicines();
+      await checkExistingTreatment();
+      await fetchProtocolDetail();
     };
     fetchAll();
-    return () => {
-      ignore = true;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedProtocolId, watchedPatientId, doctorIdFromUser, setValue]);
+
+  // ===== Data fetching helpers =====
+  const fetchMedicines = async () => {
+    try {
+      const res = await medicineService.getMedicines({ limit: 10000 });
+      setMedicines(res.data.data || []);
+    } catch {
+      setMedicines([]);
+    }
+  };
+
+  const checkExistingTreatment = async () => {
+    if (
+      typeof watchedPatientId === "number" &&
+      typeof doctorIdFromUser === "number"
+    ) {
+      try {
+        const res = await patientTreatmentService.getByPatient(
+          String(watchedPatientId),
+          { doctorId: doctorIdFromUser }
+        );
+        const treatments =
+          res && res.data && Array.isArray(res.data.data) ? res.data.data : [];
+        if (
+          treatments.length > 0 &&
+          treatments[0]?.id &&
+          treatments[0]?.patientId
+        ) {
+          setExistingTreatment({
+            id: treatments[0].id,
+            patientId: treatments[0].patientId,
+          });
+          setShowEditDialog(true);
+        } else {
+          setExistingTreatment(null);
+        }
+      } catch (err) {
+        setExistingTreatment(null);
+        console.error("Lỗi lấy hồ sơ điều trị bệnh nhân:", err);
+      }
+    }
+  };
+
+  const fetchProtocolDetail = async () => {
+    if (typeof watchedProtocolId !== "number") {
+      setProtocolDetail(null);
+      setValue("customMedications", []);
+      setValue("endDate", undefined);
+      return;
+    }
+    try {
+      const res = await treatmentProtocolService.getTreatmentProtocolById(
+        watchedProtocolId
+      );
+      const protocol = {
+        ...res.data,
+        medicines: Array.isArray(res.data?.medicines) ? res.data.medicines : [],
+      };
+      setProtocolDetail(protocol);
+      if (protocol.medicines.length) {
+        // Chỉ lấy thuốc gốc từ phác đồ, không ghi đè customMedications nếu đã có chỉnh sửa
+        const meds = protocol.medicines.map((med) => ({
+          medicineId:
+            typeof med.medicineId === "string"
+              ? Number(med.medicineId)
+              : med.medicineId,
+          medicineName: med.medicine?.name || "",
+          dosage: med.dosage || "",
+          unit: med.medicine?.unit || "",
+          price:
+            typeof med.medicine?.price === "string"
+              ? Number(med.medicine?.price)
+              : med.medicine?.price ?? 0,
+          schedule: med.duration || "MORNING",
+          frequency: med.frequency ?? "1",
+          time: "",
+          durationValue:
+            typeof protocol.durationValue === "string"
+              ? Number(protocol.durationValue)
+              : protocol.durationValue ?? 1,
+          durationUnit: protocol.durationUnit ?? "DAY",
+          notes: med.notes || "",
+          source: "protocol" as const,
+          protocolMedicineId: med.id,
+        }));
+        setValue("customMedications", meds);
+      }
+      setValue("endDate", calculateEndDate(protocol));
+    } catch {
+      setProtocolDetail(null);
+    }
+  };
+
+  const handleEditProtocolMedicine = (
+    protocolMedicineId: number,
+    newValues: Partial<Medicine & { dosage: string; notes: string }>
+  ) => {
+    const currentMeds = (getValues("customMedications") ||
+      []) as CustomMedicationItem[];
+    const existed = currentMeds.find(
+      (m) =>
+        m.protocolMedicineId === protocolMedicineId && m.source === "edited"
+    );
+    if (existed) {
+      const updated = currentMeds.map((m) =>
+        m.protocolMedicineId === protocolMedicineId && m.source === "edited"
+          ? { ...m, ...newValues }
+          : m
+      );
+      setValue("customMedications", updated);
+    } else {
+      const origin = protocolDetail?.medicines?.find(
+        (m) => m.id === protocolMedicineId
+      );
+      if (!origin) return;
+      setValue("customMedications", [
+        ...currentMeds,
+        {
+          medicineId:
+            typeof origin.medicineId === "string"
+              ? Number(origin.medicineId)
+              : origin.medicineId,
+          medicineName: origin.medicine?.name || "",
+          dosage: newValues.dosage ?? origin.dosage ?? "",
+          unit: origin.medicine?.unit || "",
+          price:
+            typeof origin.medicine?.price === "string"
+              ? Number(origin.medicine?.price)
+              : origin.medicine?.price ?? 0,
+          schedule: origin.duration || "MORNING",
+          frequency: origin.frequency ?? "1",
+          time: "",
+          durationValue:
+            typeof protocolDetail?.durationValue === "string"
+              ? Number(protocolDetail?.durationValue)
+              : protocolDetail?.durationValue ?? 1,
+          durationUnit: protocolDetail?.durationUnit ?? "DAY",
+          notes: newValues.notes ?? origin.notes ?? "",
+          source: "edited",
+          protocolMedicineId: origin.id,
+        },
+      ]);
+    }
+  };
+
+  // Handler: delete protocol medicine (xoá thuốc gốc)
+  const handleDeleteProtocolMedicine = (protocolMedicineId: number) => {
+    const currentMeds = (getValues("customMedications") ||
+      []) as CustomMedicationItem[];
+    // Nếu đã có bản ghi deleted cho protocolMedicineId này thì không thêm nữa
+    const existed = currentMeds.find(
+      (m) =>
+        m.protocolMedicineId === protocolMedicineId &&
+        m.source === "edited" &&
+        m.deleted
+    );
+    if (existed) return;
+    // Lấy thông tin thuốc gốc để điền đủ các trường bắt buộc
+    const origin = protocolDetail?.medicines?.find(
+      (m) => m.id === protocolMedicineId
+    );
+    setValue("customMedications", [
+      ...currentMeds,
+      {
+        medicineId: origin
+          ? typeof origin.medicineId === "string"
+            ? Number(origin.medicineId)
+            : origin.medicineId
+          : undefined,
+        medicineName: origin?.medicine?.name || "",
+        dosage: origin?.dosage || "",
+        unit: origin?.medicine?.unit || "",
+        price: origin
+          ? typeof origin.medicine?.price === "string"
+            ? Number(origin.medicine?.price)
+            : origin.medicine?.price ?? 0
+          : undefined,
+        schedule: origin?.duration || "MORNING",
+        frequency: origin?.frequency ?? "1",
+        time: "",
+        durationValue:
+          protocolDetail && typeof protocolDetail.durationValue === "string"
+            ? Number(protocolDetail.durationValue)
+            : protocolDetail?.durationValue ?? 1,
+        durationUnit: protocolDetail?.durationUnit ?? "DAY",
+        notes: origin?.notes || "",
+        protocolMedicineId,
+        source: "edited",
+        deleted: true,
+      },
+    ]);
+  };
+
+  // Helper: calculate end date
+  const calculateEndDate = (protocol: TreatmentProtocol): string => {
+    const startDateStr = protocol.startDate || new Date().toISOString();
+    let endDate = startDateStr;
+    if (protocol.durationValue && protocol.durationUnit) {
+      const start = new Date(startDateStr);
+      let addDays = 0;
+      switch (protocol.durationUnit) {
+        case "DAY":
+          addDays = protocol.durationValue;
+          break;
+        case "WEEK":
+          addDays = protocol.durationValue * 7;
+          break;
+        case "MONTH":
+          start.setMonth(start.getMonth() + protocol.durationValue);
+          break;
+        case "YEAR":
+          start.setFullYear(start.getFullYear() + protocol.durationValue);
+          break;
+        default:
+          addDays = protocol.durationValue;
+      }
+      if (addDays > 0) {
+        start.setDate(start.getDate() + addDays);
+      }
+      endDate = start.toISOString().slice(0, 16);
+    }
+    return endDate;
+  };
 
   return (
     <div className="w-full mx-auto">
@@ -403,6 +495,8 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
           register={register}
           errors={errors}
           medicines={medicines}
+          onEditProtocolMedicine={handleEditProtocolMedicine}
+          onDeleteProtocolMedicine={handleDeleteProtocolMedicine}
         />
         {/* Dates & Total section */}
         <DatesTotalSection register={register} errors={errors} />

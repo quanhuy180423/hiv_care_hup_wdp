@@ -64,6 +64,7 @@ import DoctorSchedule from "./pages/doctor/schedule";
 // User specific pages
 import TestManagement from "./pages/admin/test";
 import CreateDoctorPatientTreatmentPage from "./pages/doctor/patientTreatment/pages/create";
+import PatientTreatmentProtocolPage from "./pages/doctor/patientTreatment/pages/patient-treatment-protocol";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import TestResultPage from "./pages/doctor/testResult";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
@@ -505,6 +506,16 @@ export const doctorRoutes: RouteConfig[] = [
     component: CreateDoctorPatientTreatmentPage,
     title: "Tạo hồ sơ bệnh án",
     description: "Tạo mới hồ sơ bệnh án cho bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    showInNav: false,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/patient-treatments/:id/protocol",
+    component: PatientTreatmentProtocolPage,
+    title: "Chỉnh sửa hồ sơ bệnh án",
+    description: "Chỉnh sửa hồ sơ bệnh án cho bệnh nhân",
     protected: true,
     layout: "DOCTOR",
     showInNav: false,

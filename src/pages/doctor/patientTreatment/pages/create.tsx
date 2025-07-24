@@ -51,6 +51,23 @@ export default function CreateDoctorPatientTreatmentPage() {
 
   return (
     <div className="w-full mx-auto py-8">
+      {/* Breadcrumb */}
+      <nav
+        className="mb-6 flex items-center gap-2 text-base"
+        aria-label="Breadcrumb"
+      >
+        <button
+          type="button"
+          className="text-gray-500 hover:text-primary focus:outline-none"
+          onClick={() => navigate("/doctor/patient-treatments")}
+        >
+          Hồ sơ điều trị
+        </button>
+        <span className="text-gray-400">/</span>
+        <span className="font-semibold text-primary">
+          {id ? "Cập nhật hồ sơ" : "Tạo hồ sơ mới"}
+        </span>
+      </nav>
       {loading ? (
         <div className="text-center py-12">Đang tải dữ liệu...</div>
       ) : (

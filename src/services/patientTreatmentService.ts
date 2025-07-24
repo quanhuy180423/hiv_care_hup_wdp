@@ -7,10 +7,10 @@ import type {
   DoctorWorkloadStats,
   EndActiveTreatmentsResult,
   PaginatedActiveTreatmentsResult,
+  PatientTreatmentDetailResponse,
   PatientTreatmentFormSubmit,
   PatientTreatmentQueryParams,
   PatientTreatmentResponse,
-  PatientTreatmentType,
   PatientTreatmentsResponse,
   TreatmentComplianceStats,
   TreatmentCostAnalysis,
@@ -38,12 +38,15 @@ export const patientTreatmentService = {
 
   // Get a single patient treatment by ID
   async getById(id: number | string) {
-    return apiClient.get<PatientTreatmentType>(`${API_URL}/${id}`, {});
+    return apiClient.get<PatientTreatmentDetailResponse>(
+      `${API_URL}/${id}`,
+      {}
+    );
   },
 
-  // Update a patient treatment by ID
+  // Update a patient treatment by ID (partial update)
   async update(id: number | string, data: Partial<PatientTreatmentFormSubmit>) {
-    return apiClient.put(`${API_URL}/${id}`, data, {});
+    return apiClient.patch(`${API_URL}/${id}`, data, {});
   },
 
   // Delete a patient treatment by ID
@@ -57,7 +60,7 @@ export const patientTreatmentService = {
     params: PatientTreatmentQueryParams
   ): Promise<PatientTreatmentsResponse> {
     const res = await apiClient.get<PatientTreatmentsResponse>(
-      `${API_URL}/patient/${patientId}`,
+      `${API_URL}/user/${patientId}`,
       {
         params,
       }

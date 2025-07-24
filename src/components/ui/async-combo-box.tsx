@@ -16,6 +16,7 @@ interface AsyncComboBoxProps {
   disabled?: boolean;
   showCount?: boolean;
   allowCustomValue?: boolean;
+  optional?: boolean;
 }
 
 const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
@@ -28,6 +29,7 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
   disabled,
   showCount = true,
   allowCustomValue = false,
+  optional = false,
 }) => {
   const [query, setQuery] = React.useState("");
   const [options, setOptions] = React.useState<AsyncComboBoxOption[]>([]);
@@ -76,6 +78,9 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
       {label && (
         <label className="block font-medium mb-1" htmlFor={label}>
           {label}
+          {optional && (
+            <span className="text-gray-400 ml-1">(không bắt buộc)</span>
+          )}
         </label>
       )}
       <Input
@@ -86,11 +91,25 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
         onFocus={() => setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
         onKeyDown={handleInputKeyDown}
-        placeholder={placeholder}
+        placeholder={optional ? placeholder || "-- Không chọn --" : placeholder}
         disabled={disabled}
         className={error ? "border-red-500" : ""}
         autoComplete="off"
       />
+      {optional && value !== undefined && value !== null && (
+        <button
+          type="button"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg bg-white px-1"
+          tabIndex={-1}
+          onClick={() => {
+            setQuery("");
+            onChange(undefined);
+          }}
+          aria-label="Xoá lựa chọn"
+        >
+          ×
+        </button>
+      )}
       {showDropdown && (options.length > 0 || loading) && (
         <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full mt-1 max-h-56 overflow-auto">
           {showCount && (

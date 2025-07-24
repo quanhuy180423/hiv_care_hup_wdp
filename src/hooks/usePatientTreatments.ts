@@ -1,4 +1,3 @@
-import { patientTreatmentSchema } from "@/schemas/patientTreatment";
 import {
   createPatientTreatment,
   deletePatientTreatment,
@@ -41,7 +40,7 @@ export const usePatientTreatments = (
         };
       }
       // Fallback for array response
-      if (Array.isArray(res.data) ) {
+      if (Array.isArray(res.data)) {
         return {
           data: res.data,
           meta: {
@@ -66,7 +65,8 @@ export const usePatientTreatment = (id: number, options?: UseQueryOptions) =>
     queryKey: ["patientTreatment", id],
     queryFn: async () => {
       const res = await getPatientTreatmentById(id);
-      return patientTreatmentSchema.parse(res);
+      console.log(`Fetched treatment data for ID ${id}:`, res.data);
+      return res.data;
     },
     enabled: !!id,
     ...(options ?? {}),

@@ -99,7 +99,9 @@ const appointmentSchema = z
 
 const RegisterAppointment = () => {
   const navigation = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
+  console.log(user);
+  console.log(userProfile);
   const [selectedDate, setSelectedDate] = useState("");
   const [availableSlots, setAvailableSlots] = useState<Slot[]>(slots);
   const [step, setStep] = useState(1);
@@ -253,6 +255,8 @@ const RegisterAppointment = () => {
       setAvailableSlots(filteredSlots);
     }
   };
+
+  const prevStep = () => setStep((s) => Math.max(1, s - 1));
 
   // Validate từng bước trước khi chuyển step
   const nextStep = async () => {
