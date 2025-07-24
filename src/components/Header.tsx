@@ -1,18 +1,17 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import {
-  Menu,
-  X,
-  User,
-  LogOut,
-  Settings,
-  ChevronDown,
   Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
   Search,
+  Settings,
+  User,
+  X,
 } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Header() {
   const navigate = useNavigate();

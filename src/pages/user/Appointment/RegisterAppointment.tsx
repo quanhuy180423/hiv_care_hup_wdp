@@ -256,8 +256,6 @@ const RegisterAppointment = () => {
     }
   };
 
-  const prevStep = () => setStep((s) => Math.max(1, s - 1));
-
   // Validate từng bước trước khi chuyển step
   const nextStep = async () => {
     if (step === 1) {
@@ -361,7 +359,8 @@ const RegisterAppointment = () => {
       <div className="relative">
         <img
           src={
-            getAvatarUrl(doctor.user.avatar || "") || "/images/default-avatar.png"
+            getAvatarUrl(doctor.user.avatar || "") ||
+            "/images/default-avatar.png"
           }
           alt={doctor.user.name}
           className="w-14 h-14 rounded-full object-cover border-2 border-purple-400"

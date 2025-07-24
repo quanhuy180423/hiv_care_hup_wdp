@@ -1,10 +1,11 @@
-import useAuthStore from "@/store/authStore";
 import type { PatientTreatmentWithAppointment } from "@/pages/doctor/patientTreatment/index";
+import useAuthStore from "@/store/authStore";
 import { Eye, Stethoscope } from "lucide-react";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import PatientTreatmentFilterPanel from "./PatientTreatmentFilterPanel";
 
 export interface PatientTreatmentTableProps {
   treatments: PatientTreatmentWithAppointment[];
@@ -18,6 +19,58 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
   props
 ) => {
   const { treatments, onShowDetail } = props;
+
+  // Filter state
+  const [searchText, setSearchText] = useState("");
+  const [status, setStatus] = useState<string>("");
+  const [isAnonymous, setIsAnonymous] = useState<string>("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Filter logic
+  const filteredTreatments = useMemo(() => {
+    return treatments.filter((t) => {
+      // Search
+      const search = searchText.trim().toLowerCase();
+      const matchesSearch =
+        !search ||
+        t.patient?.name?.toLowerCase().includes(search) ||
+        t.doctor?.user?.name?.toLowerCase().includes(search) ||
+        t.protocol?.name?.toLowerCase().includes(search) ||
+        t.notes?.toLowerCase().includes(search);
+
+      // Status
+      const matchesStatus = !status || String(t.status) === status;
+
+      // isAnonymous
+      const matchesAnonymous =
+        !isAnonymous || String(t.isAnonymous) === isAnonymous;
+
+      // Start date
+      const matchesStartDate =
+        !startDate || (t.startDate && t.startDate >= startDate);
+
+      // End date
+      const matchesEndDate =
+        !endDate || (t.endDate ? t.endDate <= endDate : true);
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesAnonymous &&
+        matchesStartDate &&
+        matchesEndDate
+      );
+    });
+  }, [treatments, searchText, status, isAnonymous, startDate, endDate]);
+
+  const handleClearFilters = () => {
+    setSearchText("");
+    setStatus("");
+    setIsAnonymous("");
+    setStartDate("");
+    setEndDate("");
+  };
   const { userProfile } = useAuthStore();
 
   console.log(treatments);
@@ -25,12 +78,25 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
   const navigate = useNavigate();
 
   // Xử lý khi nhấn nút tạo/cập nhật phác đồ: chuyển sang trang mới
-  const handleCreateOrUpdateProtocol = (t: PatientTreatmentWithAppointment) => {
-    navigate(`/doctor/patient-treatments/${t.id}/protocol`);
-  };
+  // const handleCreateOrUpdateProtocol = (t: PatientTreatmentWithAppointment) => {
+  //   navigate(`/doctor/patient-treatments/${t.id}/protocol`);
+  // };
 
   return (
     <>
+      <PatientTreatmentFilterPanel
+        searchText={searchText}
+        onSearchChange={setSearchText}
+        status={status}
+        onStatusChange={setStatus}
+        isAnonymous={isAnonymous}
+        onIsAnonymousChange={setIsAnonymous}
+        startDate={startDate}
+        onStartDateChange={setStartDate}
+        endDate={endDate}
+        onEndDateChange={setEndDate}
+        onClearFilters={handleClearFilters}
+      />
       <div className="overflow-x-auto">
         <div className="flex items-center justify-between mb-2"></div>
         <table className="w-full text-sm border rounded-xl overflow-hidden">
@@ -47,7 +113,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
             </tr>
           </thead>
           <tbody>
-            {treatments.map((t, idx) => {
+            {filteredTreatments.map((t, idx) => {
               return (
                 <tr
                   key={t.id}
@@ -110,55 +176,25 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                     )}
                   </td>
                   <td className="p-3 flex flex-wrap gap-2 justify-center">
-                    {/* Action: Tạo phác đồ hoặc Khám ngay - dựa trên trạng thái lịch hẹn (appointmentStatus) */}
-                    <Tooltip
-                      delayDuration={
-                        t.appointmentStatus === "CONFIRMED" ? 0 : 400
-                      }
-                    >
-                      <TooltipTrigger asChild>
-                        <div>
-                          <Button
-                            className={`inline-flex items-center justify-center min-w-[40px] h-9 rounded ${
-                              t.appointmentStatus === "CONFIRMED"
-                                ? t.protocol
-                                  ? "text-green-700 hover:bg-green-100"
-                                  : "text-blue-700 hover:bg-blue-100"
-                                : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
-                            } transition text-xs font-medium focus:ring-2 focus:ring-blue-400`}
-                            onClick={() => {
-                              if (t.appointmentStatus !== "CONFIRMED") return;
-                              if (t.protocol) {
-                                // Đã có phác đồ, chuyển sang trang khám ngay
-                                navigate(`/doctor/consultation/${t.id}`);
-                              } else {
-                                // Chưa có phác đồ, chuyển sang tạo phác đồ
-                                handleCreateOrUpdateProtocol(t);
-                              }
-                            }}
-                            aria-label={
-                              t.protocol ? "Khám ngay" : "Tạo phác đồ"
-                            }
-                            disabled={t.appointmentStatus !== "CONFIRMED"}
-                            tabIndex={
-                              t.appointmentStatus === "CONFIRMED" ? 0 : -1
-                            }
-                          >
-                            <Stethoscope className="w-5 h-5" />
-                            <span className="sr-only">
-                              {t.protocol ? "Khám ngay" : "Tạo phác đồ"}
-                            </span>
-                          </Button>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs px-2 py-1">
-                        {t.appointmentStatus === "CONFIRMED"
-                          ? t.protocol
-                            ? "Khám ngay cho bệnh nhân này"
-                            : "Tạo phác đồ điều trị cho bệnh nhân"
-                          : "Chỉ thao tác khi lịch hẹn đã xác nhận (CONFIRMED)"}
-                      </TooltipContent>
-                    </Tooltip>
+                    {/* Chỉ render nút Khám ngay khi điều trị chưa kết thúc và trạng thái lịch hẹn phù hợp */}
+                    {t.status !== false &&
+                      ["PENDING", "CONFIRMED"].includes(
+                        (t.appointmentStatus || "").toUpperCase()
+                      ) && (
+                        <Button
+                          className="inline-flex items-center justify-center min-w-[40px] h-9 rounded bg-blue-500 hover:bg-blue-600 border-none text-white font-medium text-xs focus:ring-2 focus:ring-blue-400"
+                          onClick={() =>
+                            navigate(
+                              `/doctor/patient-treatments/${t.id}/protocol`
+                            )
+                          }
+                          aria-label="Khám ngay"
+                          type="button"
+                        >
+                          <Stethoscope className="w-5 h-5" />
+                          <span className="ml-1">Khám ngay</span>
+                        </Button>
+                      )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>

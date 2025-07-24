@@ -514,8 +514,8 @@ export const doctorRoutes: RouteConfig[] = [
   {
     path: "/doctor/patient-treatments/:id/protocol",
     component: PatientTreatmentProtocolPage,
-    title: "Chỉnh sửa hồ sơ bệnh án",
-    description: "Chỉnh sửa hồ sơ bệnh án cho bệnh nhân",
+    title: "Hồ sơ bệnh án",
+    description: "Hồ sơ bệnh án cho bệnh nhân",
     protected: true,
     layout: "DOCTOR",
     showInNav: false,

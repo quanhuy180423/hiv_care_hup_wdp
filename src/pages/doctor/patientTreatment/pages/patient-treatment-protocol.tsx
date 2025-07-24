@@ -27,18 +27,18 @@ import type {
   ProtocolMedicineInfo,
 } from "@/types/patientTreatment";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { UserCircle2, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, UserCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { z } from "zod";
+import type { CustomMedicineFormValues } from "@/schemas/medicine";
 
 import { CustomMedicineSchema } from "@/schemas/medicine";
 import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import { medicineService } from "@/services/medicineService";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
+import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 
 export default function PatientTreatmentProtocolPage() {
@@ -112,7 +112,7 @@ export default function PatientTreatmentProtocolPage() {
     reset,
     watch,
     formState: { errors, isSubmitting: isAddingMed },
-  } = useForm<z.infer<typeof CustomMedicineSchema>>({
+  } = useForm<CustomMedicineFormValues>({
     resolver: zodResolver(CustomMedicineSchema),
     defaultValues: {
       medicineName: "",
@@ -210,7 +210,7 @@ export default function PatientTreatmentProtocolPage() {
     reset();
   };
 
-  const onAddCustomMed = (values: z.infer<typeof CustomMedicineSchema>) => {
+  const onAddCustomMed = (values: CustomMedicineFormValues) => {
     setCustomMeds((prev) => [
       ...prev,
       {
@@ -635,7 +635,7 @@ export default function PatientTreatmentProtocolPage() {
                                       med.medicineId ?? med.id ?? undefined,
                                     medicineName: med.medicine?.name || "",
                                     dosage: med.dosage,
-                                    unit: med.medicine?.unit || "",
+                                    unit: "",
                                     durationValue: med.durationValue,
                                     durationUnit: med.durationUnit,
                                     schedule: med.schedule,
@@ -653,10 +653,7 @@ export default function PatientTreatmentProtocolPage() {
                                   "",
                                 dosage:
                                   editProtocolMedForm.dosage || med.dosage,
-                                unit:
-                                  editProtocolMedForm.medicine?.unit ||
-                                  med.medicine?.unit ||
-                                  "",
+                                unit: "",
                                 durationValue:
                                   editProtocolMedForm.durationValue ??
                                   med.durationValue ??
@@ -783,22 +780,7 @@ export default function PatientTreatmentProtocolPage() {
                               <label className="block text-xs font-medium mb-1">
                                 Đơn vị
                               </label>
-                              <Input
-                                value={
-                                  editProtocolMedForm?.medicine?.unit ||
-                                  med.medicine?.unit ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  setEditProtocolMedForm((f) => ({
-                                    ...f,
-                                    medicine: {
-                                      ...(f?.medicine ?? med.medicine),
-                                      unit: e.target.value,
-                                    },
-                                  }))
-                                }
-                              />
+                              <Input value="" disabled />
                             </div>
                             <div>
                               <label className="block text-xs font-medium mb-1">

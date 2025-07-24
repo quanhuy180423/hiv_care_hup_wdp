@@ -27,8 +27,8 @@ export interface DoctorInfo {
 export interface MedicineInfo {
   id: number;
   name: string;
-  description: string;
-  unit: string;
+  status?: boolean;
+  isAnonymous?: boolean; // Added isAnonymous
   dose: string;
   price: string;
   createdAt: string;
