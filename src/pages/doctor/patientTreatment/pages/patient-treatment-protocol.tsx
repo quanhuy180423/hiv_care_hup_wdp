@@ -42,7 +42,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 
 export default function PatientTreatmentProtocolPage() {
-  // ...existing code...
+  // State for confirm update dialog
+  // const [showConfirmUpdate, setShowConfirmUpdate] = useState(false);
   // State để lưu index các thuốc phác đồ đã xoá (chỉ ẩn trên UI)
   const [protocolMedDeletedIdxs, setProtocolMedDeletedIdxs] = useState<
     number[]
@@ -227,7 +228,8 @@ export default function PatientTreatmentProtocolPage() {
 
   const handleSubmitForm = async () => {
     setFormError(null);
-    // Validate
+
+    // Validate required fields
     if (!selectedProtocolId) {
       setFormError("Vui lòng chọn phác đồ điều trị.");
       return;
@@ -244,41 +246,35 @@ export default function PatientTreatmentProtocolPage() {
       setFormError("Không xác định được bệnh nhân.");
       return;
     }
+
     setIsSubmitting(true);
     try {
-      const mappedCustomMeds =
-        customMeds.length > 0
-          ? customMeds
-              .map((med) => {
-                const found = medicines.find(
-                  (m) => m.name === med.medicineName
-                );
-                if (!found) return undefined;
-                // Ensure enum values are uppercased for API
-                const durationUnit = med.durationUnit
+      // Map custom medicines to API format
+      const mappedCustomMeds = customMeds.length
+        ? customMeds
+            .map((med) => {
+              const found = medicines.find((m) => m.name === med.medicineName);
+              if (!found) return undefined;
+              return {
+                medicineId: found.id,
+                medicineName: med.medicineName,
+                dosage: med.dosage,
+                unit: med.unit,
+                durationValue: med.durationValue
+                  ? Number(med.durationValue)
+                  : undefined,
+                durationUnit: med.durationUnit
                   ? String(med.durationUnit).toUpperCase()
-                  : undefined;
-                const schedule = med.schedule
+                  : undefined,
+                schedule: med.schedule
                   ? String(med.schedule).toUpperCase()
-                  : undefined;
-                return {
-                  medicineId: found.id,
-                  medicineName: med.medicineName,
-                  dosage: med.dosage,
-                  unit: med.unit,
-                  durationValue: med.durationValue
-                    ? Number(med.durationValue)
-                    : undefined,
-                  durationUnit,
-                  schedule,
-                  frequency: med.frequency ?? "",
-                  notes: med.notes,
-                };
-              })
-              .filter(
-                (med): med is NonNullable<typeof med> => med !== undefined
-              )
-          : [];
+                  : undefined,
+                frequency: med.frequency ?? "",
+                notes: med.notes,
+              };
+            })
+            .filter((med): med is NonNullable<typeof med> => med !== undefined)
+        : [];
 
       const payload = {
         patientId: patient.id,
@@ -292,30 +288,25 @@ export default function PatientTreatmentProtocolPage() {
         total: 0,
       };
 
-      // =========================
-      // CHỈ HỖ TRỢ TẠO MỚI (CREATE MODE)
-      // =========================
-      // Đã loại bỏ logic cập nhật (update) để đảm bảo nghiệp vụ xoá thuốc phác đồ chỉ ẩn trên UI,
-      // không ảnh hưởng backend. Nếu cần update, hãy bổ sung lại logic phù hợp.
-      //
-      // --- CODE UPDATE ĐỂ THAM KHẢO ---
-      // if (patientData?.id) {
-      //   await updatePatientTreatmentMutation.mutateAsync({
-      //     id: patientData.id,
-      //     data: payload,
-      //   });
-      //   toast.success("Cập nhật hồ sơ điều trị thành công!");
-      //   navigate("/doctor/patient-treatments");
-      // } else {
-      // Create mode
-      await patientTreatmentService.create(payload, true);
-      toast.success("Tạo hồ sơ điều trị thành công!");
-      // Refetch lại dữ liệu để đồng bộ UI
-      await refetch();
-      navigate("/doctor/patient-treatments");
+      // Update or create patient treatment
+      if (patientData?.id && protocol) {
+        await updatePatientTreatmentMutation.mutateAsync({
+          id: patientData.id,
+          data: payload,
+        });
+        toast.success("Cập nhật hồ sơ điều trị thành công!");
+        navigate("/doctor/patient-treatments");
+      } else {
+        await patientTreatmentService.create(payload, true);
+        toast.success("Tạo hồ sơ điều trị thành công!");
+        await refetch(); // Sync UI
+        navigate("/doctor/patient-treatments");
+      }
     } catch {
       toast.error(
-        patientData?.id ? "Lỗi khi cập nhật hồ sơ." : "Lỗi khi tạo hồ sơ."
+        patientData?.id && protocol
+          ? "Lỗi khi cập nhật hồ sơ."
+          : "Lỗi khi tạo hồ sơ."
       );
     } finally {
       setIsSubmitting(false);
@@ -1522,16 +1513,24 @@ export default function PatientTreatmentProtocolPage() {
               <div className="text-red-500 text-sm mb-1">{formError}</div>
             )}
             <Button
-              disabled={(isEnded && !!protocol) || isSubmitting}
+              disabled={!!protocol || (isEnded && !!protocol) || isSubmitting}
               variant="outline"
               className="min-w-[200px] text-base font-semibold"
               title={
-                isEnded && !!protocol
+                protocol
+                  ? "Phác đồ đã được tạo, chỉ có thể xem chi tiết."
+                  : isEnded && !!protocol
                   ? "Chỉ thao tác khi hồ sơ đang điều trị"
                   : undefined
               }
-              aria-disabled={(isEnded && !!protocol) || isSubmitting}
-              onClick={handleSubmitForm}
+              aria-disabled={
+                !!protocol || (isEnded && !!protocol) || isSubmitting
+              }
+              onClick={() => {
+                if (!protocol) {
+                  handleSubmitForm();
+                }
+              }}
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
@@ -1539,12 +1538,7 @@ export default function PatientTreatmentProtocolPage() {
                   Đang lưu...
                 </span>
               ) : (
-                <>
-                  ✓{" "}
-                  {protocol
-                    ? "Cập nhật phác đồ điều trị"
-                    : "Tạo phác đồ điều trị"}
-                </>
+                <>✓ Tạo phác đồ điều trị</>
               )}
             </Button>
           </div>

@@ -1,6 +1,8 @@
+import { CalendarDays, Filter, Search, X } from "lucide-react";
 import React from "react";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
@@ -8,16 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Label } from "../ui/label";
-import { CalendarDays, Filter, X, Search } from "lucide-react";
 
 interface PatientTreatmentFilterPanelProps {
   searchText: string;
   onSearchChange: (value: string) => void;
   status: string | undefined;
-  onStatusChange: (value: string) => void;
+  onStatusChange: (value: string | undefined) => void;
   isAnonymous: string | undefined;
-  onIsAnonymousChange: (value: string) => void;
+  onIsAnonymousChange: (value: string | undefined) => void;
   startDate: string;
   onStartDateChange: (value: string) => void;
   endDate: string;
@@ -77,7 +77,12 @@ const PatientTreatmentFilterPanel: React.FC<
             Trạng thái điều trị
           </Label>
           <div className="w-full">
-            <Select value={status || undefined} onValueChange={onStatusChange}>
+            <Select
+              value={status || undefined}
+              onValueChange={(val) =>
+                onStatusChange(val === "all" ? undefined : val)
+              }
+            >
               <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
                 <SelectValue placeholder="Tất cả" />
               </SelectTrigger>
@@ -99,7 +104,9 @@ const PatientTreatmentFilterPanel: React.FC<
           <div className="w-full">
             <Select
               value={isAnonymous || undefined}
-              onValueChange={onIsAnonymousChange}
+              onValueChange={(val) =>
+                onIsAnonymousChange(val === "all" ? undefined : val)
+              }
             >
               <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
                 <SelectValue placeholder="Tất cả" />

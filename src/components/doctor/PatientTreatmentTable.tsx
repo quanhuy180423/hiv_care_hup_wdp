@@ -22,8 +22,8 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
 
   // Filter state
   const [searchText, setSearchText] = useState("");
-  const [status, setStatus] = useState<string>("");
-  const [isAnonymous, setIsAnonymous] = useState<string>("");
+  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [isAnonymous, setIsAnonymous] = useState<string | undefined>(undefined);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -40,11 +40,16 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
         t.notes?.toLowerCase().includes(search);
 
       // Status
-      const matchesStatus = !status || String(t.status) === status;
+      const matchesStatus =
+        status === undefined || status === ""
+          ? true
+          : String(t.status) === status;
 
       // isAnonymous
       const matchesAnonymous =
-        !isAnonymous || String(t.isAnonymous) === isAnonymous;
+        isAnonymous === undefined || isAnonymous === ""
+          ? true
+          : String(t.isAnonymous) === isAnonymous;
 
       // Start date
       const matchesStartDate =
@@ -66,8 +71,8 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
 
   const handleClearFilters = () => {
     setSearchText("");
-    setStatus("");
-    setIsAnonymous("");
+    setStatus(undefined);
+    setIsAnonymous(undefined);
     setStartDate("");
     setEndDate("");
   };
@@ -176,8 +181,9 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                     )}
                   </td>
                   <td className="p-3 flex flex-wrap gap-2 justify-center">
-                    {/* Chỉ render nút Khám ngay khi điều trị chưa kết thúc và trạng thái lịch hẹn phù hợp */}
+                    {/* Chỉ render nút Khám ngay khi điều trị chưa kết thúc, chưa có phác đồ và trạng thái lịch hẹn phù hợp */}
                     {t.status !== false &&
+                      !t.protocol &&
                       ["PENDING", "CONFIRMED"].includes(
                         (t.appointmentStatus || "").toUpperCase()
                       ) && (
@@ -195,6 +201,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                           <span className="ml-1">Khám ngay</span>
                         </Button>
                       )}
+                    {/* Đã có phác đồ: chỉ cho phép xem chi tiết, không cho cập nhật (ẩn nút Cập nhật) */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
