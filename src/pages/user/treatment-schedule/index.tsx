@@ -351,9 +351,12 @@ export default function TreatmentSchedule() {
                           <span className="text-sm font-medium ">
                             Giá trị xét nghiệm:
                           </span>
-                          <span className="text-sm font-semibold ">
-                            {result.rawResultValue}{" "}
-                            {result.unit || result.test?.unit || ""}
+                          <span className="text-sm font-semibold">
+                            {result.rawResultValue
+                              ? `${result.rawResultValue} ${
+                                  result.unit || result.test?.unit || ""
+                                }`
+                              : "N/A"}
                           </span>
                         </div>
                         <div className="flex justify-between p-3 bg-white/60 rounded-lg">
@@ -361,8 +364,11 @@ export default function TreatmentSchedule() {
                             Giá trị ngưỡng:
                           </span>
                           <span className="text-sm ">
-                            {result.cutOffValueUsed}{" "}
-                            {result.unit || result.test?.unit || ""}
+                            {result.cutOffValueUsed
+                              ? `${result.cutOffValueUsed} ${
+                                  result.unit || result.test?.unit || ""
+                                }`
+                              : "N/A"}
                           </span>
                         </div>
                         <div className="flex justify-between p-3 bg-white/60 rounded-lg">
@@ -429,21 +435,21 @@ export default function TreatmentSchedule() {
 
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-12 bg-white shadow-sm border">
-            <TabsTrigger 
-              value="active" 
-              className="cursor-pointer flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
-            >
-              <Activity className="w-4 h-4" />
-              Phác đồ hiện tại ({activeTreatmentList.length})
-            </TabsTrigger>
-            <TabsTrigger 
-              value="all" 
-              className="cursor-pointer flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
-            >
-              <FileText className="w-4 h-4" />
-              Danh sách phác đồ ({treatmentList.length})
-            </TabsTrigger>
-          </TabsList>
+          <TabsTrigger
+            value="active"
+            className="cursor-pointer flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+          >
+            <Activity className="w-4 h-4" />
+            Phác đồ hiện tại ({activeTreatmentList.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="all"
+            className="cursor-pointer flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+          >
+            <FileText className="w-4 h-4" />
+            Danh sách phác đồ ({treatmentList.length})
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="active">
           {isLoadingActive ? (
