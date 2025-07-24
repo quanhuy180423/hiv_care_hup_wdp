@@ -69,6 +69,8 @@ import {
 } from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { formatDate } from "@/lib/utils/dates/formatDate";
+import { getAvatarUrl } from "@/lib/utils/uploadImage/uploadImage";
+import type { DoctorScheduleByDate } from "@/types/doctor";
 
 const appointmentSchema = z
   .object({
@@ -329,6 +331,57 @@ const RegisterAppointment = () => {
       },
     });
   };
+
+  const DoctorCardMini = ({
+    doctor,
+    isSelected,
+    isAvailable,
+    onClick,
+  }: {
+    doctor: DoctorScheduleByDate;
+    isSelected: boolean;
+    isAvailable: boolean;
+    onClick: () => void;
+  }) => (
+    <div
+      onClick={onClick}
+      className={`cursor-pointer bg-white rounded-xl border-2 p-4 flex items-center gap-4 shadow-sm transition-all duration-200
+      ${
+        isSelected
+          ? "border-purple-600 ring-2 ring-purple-200"
+          : "border-gray-200 hover:border-purple-400"
+      }
+      ${!isAvailable ? "opacity-60 pointer-events-none" : ""}
+    `}
+    >
+      <div className="relative">
+        <img
+          src={
+            getAvatarUrl(doctor.user.avatar || "") || "/images/default-avatar.png"
+          }
+          alt={doctor.user.name}
+          className="w-14 h-14 rounded-full object-cover border-2 border-purple-400"
+        />
+      </div>
+      <div className="flex-1">
+        <div className="font-semibold text-base text-gray-900">
+          {doctor.user.name}
+        </div>
+        <div className="text-xs text-gray-500">
+          {doctor.specialization || "Bác sĩ đa khoa"}
+        </div>
+        <div className="flex items-center gap-1 mt-1">
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isAvailable ? "bg-emerald-500" : "bg-rose-500"
+            }`}
+          ></span>
+          <span className="text-xs">{isAvailable ? "Có sẵn" : "Bận"}</span>
+        </div>
+      </div>
+      {isSelected && <CheckCircle className="w-5 h-5 text-purple-600" />}
+    </div>
+  );
 
   // --- Render từng bước ---
   const renderStep1 = () => (
@@ -629,37 +682,22 @@ const RegisterAppointment = () => {
             <Stethoscope className="w-5 h-5 text-purple-600" />
             Chọn Bác Sĩ <span className="text-red-500 ml-1">*</span>
           </Label>
-          <Controller
-            name="doctorId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                onValueChange={(value) => field.onChange(Number(value))}
-                value={field.value ? String(field.value) : ""}
-              >
-                <SelectTrigger className="w-full border-gray-300 focus:ring-purple-500 focus:border-purple-500">
-                  <SelectValue placeholder="Chọn bác sĩ" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableDoctors?.length === 0 && (
-                    <div className="p-2 text-center text-gray-500">
-                      Không còn bác sĩ nào trống khung giờ này
-                    </div>
-                  )}
-                  {availableDoctors?.map((doctor) => (
-                    <SelectItem
-                      key={doctor.id}
-                      value={doctor.id.toString()}
-                      className="flex items-center bg-white hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 ease-in-out"
-                    >
-                      <span className="mr-2">👨‍⚕️</span>
-                      BS. {doctor.user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {availableDoctors?.length === 0 && (
+              <div className="col-span-full p-4 text-center text-gray-500 border rounded-lg">
+                Không còn bác sĩ nào trống khung giờ này
+              </div>
             )}
-          />
+            {availableDoctors?.map((doctor) => (
+              <DoctorCardMini
+                key={doctor.id}
+                doctor={doctor}
+                isAvailable={true}
+                isSelected={watch("doctorId") === doctor.id}
+                onClick={() => setValue("doctorId", doctor.id)}
+              />
+            ))}
+          </div>
           {errors.doctorId && (
             <p className="text-red-500 text-sm mt-1">
               {errors.doctorId.message}
