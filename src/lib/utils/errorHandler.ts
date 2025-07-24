@@ -6,7 +6,7 @@ interface BackendErrorResponse {
     statusCode: number;
   };
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const extractErrorMessage = (error: any): string => {
   // Nếu error có response data
   if (error?.response?.data) {
@@ -31,7 +31,7 @@ export const extractErrorMessage = (error: any): string => {
   // Fallback message
   return 'Đã có lỗi xảy ra. Vui lòng thử lại.';
 };
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleApiError = (error: any): string => {
   return extractErrorMessage(error);
 }; 

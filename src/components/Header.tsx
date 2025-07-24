@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -80,8 +81,8 @@ export default function Header() {
 
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex space-x-8">
-                <a
-                  href="/"
+                <Link
+                  to="/"
                   className={`font-medium transition-colors ${
                     isActive("/")
                       ? "text-purple-600"
@@ -89,9 +90,9 @@ export default function Header() {
                   }`}
                 >
                   Trang chủ
-                </a>
-                <a
-                  href="/services"
+                </Link>
+                <Link
+                  to="/services"
                   className={`font-medium transition-colors ${
                     isActive("/services")
                       ? "text-purple-600"
@@ -99,9 +100,9 @@ export default function Header() {
                   }`}
                 >
                   Dịch vụ
-                </a>
-                <a
-                  href="/about"
+                </Link>
+                <Link
+                  to="/about"
                   className={`font-medium transition-colors ${
                     isActive("/about")
                       ? "text-purple-600"
@@ -109,9 +110,9 @@ export default function Header() {
                   }`}
                 >
                   Giới thiệu
-                </a>
-                <a
-                  href="/contact"
+                </Link>
+                <Link
+                  to="/contact"
                   className={`font-medium transition-colors ${
                     isActive("/contact")
                       ? "text-purple-600"
@@ -119,10 +120,10 @@ export default function Header() {
                   }`}
                 >
                   Liên hệ
-                </a>
+                </Link>
                 {isAuthenticated && (
-                  <a
-                    href="/services/appointment/register"
+                  <Link
+                    to="/services/appointment/register"
                     className={`font-medium transition-colors ${
                       isActive("/services/appointment/register")
                         ? "text-purple-600"
@@ -130,7 +131,7 @@ export default function Header() {
                     }`}
                   >
                     Đặt lịch
-                  </a>
+                  </Link>
                 )}
               </nav>
             </div>
@@ -240,8 +241,8 @@ export default function Header() {
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-gray-200">
               <nav className="flex flex-col space-y-4 pt-4">
-                <a
-                  href="/"
+                <Link
+                  to="/"
                   className={`font-medium transition-colors ${
                     isActive("/")
                       ? "text-purple-600"
@@ -249,9 +250,9 @@ export default function Header() {
                   }`}
                 >
                   Trang chủ
-                </a>
-                <a
-                  href="/services"
+                </Link>
+                <Link
+                  to="/services"
                   className={`font-medium transition-colors ${
                     isActive("/services")
                       ? "text-purple-600"
@@ -259,9 +260,9 @@ export default function Header() {
                   }`}
                 >
                   Dịch vụ
-                </a>
-                <a
-                  href="/about"
+                </Link>
+                <Link
+                  to="/about"
                   className={`font-medium transition-colors ${
                     isActive("/about")
                       ? "text-purple-600"
@@ -269,9 +270,9 @@ export default function Header() {
                   }`}
                 >
                   Giới thiệu
-                </a>
-                <a
-                  href="/contact"
+                </Link>
+                <Link
+                  to="/contact"
                   className={`font-medium transition-colors ${
                     isActive("/contact")
                       ? "text-purple-600"
@@ -279,10 +280,10 @@ export default function Header() {
                   }`}
                 >
                   Liên hệ
-                </a>
+                </Link>
                 {isAuthenticated && (
-                  <a
-                    href="/services/appointment/register"
+                  <Link
+                    to="/services/appointment/register"
                     className={`font-medium transition-colors ${
                       isActive("/services/appointment/register")
                         ? "text-purple-600"
@@ -290,7 +291,7 @@ export default function Header() {
                     }`}
                   >
                     Đặt lịch
-                  </a>
+                  </Link>
                 )}
               </nav>
             </div>

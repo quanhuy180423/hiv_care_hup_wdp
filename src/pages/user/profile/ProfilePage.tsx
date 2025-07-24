@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useUploadFile, useGetFileByFilename } from "@/hooks/useMedia"; // <-- THÊM
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,12 +7,15 @@ import { Label } from "@/components/ui/label";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Camera, Save, Edit } from "lucide-react";
 import toast from "react-hot-toast";
+import {
+  getAvatarUrl,
+  uploadAvatarToSupabase,
+} from "@/lib/utils/uploadImage/uploadImage";
 
 export default function ProfilePage() {
   useDocumentTitle();
 
   const { userProfile, updateProfile, isLoading } = useAuth();
-  const { mutate: uploadFile } = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
@@ -23,8 +25,6 @@ export default function ProfilePage() {
     phoneNumber: userProfile?.phoneNumber || "",
     avatar: userProfile?.avatar || "",
   });
-
-  const { data: avatarBlob } = useGetFileByFilename(formData.avatar);
 
   if (!userProfile) {
     return (
@@ -58,33 +58,28 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    uploadFile(file, {
-      onSuccess: async (res) => {
-        const uploadedUrl = res.data.url;
-        const filename = uploadedUrl.split("/").pop() || "";
-
-        try {
-          setError("");
-          await updateProfile({ ...formData, avatar: filename });
-          // Nếu updateProfile cập nhật userProfile trong store, không cần setFormData nữa
-          setFormData((prev) => ({
-            ...prev,
-            avatar: filename,
-          }));
-        } catch (err) {
-          console.error("Cập nhật avatar thất bại:", err);
-          setError("Cập nhật avatar thất bại");
-          toast.error("Cập nhật avatar thất bại");
-        }
-      },
-      onError: (err) => {
-        setError(err.message || "Upload thất bại");
-      },
-    });
+    try {
+      setError("");
+      const { filename } = await uploadAvatarToSupabase(
+        file,
+        userProfile.id.toString()
+      );
+      await updateProfile({ ...formData, avatar: filename });
+      setFormData((prev) => ({
+        ...prev,
+        avatar: filename,
+      }));
+      toast.success("Cập nhật avatar thành công!");
+    } catch {
+      setError("Upload thất bại");
+      toast.error("Upload thất bại");
+    }
   };
 
   return (
@@ -96,9 +91,9 @@ export default function ProfilePage() {
               {/* Avatar Section */}
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  {avatarBlob ? (
+                  {formData.avatar ? (
                     <img
-                      src={URL.createObjectURL(avatarBlob)}
+                      src={getAvatarUrl(formData.avatar)}
                       alt="Avatar"
                       className="w-20 h-20 rounded-full object-cover"
                     />

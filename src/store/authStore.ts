@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 import { authService } from "@/services/authService";
 import type {
   LoginRequest,
@@ -71,13 +71,16 @@ export interface AuthActions {
   reset: () => void;
   // Authentication methods
   login: (credentials: LoginRequest) => Promise<LoginResponse>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: (userData: RegisterRequest) => Promise<any>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   sentOtp: (otpData: SentOtpRequest) => Promise<void>;
   forgotPassword: (passwordData: ForgotPasswordRequest) => Promise<void>;
   googleLogin: () => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleGoogleCallback: (code: string, state: string) => Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateProfile: (profileData: UpdateProfileRequest) => Promise<any>;
   changePassword: (passwordData: ChangePasswordRequest) => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -138,7 +141,7 @@ const initialState: AuthState = {
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
-  devtools(
+  persist(
     (set, get) => ({
       ...initialState,
 
@@ -344,12 +347,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       googleLogin: async () => {
-        try {
-          const authUrl = await authService.getGoogleAuthUrl();
-          window.location.href = authUrl;
-        } catch (error) {
-          throw error;
-        }
+        const authUrl = await authService.getGoogleAuthUrl();
+        window.location.href = authUrl;
       },
 
       handleGoogleCallback: async (code: string, state: string) => {
@@ -483,7 +482,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
     }),
     {
-      name: "auth-store",
+      name: "auth-store", // Key to store in localStorage
+      partialize: (state) => ({
+        user: state.user,
+        userProfile: state.userProfile,
+        tokens: state.tokens,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );

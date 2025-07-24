@@ -91,7 +91,7 @@ export function ProtocolsTable({
                   {protocol.description}
                 </td>
                 <td className="p-3 text-gray-700">{protocol.targetDisease}</td>
-                <td className="p-3 text-center">{protocol.medicines.length}</td>
+                <td className="p-3 text-center">{protocol.medicines?.length ?? 0}</td>
                 <td className="p-3 text-gray-500">
                   {protocol.createdAt
                     ? new Date(protocol.createdAt).toLocaleString()
