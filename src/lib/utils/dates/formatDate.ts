@@ -1,4 +1,5 @@
 import { format, formatDistanceToNow, isValid, parseISO } from "date-fns";
+import { vi } from "date-fns/locale";
 
 /**
  * Formats a date string into a readable format
@@ -16,7 +17,7 @@ export function formatDate(
     const date = parseISO(dateString);
 
     if (isValid(date)) {
-      return format(date, formatStr);
+      return format(date, formatStr, { locale: vi });
     }
 
     return "N/A";

@@ -2,12 +2,23 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, Phone, Shield, CheckCircle, Loader2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  UserPlus,
+  Phone,
+  Shield,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import { registerSchema, sentOtpSchema, type RegisterFormData, type SentOtpFormData } from "@/schemas/auth";
+import { registerSchema, type RegisterFormData } from "@/schemas/auth";
 import toast from "react-hot-toast";
 
 export const RegisterPage = () => {
@@ -19,12 +30,12 @@ export const RegisterPage = () => {
   const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
   const [isOtpValid, setIsOtpValid] = useState(false);
   const [currentEmail, setCurrentEmail] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
+  // const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const navigate = useNavigate();
-  const { register: registerUser, sentOtp, isLoading } = useAuth();
+  const { register: registerUser, sentOtp } = useAuth();
 
   const {
     register,
@@ -73,28 +84,28 @@ export const RegisterPage = () => {
     try {
       setIsSendingOtp(true);
       setVerifyMessage("");
-      
+
       await sentOtp({
         email: watchedEmail,
-        type: 'REGISTER',
+        type: "REGISTER",
       });
-      
+
       setCurrentEmail(watchedEmail);
       setOtpSent(true);
       setCountdown(60);
       setVerifyMessage("Mã OTP đã được gửi đến email của bạn!");
-      
+
       // Show success toast
       toast.success("Mã OTP đã được gửi đến email của bạn!");
-      
+
       // Auto focus first OTP input after a short delay
       setTimeout(() => {
-        const firstOtpInput = document.getElementById('otp-0');
+        const firstOtpInput = document.getElementById("otp-0");
         if (firstOtpInput) {
           firstOtpInput.focus();
         }
       }, 100);
-      
+
       // Start countdown
       const timer = setInterval(() => {
         setCountdown((prev) => {
@@ -105,8 +116,8 @@ export const RegisterPage = () => {
           return prev - 1;
         });
       }, 1000);
-
     } catch (error) {
+      console.error("🌐 Send OTP error:", error);
       setVerifyMessage("Không thể gửi mã OTP. Vui lòng thử lại.");
       toast.error("Không thể gửi mã OTP. Vui lòng thử lại.");
     } finally {
@@ -116,7 +127,7 @@ export const RegisterPage = () => {
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
-    
+
     const newOtp = [...otpCode];
     newOtp[index] = value;
     setOtpCode(newOtp);
@@ -130,7 +141,10 @@ export const RegisterPage = () => {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (e.key === "Backspace" && !otpCode[index] && index > 0) {
       // Move to previous input on backspace
       const prevInput = document.getElementById(`otp-${index - 1}`);
@@ -152,14 +166,18 @@ export const RegisterPage = () => {
         confirmPassword: data.confirmPassword,
         code: data.code,
       });
-      
+
       if (res) {
-        toast.success("Đăng ký thành công! Chào mừng bạn đến với HIV Care Hub.");
+        toast.success(
+          "Đăng ký thành công! Chào mừng bạn đến với HIV Care Hub."
+        );
         // Navigate to dashboard after successful registration
         if (res.data.user.role === "PATIENT") navigate("/");
-        else if (res.data.user.role === "DOCTOR") navigate("/doctor/appointments");
+        else if (res.data.user.role === "DOCTOR")
+          navigate("/doctor/appointments");
         else if (res.data.user.role === "ADMIN") navigate("/admin/dashboard");
-        else if (res.data.user.role === "STAFF") navigate("/staff/appointments");
+        else if (res.data.user.role === "STAFF")
+          navigate("/staff/appointments");
       }
     } catch (err) {
       toast.error(
@@ -243,7 +261,12 @@ export const RegisterPage = () => {
               <Button
                 type="button"
                 onClick={handleSendOtp}
-                disabled={isSendingOtp || !watchedEmail || countdown > 0 || watchedEmail === currentEmail}
+                disabled={
+                  isSendingOtp ||
+                  !watchedEmail ||
+                  countdown > 0 ||
+                  watchedEmail === currentEmail
+                }
                 className="px-4 h-11 bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
               >
                 {isSendingOtp ? (
@@ -260,7 +283,13 @@ export const RegisterPage = () => {
             )}
             {/* Verify Message */}
             {verifyMessage && (
-              <p className={`text-sm ${verifyMessage.includes('thành công') ? 'text-green-600' : 'text-red-600'}`}>
+              <p
+                className={`text-sm ${
+                  verifyMessage.includes("thành công")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
                 {verifyMessage}
               </p>
             )}

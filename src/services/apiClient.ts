@@ -9,9 +9,9 @@ class ApiClient {
   private isRefreshing = false;
   private failedQueue: Array<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolve: (value?: any) => void;
+    resolve: (value?: unknown) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    reject: (error?: any) => void;
+    reject: (error?: unknown) => void;
   }> = [];
 
   constructor() {

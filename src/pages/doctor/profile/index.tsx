@@ -1,28 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useUploadFile, useGetFileByFilename } from "@/hooks/useMedia";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Camera,
-  Save,
-  Edit,
-  Stethoscope,
-  BadgeCheck,
-  X,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Camera, Save, Edit, Plus, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
+import {
+  getAvatarUrl,
+  uploadAvatarToSupabase,
+} from "@/lib/utils/uploadImage/uploadImage";
 
 export default function ProfileDoctorPage() {
   const { userProfile, updateProfile, isLoading, refetchProfile } = useAuth();
-  const { mutate: uploadFile } = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
@@ -47,8 +37,6 @@ export default function ProfileDoctorPage() {
       });
     }
   }, [userProfile]);
-
-  const { data: avatarBlob } = useGetFileByFilename(formData.avatar);
 
   if (!userProfile) {
     return (
@@ -95,7 +83,9 @@ export default function ProfileDoctorPage() {
     setNewCertification("");
   };
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -105,30 +95,22 @@ export default function ProfileDoctorPage() {
       return;
     }
 
-    uploadFile(file, {
-      onSuccess: async (res) => {
-        const uploadedUrl = res.data.url;
-        const filename = uploadedUrl.split("/").pop() || "";
-
-        try {
-          setError("");
-          await updateProfile({ ...formData, avatar: filename });
-          setFormData((prev) => ({
-            ...prev,
-            avatar: filename,
-          }));
-          toast.success("Cập nhật ảnh đại diện thành công");
-        } catch (err) {
-          console.error("Cập nhật avatar thất bại:", err);
-          setError("Cập nhật avatar thất bại");
-          toast.error("Cập nhật avatar thất bại");
-        }
-      },
-      onError: (err) => {
-        setError(err.message || "Upload thất bại");
-        toast.error(err.message || "Upload thất bại");
-      },
-    });
+    try {
+      setError("");
+      const { filename } = await uploadAvatarToSupabase(
+        file,
+        userProfile.id.toString()
+      );
+      await updateProfile({ ...formData, avatar: filename });
+      setFormData((prev) => ({
+        ...prev,
+        avatar: filename,
+      }));
+      toast.success("Cập nhật avatar thành công!");
+    } catch {
+      setError("Upload thất bại");
+      toast.error("Upload thất bại");
+    }
   };
 
   const addCertification = () => {
@@ -154,29 +136,24 @@ export default function ProfileDoctorPage() {
   };
 
   return (
-    <div className="container">
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Stethoscope className="h-6 w-6 text-primary" />
-              <span>Hồ sơ bác sĩ</span>
-            </CardTitle>
-          </CardHeader>
-
+    <div className="w-full mx-auto space-y-6">
+      <div className="w-full">
+        <Card className="w-full">
           <CardContent className="space-y-6">
             {/* Avatar Section */}
-            <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex items-center gap-4">
               <div className="relative">
-                <Avatar className="h-24 w-24">
-                  {avatarBlob ? (
-                    <AvatarImage src={URL.createObjectURL(avatarBlob)} />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-2xl font-bold">
-                      {userProfile.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+                {formData.avatar ? (
+                  <img
+                    src={getAvatarUrl(formData.avatar)}
+                    alt="Avatar"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                    {userProfile.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
 
                 <input
                   type="file"
@@ -194,26 +171,20 @@ export default function ProfileDoctorPage() {
                   <Camera className="h-4 w-4" />
                 </Button>
               </div>
-
-              <div className="text-center sm:text-left">
-                <h3 className="text-xl font-semibold">{userProfile.name}</h3>
-                <p className="text-muted-foreground">{userProfile.email}</p>
-
+              <div>
+                <h3 className="text-lg font-semibold">{userProfile.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {userProfile.email}
+                </p>
                 {userProfile.doctor && (
-                  <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-2">
-                    <Badge
-                      variant="secondary"
-                      className="flex items-center gap-1"
-                    >
-                      <BadgeCheck className="h-4 w-4" />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
                       {userProfile.doctor.specialization}
-                    </Badge>
+                    </span>
                   </div>
                 )}
               </div>
             </div>
-
-            <Separator />
 
             {/* Form Info */}
             <div className="space-y-4">
@@ -224,8 +195,8 @@ export default function ProfileDoctorPage() {
               )}
 
               <div className="flex items-center justify-between">
-                <h4 className="text-lg font-medium">Thông tin cá nhân</h4>
-                {!isEditing ? (
+                <h4 className="text-sm font-medium">Thông tin cá nhân</h4>
+                {!isEditing && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -236,7 +207,8 @@ export default function ProfileDoctorPage() {
                     <Edit className="h-4 w-4" />
                     Chỉnh sửa
                   </Button>
-                ) : (
+                )}
+                {isEditing && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -340,8 +312,9 @@ export default function ProfileDoctorPage() {
                           className="flex items-center justify-between"
                         >
                           <div className="flex items-start gap-2">
-                            <BadgeCheck className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                            <p>{cert}</p>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                              {cert}
+                            </span>
                           </div>
                           {isEditing && (
                             <Button
@@ -367,7 +340,7 @@ export default function ProfileDoctorPage() {
               </div>
 
               {isEditing && (
-                <div className="flex gap-2 pt-4 justify-end">
+                <div className="flex gap-2 pt-4">
                   <Button
                     onClick={handleSave}
                     className="flex items-center gap-2 cursor-pointer"

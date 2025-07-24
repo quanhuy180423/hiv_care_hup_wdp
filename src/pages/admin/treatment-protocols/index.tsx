@@ -8,19 +8,18 @@ import { TreatmentProtocolFormModal } from "./components/TreatmentProtocolFormMo
 import { TreatmentProtocolDetailsDrawer } from "./components/TreatmentProtocolDetailsDrawer";
 import { SearchAndFilter } from "./components/SearchAndFilter";
 import { createColumns } from "./columns";
-import { 
-  useTreatmentProtocols, 
-  useCreateTreatmentProtocol, 
-  useUpdateTreatmentProtocol, 
+import {
+  useTreatmentProtocols,
+  useCreateTreatmentProtocol,
+  useUpdateTreatmentProtocol,
   useDeleteTreatmentProtocol,
-  useCloneTreatmentProtocol
+  useCloneTreatmentProtocol,
 } from "@/hooks/useTreatmentProtocols";
 import { toast } from "react-hot-toast";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
 import type { TreatmentProtocolFormValues } from "@/schemas/treatmentProtocol";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
-import { handleApiError } from "@/lib/utils/errorHandler";
 
 export default function TreatmentProtocolsManagement() {
   const [searchText, setSearchText] = useState("");
@@ -34,16 +33,21 @@ export default function TreatmentProtocolsManagement() {
     maxMedicineCount: undefined as number | undefined,
   });
 
- 
   const [globalFilter, setGlobalFilter] = useState("");
 
   // Modal and drawer states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingProtocol, setEditingProtocol] = useState<TreatmentProtocol | null>(null);
-  const [selectedProtocol, setSelectedProtocol] = useState<TreatmentProtocol | null>(null);
+  const [editingProtocol, setEditingProtocol] =
+    useState<TreatmentProtocol | null>(null);
+  const [selectedProtocol, setSelectedProtocol] =
+    useState<TreatmentProtocol | null>(null);
 
-  const { data: protocolsData, isLoading, refetch } = useTreatmentProtocols({
+  const {
+    data: protocolsData,
+    isLoading,
+    refetch,
+  } = useTreatmentProtocols({
     page: currentPage.toString(),
     limit: pageSize.toString(),
     search: searchText,
@@ -72,15 +76,15 @@ export default function TreatmentProtocolsManagement() {
     setCurrentPage(1); // Reset về trang đầu khi tìm kiếm
   };
 
-  const handleFilter = (filters: { 
-    targetDisease?: string; 
-    createdById?: number; 
-    minMedicineCount?: number; 
-    maxMedicineCount?: number; 
+  const handleFilter = (filters: {
+    targetDisease?: string;
+    createdById?: number;
+    minMedicineCount?: number;
+    maxMedicineCount?: number;
   }) => {
-    setSearchParams(prev => ({ 
-      ...prev, 
-      ...filters
+    setSearchParams((prev) => ({
+      ...prev,
+      ...filters,
     }));
     setCurrentPage(1); // Reset về trang đầu khi filter
   };
@@ -103,15 +107,15 @@ export default function TreatmentProtocolsManagement() {
       toast.success("Tạo protocol thành công!");
       closeModal();
       refetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Create protocol error:", error);
-      toast.error(handleApiError(error));
     }
   };
 
   const handleUpdateProtocol = async (values: TreatmentProtocolFormValues) => {
     if (!editingProtocol) return;
-    
+
     try {
       await updateProtocolMutation.mutateAsync({
         id: editingProtocol.id,
@@ -120,9 +124,9 @@ export default function TreatmentProtocolsManagement() {
       toast.success("Cập nhật protocol thành công!");
       closeModal();
       refetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Update protocol error:", error);
-      toast.error(handleApiError(error));
     }
   };
 
@@ -133,14 +137,17 @@ export default function TreatmentProtocolsManagement() {
       await deleteProtocolMutation.mutateAsync(protocol.id);
       toast.success("Xóa protocol thành công!");
       refetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Delete protocol error:", error);
-      toast.error(handleApiError(error));
     }
   };
 
   const handleCloneProtocol = async (protocol: TreatmentProtocol) => {
-    const newName = prompt("Nhập tên cho protocol mới:", `${protocol.name} (Copy)`);
+    const newName = prompt(
+      "Nhập tên cho protocol mới:",
+      `${protocol.name} (Copy)`
+    );
     if (!newName) return;
 
     try {
@@ -150,9 +157,9 @@ export default function TreatmentProtocolsManagement() {
       });
       toast.success("Sao chép protocol thành công!");
       refetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Clone protocol error:", error);
-      toast.error(handleApiError(error));
     }
   };
 
@@ -181,9 +188,10 @@ export default function TreatmentProtocolsManagement() {
     setSelectedProtocol(null);
   };
 
-  const isLoadingAny = isLoading || 
-    createProtocolMutation.isPending || 
-    updateProtocolMutation.isPending || 
+  const isLoadingAny =
+    isLoading ||
+    createProtocolMutation.isPending ||
+    updateProtocolMutation.isPending ||
     deleteProtocolMutation.isPending ||
     cloneProtocolMutation.isPending;
 
@@ -199,12 +207,18 @@ export default function TreatmentProtocolsManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Quản lý protocols điều trị</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Quản lý protocols điều trị
+          </h1>
           <p className="text-gray-600 mt-1">
             Quản lý các protocols điều trị trong hệ thống
           </p>
         </div>
-        <Button onClick={handleOpenCreateModal} className="flex items-center gap-2" variant="outline">
+        <Button
+          onClick={handleOpenCreateModal}
+          className="flex items-center gap-2"
+          variant="outline"
+        >
           <Plus className="h-4 w-4" />
           Thêm protocol mới
         </Button>
@@ -213,7 +227,9 @@ export default function TreatmentProtocolsManagement() {
       {/* Search and Filter */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Tìm kiếm và lọc</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Tìm kiếm và lọc
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <SearchAndFilter
@@ -227,7 +243,9 @@ export default function TreatmentProtocolsManagement() {
       {/* Content */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Danh sách protocols</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Danh sách protocols
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -235,7 +253,7 @@ export default function TreatmentProtocolsManagement() {
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
               <span className="ml-2 text-gray-600">Đang tải dữ liệu...</span>
             </div>
-          ) : protocols && protocols.length > 0 ? (
+          ) : Array.isArray(protocols) && protocols.length > 0 ? (
             <div>
               {/* Search */}
               <div className="flex items-center py-4">
@@ -285,4 +303,4 @@ export default function TreatmentProtocolsManagement() {
       />
     </div>
   );
-} 
+}

@@ -26,10 +26,13 @@ export function useAutoFillMedicinesFromTreatmentProtocol({
       // Fill medicines using replace
       const additionalMeds = selected.medicines.map((med) => ({
         id: med.medicine?.id ?? Date.now(),
-        name: med.medicine?.name ?? "",
+        medicineName: med.medicine?.name ?? "", // Updated to match CustomMedicationItem
         unit: med.medicine?.unit ?? "",
-        dose: med.medicine?.dose ?? med.dosage ?? "",
-        price: med.medicine?.price ?? "",
+        dosage: med.medicine?.dose ?? med.dosage ?? "", // Updated to match CustomMedicationItem
+        price:
+          typeof med.medicine?.price === "string"
+            ? parseFloat(med.medicine.price)
+            : med.medicine?.price ?? undefined,
         createdAt:
           med.medicine?.createdAt ?? new Date().toISOString().slice(0, 16),
         updatedAt:
