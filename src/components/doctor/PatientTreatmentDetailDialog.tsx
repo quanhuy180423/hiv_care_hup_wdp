@@ -253,30 +253,39 @@ export const PatientTreatmentDetailDialog = ({
                 </div>
                 {(() => {
                   const protocolMeds = detail.protocol?.medicines || [];
-                  if (protocolMeds.length > 0) {
-                    return (
-                      <ul className="list-disc ml-6 text-sm space-y-1">
-                        {protocolMeds.map(
-                          (med: (typeof protocolMeds)[number]) => (
-                            <li key={med.id}>
-                              <span className="font-medium">
-                                {med.medicine?.name}
-                              </span>
-                              {med.dosage && (
-                                <span className="ml-1">- {med.dosage}</span>
-                              )}
-                              {med.notes && (
-                                <span className="ml-2 text-xs text-gray-400">
-                                  [{med.notes}]
-                                </span>
-                              )}
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    );
-                  }
-                  return (
+                  const customMeds = detail.customMedications || [];
+                  // Tạo set id hoặc tên thuốc custom để filter
+                  const customMedKeys = new Set(
+                    customMeds.map((c) =>
+                      String(c.medicineId ?? c.medicineName).toLowerCase()
+                    )
+                  );
+                  // Lọc thuốc phác đồ không trùng với custom
+                  const filteredProtocolMeds = protocolMeds.filter((med) => {
+                    const key = String(
+                      med.medicineId ?? med.medicine?.name
+                    ).toLowerCase();
+                    return !customMedKeys.has(key);
+                  });
+                  return filteredProtocolMeds.length > 0 ? (
+                    <ul className="list-disc ml-6 text-sm space-y-1">
+                      {filteredProtocolMeds.map((med) => (
+                        <li key={med.id}>
+                          <span className="font-medium">
+                            {med.medicine?.name}
+                          </span>
+                          {med.dosage && (
+                            <span className="ml-1">- {med.dosage}</span>
+                          )}
+                          {med.notes && (
+                            <span className="ml-2 text-xs text-gray-400">
+                              [{med.notes}]
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
                     <span className="ml-2 text-gray-500">
                       Không có thuốc trong phác đồ
                     </span>
