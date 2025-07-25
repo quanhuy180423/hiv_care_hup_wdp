@@ -1,5 +1,6 @@
 import Breadcrumb from "@/components/doctor/Breadcrumb";
 import ProtocolFormCard from "@/components/doctor/ProtocolFormCard";
+import TestResultCreate from "@/pages/doctor/testResult/components/TestResultCreate";
 
 import {
   usePatientTreatment,
@@ -551,6 +552,12 @@ export default function ConsultationPage() {
           handleSubmitForm={handleSubmitForm}
           toast={toast}
         />
+      </div>
+      <div className="mt-10">
+        <div className="bg-white rounded-lg shadow-lg w-full p-6 relative">
+          <h2 className="text-xl font-semibold mb-4">Kết quả xét nghiệm</h2>
+          <TestResultCreate />
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -10,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 import { translateStatus } from "@/lib/utils/status/translateStatus";
+import TestResultCreate from "@/pages/doctor/testResult/components/TestResultCreate";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
 import {
   useAppointmentDrawerStore,
@@ -18,6 +25,7 @@ import {
 import { useMeetingRecordDialogStore } from "@/store/meetingRecordStore";
 import type { Appointment, AppointmentStatus } from "@/types/appointment";
 import { MoreVertical, Stethoscope } from "lucide-react";
+import { useState } from "react";
 
 const STATUS_FLOW: AppointmentStatus[] = [
   "PENDING",
@@ -41,6 +49,8 @@ interface Props {
 }
 
 const AppointmentActionsCell = ({ appointment }: Props) => {
+  const [showTestResultForm, setShowTestResultForm] = useState(false);
+
   const { openDrawer } = useAppointmentDrawerStore();
   const { openModal } = useAppointmentModalStore();
   const { mutate: changeStatus } = useChangeAppointmentStatus();
@@ -63,6 +73,10 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
       id: appointment.id,
       status: "CANCELLED",
     });
+  };
+
+  const handleOpenTestResultForm = () => {
+    setShowTestResultForm(true);
   };
 
   return (
@@ -94,23 +108,33 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
             Khám ngay
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => {}}>
-          Thêm bài thử nghiệm
+        <DropdownMenuItem
+          onClick={handleOpenTestResultForm}
+          onSelect={(e) => e.preventDefault()}
+          className="cursor-pointer"
+        >
+          Thêm kết quả xét nghiệm
         </DropdownMenuItem>
+        <Dialog open={showTestResultForm} onOpenChange={setShowTestResultForm}>
+          <DialogContent className="max-w-2xl bg-white">
+            <DialogHeader>
+              <DialogTitle>Thêm kết quả xét nghiệm</DialogTitle>
+            </DialogHeader>
+            <TestResultCreate onClose={() => setShowTestResultForm(false)} />
+          </DialogContent>
+        </Dialog>
         <DropdownMenuItem
           onClick={() => openDrawer(appointment)}
           className="cursor-pointer"
         >
           Xem chi tiết
         </DropdownMenuItem>
-
         <DropdownMenuItem
           onClick={() => openModal(appointment)}
           className="cursor-pointer"
         >
           Cập nhật thông tin
         </DropdownMenuItem>
-
         {appointment.type === "ONLINE" && (
           <DropdownMenuItem
             onClick={() => openMeetingRecordDialog(appointment)}
@@ -119,7 +143,6 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
             Biên bản cuộc họp
           </DropdownMenuItem>
         )}
-
         {appointment.status !== "COMPLETED" &&
           appointment.status !== "CANCELLED" &&
           getNextStatus(appointment.status) && (
@@ -130,7 +153,6 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
               Chuyển sang: {translateStatus(getNextStatus(appointment.status)!)}
             </DropdownMenuItem>
           )}
-
         {appointment.status !== "CANCELLED" &&
           appointment.status !== "COMPLETED" && (
             <ConfirmDelete
