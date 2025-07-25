@@ -96,17 +96,8 @@ export const AppointmentFilters = ({ onChange }: Props) => {
             <SelectItem value="PENDING" className=" ">
               Đang chờ
             </SelectItem>
-            <SelectItem value="CHECKIN" className=" ">
-              Có mặt
-            </SelectItem>
             <SelectItem value="PAID" className=" ">
               Đã thanh toán
-            </SelectItem>
-            <SelectItem value="PROCESS" className="">
-              Đang khám
-            </SelectItem>
-            <SelectItem value="CONFIRMED" className="">
-              Đã xác nhận
             </SelectItem>
             <SelectItem value="CANCELLED" className="">
               Đã huỷ
