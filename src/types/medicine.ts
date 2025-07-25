@@ -101,16 +101,16 @@ export type MedicineResponse = {
 };
 
 export enum MedicationSchedule {
-  MORNING = "morning",
-  AFTERNOON = "afternoon",
-  NIGHT = "night",
+  MORNING = "MORNING",
+  AFTERNOON = "AFTERNOON",
+  NIGHT = "NIGHT",
 }
 
 export enum DurationUnit {
-  DAY = "day",
-  WEEK = "week",
-  MONTH = "month",
-  YEAR = "year",
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+  YEAR = "YEAR",
 }
 
 export type CustomMedication = {

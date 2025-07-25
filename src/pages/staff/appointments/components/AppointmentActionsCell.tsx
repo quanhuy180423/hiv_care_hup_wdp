@@ -1,30 +1,28 @@
-"use client";
+import { useNavigate } from "react-router-dom";
 
+import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
+import { translateStatus } from "@/lib/utils/status/translateStatus";
+import { patientTreatmentService } from "@/services/patientTreatmentService";
 import {
   useAppointmentDrawerStore,
   useAppointmentModalStore,
 } from "@/store/appointmentStore";
-import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
-import type { Appointment } from "@/types/appointment";
-import { ConfirmDelete } from "@/components/ConfirmDelete";
-import type { AppointmentStatus } from "@/types/appointment";
-import { translateStatus } from "@/lib/utils/status/translateStatus";
 import { useMeetingRecordDialogStore } from "@/store/meetingRecordStore";
+import type { Appointment, AppointmentStatus } from "@/types/appointment";
+import { MoreVertical, Stethoscope } from "lucide-react";
 
 const STATUS_FLOW: AppointmentStatus[] = [
   "PENDING",
-  "CHECKIN",
   "PAID",
-  "PROCESS",
-  "CONFIRMED",
+  "CANCELLED",
   "COMPLETED",
 ];
 
@@ -47,6 +45,8 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
   const { openModal } = useAppointmentModalStore();
   const { mutate: changeStatus } = useChangeAppointmentStatus();
   const { open: openMeetingRecordDialog } = useMeetingRecordDialogStore();
+
+  const navigate = useNavigate();
 
   const handleChangeStatus = () => {
     const nextStatus = getNextStatus(appointment.status);
@@ -73,6 +73,30 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white">
+        {["PENDING", "CONFIRMED"].includes(
+          (appointment.status || "").toUpperCase()
+        ) && (
+          <DropdownMenuItem
+            onClick={async () => {
+              const patientId = appointment.userId;
+              const res = await patientTreatmentService.getActiveByPatient(
+                patientId
+              );
+
+              const patientTreatments = res.data[0];
+              navigate(
+                `/doctor/patient-treatments/${patientTreatments.id}/consultation`
+              );
+            }}
+            className="flex items-center cursor-pointer"
+          >
+            <Stethoscope className="w-4 h-4 mr-2" />
+            Khám ngay
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onClick={() => {}}>
+          Thêm bài thử nghiệm
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => openDrawer(appointment)}
           className="cursor-pointer"

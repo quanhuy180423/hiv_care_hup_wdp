@@ -154,7 +154,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                   </td>
                   {/* Trạng thái lịch hẹn */}
                   <td className="p-3">
-                    {t.appointmentStatus === "CONFIRMED" && (
+                    {t.appointmentStatus === "PAID" && (
                       <span className="inline-block px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-semibold">
                         Đã xác nhận
                       </span>
@@ -184,14 +184,14 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                     {/* Chỉ render nút Khám ngay khi điều trị chưa kết thúc, chưa có phác đồ và trạng thái lịch hẹn phù hợp */}
                     {t.status !== false &&
                       !t.protocol &&
-                      ["PENDING", "CONFIRMED"].includes(
+                      ["PENDING", "PAID"].includes(
                         (t.appointmentStatus || "").toUpperCase()
                       ) && (
                         <Button
                           className="inline-flex items-center justify-center min-w-[40px] h-9 rounded bg-blue-500 hover:bg-blue-600 border-none text-white font-medium text-xs focus:ring-2 focus:ring-blue-400"
                           onClick={() =>
                             navigate(
-                              `/doctor/patient-treatments/${t.id}/protocol`
+                              `/doctor/patient-treatments/${t.id}/consultation`
                             )
                           }
                           aria-label="Khám ngay"

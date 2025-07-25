@@ -193,7 +193,7 @@ export function ProtocolFormModal({
   const isStatusAllowed =
     !appointmentStatus ||
     appointmentStatus === "PENDING" ||
-    appointmentStatus === "CONFIRMED";
+    appointmentStatus === "PAID";
   const statusTooltip = !isStatusAllowed
     ? appointmentStatus === "COMPLETED"
       ? "Lịch hẹn đã hoàn thành. Không thể cập nhật phác đồ."

@@ -1,13 +1,3 @@
-// TestResult type for test result records
-export interface TestResult {
-  id: number;
-  patientTreatmentId: number;
-  testName: string; // Name of the test
-  result: string; // Result of the test
-  date: string; // ISO date string
-  note?: string; // Optional note for the test result
-}
-
 export enum TestInterpretation {
   POSITIVE = "POSITIVE",
   NEGATIVE = "NEGATIVE",
@@ -35,4 +25,38 @@ export function translateInterpretation(
   }
 }
 
-export type TestResultCreate = Omit<TestResult, "id">;
+export type TestResultCreate = Omit<
+  TestResult,
+  "id" | "createdAt" | "updatedAt"
+>;
+
+export interface TestResultFormValues {
+  name: string;
+  userId?: number;
+  doctorId?: number;
+  type: string;
+  result: string;
+  price?: number;
+  description?: string;
+  patientTreatmentId?: number;
+  resultDate: Date;
+}
+export interface TestResult {
+  id: number;
+  name: string;
+  userId: number;
+  doctorId: number;
+  type: string;
+  result: string;
+  price: number;
+  description?: string;
+  patientTreatmentId: number;
+  resultDate: Date;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface TestResultResponse {
+  data: TestResult;
+  statusCode: number;
+  message: string;
+}
