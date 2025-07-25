@@ -2,7 +2,10 @@ import { useState } from "react";
 import { format, startOfWeek, addDays } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { vi } from "date-fns/locale";
-import { useAppointmentsByUser } from "@/hooks/useAppointments";
+import {
+  useAppointmentsByUser,
+  useChangeAppointmentStatus,
+} from "@/hooks/useAppointments";
 import useAuth from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,12 +34,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Appointment } from "@/types/appointment";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
+import { ConfirmDelete } from "@/components/ConfirmDelete";
 
 const AppointmentHistory = () => {
   const { user } = useAuth();
@@ -56,6 +61,7 @@ const AppointmentHistory = () => {
       dateTo: format(endOfSelectedWeek, "yyyy-MM-dd"),
     }
   );
+  const { mutate: changeStatus } = useChangeAppointmentStatus();
 
   const weekDates = Array.from({ length: 7 }).map((_, i) =>
     addDays(startOfSelectedWeek, i)
@@ -85,20 +91,14 @@ const AppointmentHistory = () => {
     switch (status) {
       case "COMPLETED":
         return (
-          <Badge variant="default" className="gap-1">
+          <Badge variant="outline" className="gap-1">
             <CheckCircle className="h-3 w-3" /> Hoàn thành
           </Badge>
         );
       case "CANCELLED":
         return (
-          <Badge variant="destructive" className="gap-1">
+          <Badge variant="outline" className="gap-1">
             <XCircle className="h-3 w-3" /> Đã hủy
-          </Badge>
-        );
-      case "CONFIRMED":
-        return (
-          <Badge variant="default" className="gap-1">
-            Đã xác nhận
           </Badge>
         );
       default:
@@ -113,6 +113,40 @@ const AppointmentHistory = () => {
   const handleAppointmentClick = (appt: Appointment) => {
     setSelectedAppointment(appt);
     setIsDialogOpen(true);
+  };
+
+  const canCancelAppointment = (appointment: Appointment) => {
+    // Không thể hủy nếu đã hủy hoặc đã hoàn thành
+    if (
+      appointment.status === "CANCELLED" ||
+      appointment.status === "COMPLETED"
+    ) {
+      return false;
+    }
+
+    // Kiểm tra thời gian: không thể hủy nếu còn 1 ngày hoặc ít hơn
+    const appointmentDate = new Date(appointment.appointmentTime);
+    const now = new Date();
+    const timeDiff = appointmentDate.getTime() - now.getTime();
+    const daysDiff = timeDiff / (1000 * 3600 * 24);
+
+    return daysDiff > 1; // Chỉ có thể hủy nếu còn hơn 1 ngày
+  };
+
+  const handleCancelAppointment = () => {
+    if (selectedAppointment) {
+      changeStatus(
+        {
+          id: selectedAppointment.id,
+          status: "CANCELLED",
+        },
+        {
+          onSuccess: () => {
+            setIsDialogOpen(false);
+          },
+        }
+      );
+    }
   };
 
   return (
@@ -325,7 +359,7 @@ const AppointmentHistory = () => {
                           Bác sĩ
                         </h4>
                         <p className="font-medium">
-                          BS. {selectedAppointment.doctor.user.name}
+                          {selectedAppointment.doctor.user.name}
                         </p>
                       </div>
                     </div>
@@ -338,7 +372,7 @@ const AppointmentHistory = () => {
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-gray-500">
-                          Thời gian
+                          Thời gian đặt lịch
                         </h4>
                         <p className="font-medium">
                           {formatUtcDateManually(
@@ -409,7 +443,7 @@ const AppointmentHistory = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">
-                        Thời gian khám
+                        Thời gian hoạt động
                       </h4>
                       <p className="font-medium">
                         {selectedAppointment.service.startTime} -{" "}
@@ -505,6 +539,31 @@ const AppointmentHistory = () => {
                   </div>
                 )}
               </div>
+              <DialogFooter>
+                {canCancelAppointment(selectedAppointment) && (
+                  <ConfirmDelete
+                    onConfirm={handleCancelAppointment}
+                    title="Xác nhận hủy lịch hẹn"
+                    description="Bạn có chắc chắn muốn hủy lịch hẹn này không? Hành động này không thể hoàn tác."
+                    cancelText="Không"
+                    confirmText="Xác nhận hủy"
+                    trigger={
+                      <Button variant="outline" className="cursor-pointer bg-red-600 text-white">
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Hủy lịch hẹn
+                      </Button>
+                    }
+                    asChild
+                  />
+                )}
+                {!canCancelAppointment(selectedAppointment) &&
+                  selectedAppointment.status !== "CANCELLED" &&
+                  selectedAppointment.status !== "COMPLETED" && (
+                    <p className="text-sm text-red-500">
+                      Không thể hủy lịch hẹn trong vòng 24 giờ trước giờ khám
+                    </p>
+                  )}
+              </DialogFooter>
             </>
           )}
         </DialogContent>
