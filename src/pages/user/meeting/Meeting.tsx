@@ -434,7 +434,6 @@ const Meeting: React.FC = () => {
         meetingId: roomId,
         name: "Participant",
         micEnabled: true,
-
         webcamEnabled: true,
         debugMode: true,
       }}
