@@ -21,10 +21,7 @@ import { useMeetingRecordDialogStore } from "@/store/meetingRecordStore";
 
 const STATUS_FLOW: AppointmentStatus[] = [
   "PENDING",
-  "CHECKIN",
   "PAID",
-  "PROCESS",
-  "CONFIRMED",
   "COMPLETED",
 ];
 

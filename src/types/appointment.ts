@@ -1,14 +1,7 @@
 import type { Service } from "./service";
 
 export type AppointmentType = "ONLINE" | "OFFLINE";
-export type AppointmentStatus =
-  | "PENDING"
-  | "CHECKIN"
-  | "PAID"
-  | "PROCESS"
-  | "CONFIRMED"
-  | "CANCELLED"
-  | "COMPLETED";
+export type AppointmentStatus = "PENDING" | "PAID" | "CANCELLED" | "COMPLETED";
 
 export interface User {
   id: number;
