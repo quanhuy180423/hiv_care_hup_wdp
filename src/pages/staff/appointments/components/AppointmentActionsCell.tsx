@@ -146,9 +146,7 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
         {appointment.status !== "COMPLETED" &&
           appointment.status !== "CANCELLED" && (
             <DropdownMenuItem
-              onClick={() =>
-                navigate(`/staff/payments?userId=${appointment.userId}`)
-              }
+              onClick={() => navigate(`/staff/payments/${appointment.userId}`)}
               className="cursor-pointer"
             >
               Thanh toán
