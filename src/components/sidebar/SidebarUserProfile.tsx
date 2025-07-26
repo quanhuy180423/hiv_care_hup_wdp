@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Calendar, LogOut, Shield, Syringe, User } from "lucide-react";
+import { Calendar, LogOut, Syringe, User } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import useAuth from "@/hooks/useAuth";
@@ -22,7 +22,7 @@ interface SidebarUserProfileProps {
 
 const sidebarNav = [
   { id: "profile", name: "Hồ sơ", icon: User, path: "/user/profile" },
-  { id: "security", name: "Bảo mật", icon: Shield, path: "/user/security" },
+  // { id: "security", name: "Bảo mật", icon: Shield, path: "/user/security" },
   {
     id: "appointments",
     name: "Lịch hẹn",

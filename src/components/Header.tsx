@@ -120,6 +120,11 @@ export default function Header() {
                 >
                   Liên hệ
                 </Link>
+                <Link to="/knowledge" className={`font-medium transition-colors ${
+                    isActive("/knowledge")
+                      ? "text-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}>Blog</Link>
                 {isAuthenticated && (
                   <Link
                     to="/services/appointment/register"

@@ -3,6 +3,7 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
 // Doctor Card Component
 const DoctorCard = ({
@@ -74,9 +75,11 @@ const DoctorCard = ({
         </div>
 
         {/* Bottom Section - Action Button */}
-        <button className="w-full bg-slate-50 border border-purple-400 text-slate-700 px-6 py-3 rounded-lg font-medium hover:bg-slate-100 hover:border-purple-500 transition-all duration-200 text-sm">
-          Đặt Lịch Khám
-        </button>
+        <Link to="services/appointment/register">
+          <Button className="w-full bg-slate-50 border border-purple-400 text-slate-700 px-6 py-3 rounded-lg font-medium hover:bg-slate-100 hover:border-purple-500 transition-all duration-200 text-sm">
+            Đặt Lịch Khám
+          </Button>
+        </Link>
       </div>
     </div>
   );
@@ -119,25 +122,27 @@ const HomePage = () => {
 
               <div className="space-y-6">
                 {/* Book Appointment Button */}
-                <button className="bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors transform hover:scale-105 flex items-center space-x-3">
-                  <span>Đặt lịch khám</span>
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
+                <Link to="services/appointment/register">
+                  <button className="bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors transform hover:scale-105 flex items-center space-x-3">
+                    <span>Đặt lịch khám</span>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                </Link>
 
                 {/* Watch Videos Section */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 mt-2">
                   <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-purple-700 transition-colors">
                     <svg
                       className="w-6 h-6 text-white"
@@ -238,9 +243,11 @@ const HomePage = () => {
                         </p>
                       </div>
                     </div>
-                    <button className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
-                      Đặt Ngay
-                    </button>
+                    <Link to="services/appointment/register">
+                      <button className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
+                        Đặt Ngay
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>
