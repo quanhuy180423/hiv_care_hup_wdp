@@ -71,6 +71,8 @@ import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { formatDate } from "@/lib/utils/dates/formatDate";
 import { getAvatarUrl } from "@/lib/utils/uploadImage/uploadImage";
 import type { DoctorScheduleByDate } from "@/types/doctor";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
 const appointmentSchema = z
   .object({
@@ -300,7 +302,7 @@ const RegisterAppointment = () => {
     });
   };
 
-  const DoctorCardMini = ({
+   const DoctorCard = ({
     doctor,
     isSelected,
     isAvailable,
@@ -313,42 +315,58 @@ const RegisterAppointment = () => {
   }) => (
     <div
       onClick={onClick}
-      className={`cursor-pointer bg-white rounded-xl border-2 p-4 flex items-center gap-4 shadow-sm transition-all duration-200
+      className={`cursor-pointer bg-white rounded-xl border-2 p-6 shadow-lg transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 h-full relative
       ${
         isSelected
-          ? "border-purple-600 ring-2 ring-purple-200"
+          ? "border-purple-600 ring-2 ring-purple-200 bg-purple-50"
           : "border-gray-200 hover:border-purple-400"
       }
       ${!isAvailable ? "opacity-60 pointer-events-none" : ""}
     `}
     >
-      <div className="relative">
-        <img
-          src={
-            getAvatarUrl(doctor.user.avatar || "") ||
-            "/images/default-avatar.png"
-          }
-          alt={doctor.user.name}
-          className="w-14 h-14 rounded-full object-cover border-2 border-purple-400"
-        />
-      </div>
-      <div className="flex-1">
-        <div className="font-semibold text-base text-gray-900">
-          {doctor.user.name}
-        </div>
-        <div className="text-xs text-gray-500">
-          {doctor.specialization || "Bác sĩ đa khoa"}
-        </div>
-        <div className="flex items-center gap-1 mt-1">
-          <span
-            className={`w-2 h-2 rounded-full ${
+      <div className="flex flex-col items-center text-center space-y-4">
+        <div className="relative">
+          <img
+            src={
+              getAvatarUrl(doctor.user.avatar || "") ||
+              "/images/default-avatar.png"
+            }
+            alt={doctor.user.name}
+            className="w-20 h-20 rounded-full object-cover border-4 border-purple-400 shadow-md"
+          />
+          <div
+            className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-3 border-white ${
               isAvailable ? "bg-emerald-500" : "bg-rose-500"
             }`}
-          ></span>
-          <span className="text-xs">{isAvailable ? "Có sẵn" : "Bận"}</span>
+          />
         </div>
+        
+        <div className="space-y-2">
+          <h3 className="font-bold text-lg text-gray-900 leading-tight">
+            {doctor.user.name}
+          </h3>
+          <p className="text-sm text-gray-600 font-medium">
+            {doctor.specialization || "Bác sĩ đa khoa"}
+          </p>
+          
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isAvailable ? "bg-emerald-500" : "bg-rose-500"
+              }`}
+            />
+            <span className="text-xs font-medium">
+              {isAvailable ? "Có sẵn" : "Bận"}
+            </span>
+          </div>
+        </div>
+        
+        {isSelected && (
+          <div className="absolute top-4 right-4">
+            <CheckCircle className="w-6 h-6 text-purple-600" />
+          </div>
+        )}
       </div>
-      {isSelected && <CheckCircle className="w-5 h-5 text-purple-600" />}
     </div>
   );
 
@@ -557,33 +575,76 @@ const RegisterAppointment = () => {
       </div>
       {/* Carousel chọn bác sĩ */}
       {selectedService?.type !== "CONSULT" && (
-        <>
-          <Label>Chọn bác sĩ</Label>
-          <div className="flex gap-4 overflow-x-auto py-2">
-            {availableDoctors?.length === 0 && (
-              <div className="p-4 text-gray-500">
-                Không có bác sĩ nào trống ngày này
-              </div>
-            )}
-            {availableDoctors?.map((doctor) => (
-              <DoctorCardMini
-                key={doctor.id}
-                doctor={doctor}
-                isAvailable={true}
-                isSelected={selectedDoctorId === doctor.id}
-                onClick={() => {
-                  setSelectedDoctorId(doctor.id);
-                  setValue("doctorId", doctor.id);
+        <div className="space-y-4">
+          <Label className="text-lg font-semibold flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-purple-600" />
+            Chọn bác sĩ
+          </Label>
+          {availableDoctors?.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg">
+              <UserCheck className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-lg font-medium">Không có bác sĩ nào trống ngày này</p>
+              <p className="text-sm">Vui lòng chọn ngày khác</p>
+            </div>
+          ) : (
+            <div className="relative">
+              <Swiper
+                modules={[Navigation, Pagination, Autoplay]}
+                spaceBetween={20}
+                slidesPerView={1}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 30,
+                  },
+                  1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                  },
+                  1280: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                  },
                 }}
-              />
-            ))}
-          </div>
+                loop={(availableDoctors || []).length > 4}
+                autoplay={{
+                  delay: 3000,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                }}
+                pagination={{
+                  clickable: true,
+                  dynamicBullets: true,
+                }}
+                navigation={true}
+                className="pb-12 [&_.swiper-pagination-bullet]:bg-purple-600 [&_.swiper-pagination-bullet]:opacity-50 [&_.swiper-pagination-bullet-active]:bg-purple-700 [&_.swiper-pagination-bullet-active]:opacity-100 [&_.swiper-button-next]:text-purple-600 [&_.swiper-button-prev]:text-purple-600 [&_.swiper-button-next]:bg-white [&_.swiper-button-prev]:bg-white [&_.swiper-button-next]:rounded-full [&_.swiper-button-prev]:rounded-full [&_.swiper-button-next]:w-10 [&_.swiper-button-prev]:w-10 [&_.swiper-button-next]:h-10 [&_.swiper-button-prev]:h-10 [&_.swiper-button-next]:shadow-lg [&_.swiper-button-prev]:shadow-lg [&_.swiper-button-next:after]:text-base [&_.swiper-button-prev:after]:text-base [&_.swiper-button-next:after]:font-bold [&_.swiper-button-prev:after]:font-bold"
+              >
+                {availableDoctors?.map((doctor) => (
+                  <SwiperSlide key={doctor.id}>
+                    <DoctorCard
+                      doctor={doctor}
+                      isAvailable={true}
+                      isSelected={selectedDoctorId === doctor.id}
+                      onClick={() => {
+                        setSelectedDoctorId(doctor.id);
+                        setValue("doctorId", doctor.id);
+                      }}
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          )}
           {errors.doctorId && (
             <p className="text-red-500 text-sm mt-1">
               {errors.doctorId.message}
             </p>
           )}
-        </>
+        </div>
       )}
       <div className="flex justify-between">
         <Button
@@ -628,29 +689,58 @@ const RegisterAppointment = () => {
           name="appointmentTime"
           control={control}
           render={({ field }) => {
-          // Nếu là CONSULT, slot lấy theo service, không cần bác sĩ
-          if (selectedService?.type === "CONSULT") {
-            const consultSlots = filterSlotsByService(
-              slots,
-              selectedService.startTime,
-              selectedService.endTime
-            );
+            // Nếu là CONSULT, slot lấy theo service, không cần bác sĩ
+            if (selectedService?.type === "CONSULT") {
+              const consultSlots = filterSlotsByService(
+                slots,
+                selectedService.startTime,
+                selectedService.endTime
+              );
+              return (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={!selectedDate}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn khung giờ" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {consultSlots.length === 0 ? (
+                      <div className="p-2 text-center text-gray-500">
+                        Không có khung giờ trống
+                      </div>
+                    ) : (
+                      consultSlots.map((slot, idx) => (
+                        <SelectItem
+                          key={idx}
+                          value={`${slot.start}-${slot.end}`}
+                        >
+                          {slot.start} - {slot.end}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              );
+            }
+            // Nếu không phải CONSULT, slot lấy theo bác sĩ đã chọn
             return (
               <Select
                 onValueChange={field.onChange}
                 value={field.value || ""}
-                disabled={!selectedDate}
+                disabled={!selectedDoctorId}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn khung giờ" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  {consultSlots.length === 0 ? (
+                  {doctorSlots.length === 0 ? (
                     <div className="p-2 text-center text-gray-500">
                       Không có khung giờ trống
                     </div>
                   ) : (
-                    consultSlots.map((slot, idx) => (
+                    doctorSlots.map((slot, idx) => (
                       <SelectItem key={idx} value={`${slot.start}-${slot.end}`}>
                         {slot.start} - {slot.end}
                       </SelectItem>
@@ -659,33 +749,7 @@ const RegisterAppointment = () => {
                 </SelectContent>
               </Select>
             );
-          }
-          // Nếu không phải CONSULT, slot lấy theo bác sĩ đã chọn
-          return (
-            <Select
-              onValueChange={field.onChange}
-              value={field.value || ""}
-              disabled={!selectedDoctorId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn khung giờ" />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                {doctorSlots.length === 0 ? (
-                  <div className="p-2 text-center text-gray-500">
-                    Không có khung giờ trống
-                  </div>
-                ) : (
-                  doctorSlots.map((slot, idx) => (
-                    <SelectItem key={idx} value={`${slot.start}-${slot.end}`}>
-                      {slot.start} - {slot.end}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          );
-        }}
+          }}
         />
         {errors.appointmentTime && (
           <p className="text-red-500 text-sm mt-1">
