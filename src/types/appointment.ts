@@ -8,10 +8,12 @@ export interface User {
   name: string;
   email: string;
   avatar: string | null;
+  phoneNumber: string | null;
 }
 
 export interface Doctor {
   id: number;
+  specialization: string;
   user: User;
 }
 

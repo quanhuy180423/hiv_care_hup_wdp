@@ -76,7 +76,9 @@ const appointmentSchema = z
   .object({
     userId: z.number(),
     doctorId: z.number().optional(),
-    serviceId: z.number().nonnegative("Vui lòng chọn dịch vụ"),
+    serviceId: z
+      .number({ required_error: "Vui lòng chọn dịch vụ" })
+      .min(1, "Vui lòng chọn dịch vụ"),
     appointmentDate: z.string().nonempty("Vui lòng chọn ngày"),
     appointmentTime: z.string().nonempty("Vui lòng chọn khung giờ"),
     isAnonymous: z.boolean(),
@@ -101,9 +103,11 @@ const RegisterAppointment = () => {
   const navigation = useNavigate();
   const { userProfile } = useAuth();
   const [selectedDate, setSelectedDate] = useState("");
-  const [availableSlots, setAvailableSlots] = useState<Slot[]>(slots);
   const [step, setStep] = useState(1);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [doctorSlots, setDoctorSlots] = useState<Slot[]>([]);
+  const [dialogLoading, setDialogLoading] = useState(false);
 
   const services = useServices({ page: 1, limit: 100 });
   const { data: doctors } = useDoctorSchedulesByDate(
@@ -114,7 +118,7 @@ const RegisterAppointment = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     watch,
     setValue,
     trigger,
@@ -176,83 +180,44 @@ const RegisterAppointment = () => {
         setValue("isAnonymous", false);
         setValue("type", "OFFLINE");
       }
-
-      if (watch("appointmentDate")) {
-        const filtered = filterSlotsByService(
-          slots,
-          selectedService.startTime,
-          selectedService.endTime
-        );
-        setAvailableSlots(filtered);
-        // Nếu slot đã chọn không còn trong filtered, reset
-        if (
-          watch("appointmentTime") &&
-          !filtered.some(
-            (slot) => `${slot.start}-${slot.end}` === watch("appointmentTime")
-          )
-        ) {
-          setValue("appointmentTime", "");
-        }
-      }
-    }
-    // Khi đổi service, reset slot nếu đã chọn ngày
-    if (selectedService && watch("appointmentDate")) {
-      handleDateChange(watch("appointmentDate"));
-    }
-    // eslint-disable-next-line
-  }, [selectedService]);
-
-  const handleDateChange = (date: string) => {
-    if (date !== watch("appointmentDate")) {
+      // Reset các trường liên quan khi đổi service
+      setSelectedDate("");
+      setValue("appointmentDate", "");
+      setSelectedDoctorId(null);
+      setValue("doctorId", 0);
+      setDoctorSlots([]);
       setValue("appointmentTime", "");
     }
-    setSelectedDate(date);
-    setValue("appointmentDate", date);
+  }, [selectedService, setValue]);
 
-    if (!selectedService) {
-      setAvailableSlots([]);
-      return;
-    }
-
-    // Lọc slot theo thời gian của service
-    let filteredSlots = filterSlotsByService(
-      slots,
-      selectedService.startTime,
-      selectedService.endTime
-    );
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selected = new Date(date);
-    selected.setHours(0, 0, 0, 0);
-
-    if (selected < today) {
-      toast.error("Vui lòng chọn ngày từ hôm nay trở đi");
-      setAvailableSlots([]);
-      return;
-    }
-
-    const now = new Date();
-    const isToday = selected.getTime() === today.getTime();
-
-    if (isToday) {
-      const currentTime = now.getHours() * 60 + now.getMinutes();
+  useEffect(() => {
+    if (selectedDoctorId && selectedService && selectedDate) {
+      // Lấy slot trống của bác sĩ này
+      const doctorAppointments = staffAppointments.data?.data.filter(
+        (appt) => appt.doctorId === selectedDoctorId
+      );
+      let filteredSlots = filterSlotsByService(
+        slots,
+        selectedService.startTime,
+        selectedService.endTime
+      );
+      // Loại bỏ slot đã có appointment
       filteredSlots = filteredSlots.filter((slot) => {
-        const [hours, minutes] = slot.start.split(":").map(Number);
-        const slotTime = hours * 60 + minutes;
-        return slotTime > currentTime;
+        const slotStr = `${slot.start}-${slot.end}`;
+        return !doctorAppointments?.some((appt) => {
+          const apptSlot = `${appt.appointmentTime.slice(11, 16)}-${new Date(
+            new Date(appt.appointmentTime).getTime() + 30 * 60000
+          )
+            .toISOString()
+            .slice(11, 16)}`;
+          return apptSlot === slotStr;
+        });
       });
-      setAvailableSlots(filteredSlots);
-
-      if (filteredSlots.length === 0) {
-        toast.error(
-          "Không có khung giờ trống cho hôm nay. Vui lòng chọn ngày khác."
-        );
-      }
+      setDoctorSlots(filteredSlots);
     } else {
-      setAvailableSlots(filteredSlots);
+      setDoctorSlots([]);
     }
-  };
+  }, [selectedDoctorId, selectedService, selectedDate, staffAppointments.data]);
 
   // Validate từng bước trước khi chuyển step
   const nextStep = async () => {
@@ -329,6 +294,9 @@ const RegisterAppointment = () => {
         toast.success("Đặt lịch hẹn thành công!");
         navigation("/user/appointments");
       },
+      onSettled: () => {
+        setDialogLoading(false);
+      },
     });
   };
 
@@ -357,7 +325,8 @@ const RegisterAppointment = () => {
       <div className="relative">
         <img
           src={
-            getAvatarUrl(doctor.user.avatar || "") || "/images/default-avatar.png"
+            getAvatarUrl(doctor.user.avatar || "") ||
+            "/images/default-avatar.png"
           }
           alt={doctor.user.name}
           className="w-14 h-14 rounded-full object-cover border-2 border-purple-400"
@@ -465,11 +434,11 @@ const RegisterAppointment = () => {
             </Select>
           )}
         />
-        {errors.serviceId && (
+        {errors.serviceId && !watch("serviceId") ? (
           <p className="text-red-500 text-sm mt-1">
             {errors.serviceId.message}
           </p>
-        )}
+        ) : null}
       </div>
       {/* Hiển thị thông tin service đã chọn */}
       {selectedService && (
@@ -558,111 +527,89 @@ const RegisterAppointment = () => {
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Date Selection */}
-        <div className="space-y-3">
-          <Label
-            htmlFor="appointmentDate"
-            className="text-gray-700 font-semibold flex items-center gap-2"
-          >
-            <CalendarDays className="w-5 h-5 text-purple-600" />
-            Chọn Ngày <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <Controller
-            name="appointmentDate"
-            control={control}
-            render={({ field }) => (
-              <Input
-                type="date"
-                {...field}
-                min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => {
-                  field.onChange(e.target.value);
-                  handleDateChange(e.target.value);
-                }}
-                className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
-              />
-            )}
-          />
-          {errors.appointmentDate && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.appointmentDate.message}
-            </p>
+      {/* Chọn ngày */}
+      <div className="space-y-2 w-sm">
+        <Label>
+          Chọn ngày <span className="text-red-500">*</span>
+        </Label>
+        <Controller
+          name="appointmentDate"
+          control={control}
+          render={({ field }) => (
+            <Input
+              type="date"
+              {...field}
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => {
+                field.onChange(e.target.value);
+                setSelectedDate(e.target.value);
+                setSelectedDoctorId(null);
+                setValue("doctorId", 0);
+              }}
+            />
           )}
-        </div>
-        {/* Time Slot Selection */}
-        <div className="space-y-3">
-          <Label
-            htmlFor="appointmentTime"
-            className="text-gray-700 font-semibold flex items-center gap-2"
-          >
-            <Clock className="w-5 h-5 text-purple-600" />
-            Chọn Khung Giờ <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <Controller
-            name="appointmentTime"
-            control={control}
-            render={({ field }) => (
-              <Select
-                onValueChange={field.onChange}
-                value={field.value || ""}
-                disabled={!selectedDate}
-              >
-                <SelectTrigger
-                  className={`w-full ${
-                    !selectedDate ? "bg-gray-50 text-gray-400" : ""
-                  } border-gray-300 focus:ring-purple-500 focus:border-purple-500`}
-                >
-                  <SelectValue
-                    placeholder={
-                      !selectedDate
-                        ? "Vui lòng chọn ngày trước"
-                        : "Chọn khung giờ"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent className="flex items-center bg-white ">
-                  {availableSlots.length === 0 ? (
-                    <div className="p-2 text-center text-gray-500">
-                      Không có khung giờ trống
-                    </div>
-                  ) : (
-                    availableSlots.map((slot, index) => (
-                      <SelectItem
-                        key={index}
-                        value={`${slot.start}-${slot.end}`}
-                        className="flex items-center hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 ease-in-out"
-                      >
-                        <span className="mr-2">⏰</span>
-                        {slot.start} - {slot.end}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.appointmentTime && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.appointmentTime.message}
-            </p>
-          )}
-        </div>
+        />
+        {errors.appointmentDate && !watch("appointmentDate") ? (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.appointmentDate.message}
+          </p>
+        ) : null}
       </div>
+      {/* Carousel chọn bác sĩ */}
+      {selectedService?.type !== "CONSULT" && (
+        <>
+          <Label>Chọn bác sĩ</Label>
+          <div className="flex gap-4 overflow-x-auto py-2">
+            {availableDoctors?.length === 0 && (
+              <div className="p-4 text-gray-500">
+                Không có bác sĩ nào trống ngày này
+              </div>
+            )}
+            {availableDoctors?.map((doctor) => (
+              <DoctorCardMini
+                key={doctor.id}
+                doctor={doctor}
+                isAvailable={true}
+                isSelected={selectedDoctorId === doctor.id}
+                onClick={() => {
+                  setSelectedDoctorId(doctor.id);
+                  setValue("doctorId", doctor.id);
+                }}
+              />
+            ))}
+          </div>
+          {errors.doctorId && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.doctorId.message}
+            </p>
+          )}
+        </>
+      )}
       <div className="flex justify-between">
         <Button
           type="button"
           variant="outline"
-          onClick={prevStep}
           className="cursor-pointer"
+          onClick={prevStep}
         >
           <ChevronLeft className="w-4 h-4 mr-1" /> Quay lại
         </Button>
         <Button
           type="button"
           variant="outline"
-          onClick={nextStep}
           className="cursor-pointer"
+          onClick={async () => {
+            if (selectedService?.type === "CONSULT") {
+              const valid = await trigger(["appointmentDate"]);
+              if (!valid) return toast.error("Vui lòng chọn ngày!");
+              setStep(3);
+            } else {
+              const valid = await trigger(["appointmentDate", "doctorId"]);
+              if (!valid) return toast.error("Vui lòng chọn ngày và bác sĩ!");
+              setStep(3);
+            }
+          }}
+          disabled={selectedService?.type !== "CONSULT" && !selectedDoctorId}
         >
           Tiếp tục <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
@@ -673,38 +620,79 @@ const RegisterAppointment = () => {
   const renderStep3 = () => (
     <div className="space-y-6">
       {/* Doctor Selection */}
-      {selectedService?.type !== "CONSULT" && (
-        <div className="space-y-3">
-          <Label
-            htmlFor="doctorId"
-            className="text-gray-700 font-semibold flex items-center gap-2"
-          >
-            <Stethoscope className="w-5 h-5 text-purple-600" />
-            Chọn Bác Sĩ <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {availableDoctors?.length === 0 && (
-              <div className="col-span-full p-4 text-center text-gray-500 border rounded-lg">
-                Không còn bác sĩ nào trống khung giờ này
-              </div>
-            )}
-            {availableDoctors?.map((doctor) => (
-              <DoctorCardMini
-                key={doctor.id}
-                doctor={doctor}
-                isAvailable={true}
-                isSelected={watch("doctorId") === doctor.id}
-                onClick={() => setValue("doctorId", doctor.id)}
-              />
-            ))}
-          </div>
-          {errors.doctorId && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.doctorId.message}
-            </p>
-          )}
-        </div>
-      )}
+      <div className="space-y-2 w-sm">
+        <Label>
+          Chọn khung giờ <span className="text-red-500">*</span>
+        </Label>
+        <Controller
+          name="appointmentTime"
+          control={control}
+          render={({ field }) => {
+          // Nếu là CONSULT, slot lấy theo service, không cần bác sĩ
+          if (selectedService?.type === "CONSULT") {
+            const consultSlots = filterSlotsByService(
+              slots,
+              selectedService.startTime,
+              selectedService.endTime
+            );
+            return (
+              <Select
+                onValueChange={field.onChange}
+                value={field.value || ""}
+                disabled={!selectedDate}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn khung giờ" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  {consultSlots.length === 0 ? (
+                    <div className="p-2 text-center text-gray-500">
+                      Không có khung giờ trống
+                    </div>
+                  ) : (
+                    consultSlots.map((slot, idx) => (
+                      <SelectItem key={idx} value={`${slot.start}-${slot.end}`}>
+                        {slot.start} - {slot.end}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            );
+          }
+          // Nếu không phải CONSULT, slot lấy theo bác sĩ đã chọn
+          return (
+            <Select
+              onValueChange={field.onChange}
+              value={field.value || ""}
+              disabled={!selectedDoctorId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn khung giờ" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {doctorSlots.length === 0 ? (
+                  <div className="p-2 text-center text-gray-500">
+                    Không có khung giờ trống
+                  </div>
+                ) : (
+                  doctorSlots.map((slot, idx) => (
+                    <SelectItem key={idx} value={`${slot.start}-${slot.end}`}>
+                      {slot.start} - {slot.end}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          );
+        }}
+        />
+        {errors.appointmentTime && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.appointmentTime.message}
+          </p>
+        )}
+      </div>
       {/* Notes */}
       <div className="space-y-3">
         <Label
@@ -742,15 +730,11 @@ const RegisterAppointment = () => {
           variant="outline"
           className="cursor-pointer"
           onClick={async () => {
-            // Validate trước khi mở dialog
-            const valid = await trigger([
-              ...(selectedService?.type !== "CONSULT" ? ["doctorId"] : []),
-              "notes",
-            ] as (keyof AppointmentFormValues)[]);
-            if (!valid) return;
+            const valid = await trigger(["appointmentTime"]);
+            if (!valid) return toast.error("Vui lòng chọn khung giờ!");
             setIsConfirmDialogOpen(true);
           }}
-          disabled={isSubmitting}
+          disabled={!watch("appointmentTime")}
         >
           Đặt lịch
         </Button>
@@ -980,17 +964,21 @@ const RegisterAppointment = () => {
               variant="outline"
               onClick={() => setIsConfirmDialogOpen(false)}
               className="flex items-center gap-2 border-gray-300 hover:bg-gray-100 cursor-pointer"
+              disabled={dialogLoading}
             >
               <ArrowLeft className="w-4 h-4" />
               Quay lại chỉnh sửa
             </Button>
             <Button
               type="button"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
+              onClick={() => {
+                setDialogLoading(true);
+                handleSubmit(onSubmit)();
+              }}
+              disabled={dialogLoading}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold flex items-center gap-2 px-6 cursor-pointer"
             >
-              {isSubmitting ? (
+              {dialogLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Đang xử lý...

@@ -29,7 +29,7 @@ const sidebarNav = [
     icon: Calendar,
     path: "/user/appointments",
   },
-  { id: "treatment-schedule", name: "Lịch điều trị", icon: Syringe, path: "/user/treatment-schedule" },
+  { id: "treatment-schedule", name: "Hồ sơ điều trị", icon: Syringe, path: "/user/treatment-schedule" },
 ];
 
 export default function SidebarUser({ children }: SidebarUserProfileProps) {
