@@ -295,7 +295,7 @@ export default function ConsultationPage() {
           values.durationValue === "" || values.durationValue === undefined
             ? undefined
             : Number(values.durationValue),
-        medicineId: undefined, // For custom, let user pick from select, or leave undefined
+        medicineId: undefined,
       },
     ]);
     setAddMedOpen(false);
@@ -507,7 +507,9 @@ export default function ConsultationPage() {
               <div className="font-semibold mb-1">Thông tin y tế</div>
               <div>
                 <span className="font-medium">Phác đồ hiện tại:</span>
-                <span className="text-gray-700">-</span>
+                <span className="text-gray-700">
+                  {patientData?.protocol?.name || "-"}
+                </span>
               </div>
             </div>
           </div>
@@ -556,7 +558,7 @@ export default function ConsultationPage() {
       <div className="mt-10">
         <div className="bg-white rounded-lg shadow-lg w-full p-6 relative">
           <h2 className="text-xl font-semibold mb-4">Kết quả xét nghiệm</h2>
-          <TestResultCreate />
+          <TestResultCreate patientId={patient?.id} patient={patient} />
         </div>
       </div>
     </div>

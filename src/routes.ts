@@ -72,6 +72,7 @@ import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
+import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
 
 // Route definition interface
 export interface RouteConfig {
@@ -530,6 +531,16 @@ export const doctorRoutes: RouteConfig[] = [
     layout: "DOCTOR",
     icon: FlaskConical,
     showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "doctor/patient-treatments/:id/detail",
+    component: DetailPage,
+    title: "Chi tiết hồ sơ bệnh án",
+    description: "Chi tiết hồ sơ bệnh án cho bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    showInNav: false,
     allowedRoles: ["DOCTOR"],
   },
 ];

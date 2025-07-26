@@ -15,7 +15,12 @@ import React, { useState } from "react";
 import type { CustomMedicineFormValues } from "@/schemas/medicine";
 import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import type { Medicine } from "@/types/medicine";
-import { DurationUnit, MedicationSchedule } from "@/types/medicine";
+import {
+  DurationUnit,
+  MedicationSchedule,
+  MedicineUnit,
+} from "@/types/medicine";
+
 import type { ProtocolMedicineInfo } from "@/types/patientTreatment";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
 import type { Dispatch, SetStateAction } from "react";
@@ -109,9 +114,37 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
   handleSubmitForm,
   toast,
 }) => {
-  // State for custom unit and frequency input
   const [customUnit, setCustomUnit] = useState("");
   const [customFrequency, setCustomFrequency] = useState("");
+
+  const medicineUnitOptions = [
+    { value: MedicineUnit.TABLET, label: "Tablet" },
+    { value: MedicineUnit.AMPOULE, label: "Ampoule" },
+    { value: MedicineUnit.ML, label: "ml" },
+    { value: MedicineUnit.SACHET, label: "Sachet" },
+    { value: MedicineUnit.BOTTLE, label: "Bottle" },
+    { value: MedicineUnit.OTHER, label: "Other" },
+  ];
+
+  const protocolSelectItems = React.useMemo(() => {
+    if (protocolOptions.length === 0 && !protocolLoading) {
+      return (
+        <div className="px-3 py-2 text-gray-400 text-sm">
+          No protocol available
+        </div>
+      );
+    }
+    return protocolOptions.map((option) => (
+      <SelectItem key={option.id} value={String(option.id)}>
+        {option.name}
+      </SelectItem>
+    ));
+  }, [protocolOptions, protocolLoading]);
+
+  const protocolSelectPlaceholder = protocolLoading
+    ? "Loading..."
+    : "Select protocol";
+
   return (
     <div className="bg-white rounded-2xl shadow p-7 col-span-1 md:col-span-2">
       {/* Chọn phác đồ điều trị */}
@@ -138,24 +171,10 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
             id="protocol-select"
             className="w-full h-12 border border-gray-300 rounded-lg px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
-            <SelectValue
-              placeholder={
-                protocolLoading ? "Đang tải..." : "Chọn phác đồ điều trị"
-              }
-            />
+            <SelectValue placeholder={protocolSelectPlaceholder} />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            {protocolOptions.length === 0 && !protocolLoading ? (
-              <div className="px-3 py-2 text-gray-400 text-sm">
-                Không có phác đồ
-              </div>
-            ) : (
-              protocolOptions.map((option) => (
-                <SelectItem key={option.id} value={String(option.id)}>
-                  {option.name}
-                </SelectItem>
-              ))
-            )}
+            {protocolSelectItems}
           </SelectContent>
         </Select>
         {formError && !selectedProtocolId && (
@@ -249,52 +268,51 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                 <label className="block text-sm font-medium mb-1">
                   Tên thuốc <span className="text-red-500">*</span>
                 </label>
-                <Select
-                  value={
-                    medicines.find((m) => m.name === watch("medicineName"))?.id
-                      ? String(
-                          medicines.find(
-                            (m) => m.name === watch("medicineName")
-                          )!.id
-                        )
-                      : ""
-                  }
-                  onValueChange={(val) => {
-                    const med = medicines.find((m) => String(m.id) === val);
-                    if (med) {
-                      reset(
-                        {
-                          medicineName: med.name,
-                          dosage: med.dose,
-                          unit: med.unit,
-                          durationValue: "",
-                          durationUnit: undefined,
-                          frequency: "",
-                          schedule: undefined,
-                          notes: "",
-                        },
-                        { keepErrors: true, keepDirty: true }
-                      );
-                    } else {
-                      reset((prev) => ({ ...prev, medicineName: "" }), {
-                        keepErrors: true,
-                        keepDirty: true,
-                      });
-                    }
-                  }}
-                  disabled={isAddingMed}
-                >
-                  <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                    <SelectValue placeholder="Chọn thuốc" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {medicines.map((med: Medicine) => (
-                      <SelectItem key={med.id} value={String(med.id)}>
-                        {med.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {(() => {
+                  const selectedMed = medicines.find(
+                    (m) => m.name === watch("medicineName")
+                  );
+                  return (
+                    <Select
+                      value={selectedMed ? String(selectedMed.id) : ""}
+                      onValueChange={(val) => {
+                        const med = medicines.find((m) => String(m.id) === val);
+                        if (med) {
+                          reset(
+                            {
+                              medicineName: med.name,
+                              dosage: med.dose,
+                              unit: med.unit,
+                              durationValue: "",
+                              durationUnit: undefined,
+                              frequency: "",
+                              schedule: undefined,
+                              notes: "",
+                            },
+                            { keepErrors: true, keepDirty: true }
+                          );
+                        } else {
+                          reset((prev) => ({ ...prev, medicineName: "" }), {
+                            keepErrors: true,
+                            keepDirty: true,
+                          });
+                        }
+                      }}
+                      disabled={isAddingMed}
+                    >
+                      <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                        <SelectValue placeholder="Chọn thuốc" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        {medicines.map((med: Medicine) => (
+                          <SelectItem key={med.id} value={String(med.id)}>
+                            {med.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  );
+                })()}
                 {errors.medicineName && (
                   <div className="text-xs text-red-500 mt-1">
                     {errors.medicineName.message}
@@ -324,38 +342,29 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                   <Select
                     value={watch("unit") || ""}
                     onValueChange={(val) => {
-                      if (val === "khác") {
-                        setCustomUnit("");
-                        reset(
-                          { ...watch(), unit: "khác" },
-                          { keepErrors: true, keepDirty: true }
-                        );
-                      } else {
-                        setCustomUnit("");
-                        reset(
-                          { ...watch(), unit: val },
-                          { keepErrors: true, keepDirty: true }
-                        );
-                      }
+                      setCustomUnit("");
+                      reset(
+                        { ...watch(), unit: val as MedicineUnit },
+                        { keepErrors: true, keepDirty: true }
+                      );
                     }}
                     disabled={isAddingMed}
                   >
                     <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <SelectValue placeholder="Chọn đơn vị" />
+                      <SelectValue placeholder="Select unit" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="viên">Viên</SelectItem>
-                      <SelectItem value="ống">Ống</SelectItem>
-                      <SelectItem value="ml">ml</SelectItem>
-                      <SelectItem value="gói">Gói</SelectItem>
-                      <SelectItem value="chai">Chai</SelectItem>
-                      <SelectItem value="khác">Khác</SelectItem>
+                      {medicineUnitOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  {watch("unit") === "khác" && (
+                  {watch("unit") === MedicineUnit.OTHER && (
                     <Input
                       className="mt-2"
-                      placeholder="Nhập đơn vị khác"
+                      placeholder="Enter other unit"
                       value={customUnit}
                       onChange={(e) => {
                         setCustomUnit(e.target.value);

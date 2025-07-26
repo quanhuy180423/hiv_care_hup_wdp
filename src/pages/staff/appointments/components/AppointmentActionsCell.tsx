@@ -87,9 +87,7 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white">
-        {["PENDING", "CONFIRMED"].includes(
-          (appointment.status || "").toUpperCase()
-        ) && (
+        {["PAID"].includes((appointment.status || "").toUpperCase()) && (
           <DropdownMenuItem
             onClick={async () => {
               const patientId = appointment.userId;
