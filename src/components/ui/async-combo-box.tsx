@@ -16,6 +16,7 @@ interface AsyncComboBoxProps {
   disabled?: boolean;
   showCount?: boolean;
   allowCustomValue?: boolean;
+  optional?: boolean;
 }
 
 const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
@@ -28,6 +29,7 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
   disabled,
   showCount = true,
   allowCustomValue = false,
+  optional = false,
 }) => {
   const [query, setQuery] = React.useState("");
   const [options, setOptions] = React.useState<AsyncComboBoxOption[]>([]);
@@ -35,18 +37,29 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
   const [showDropdown, setShowDropdown] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
+  // Effect 1: fetch options when query or onSearch changes
   React.useEffect(() => {
-    // Nếu có value và chưa có query, tự động fill query bằng tên option đã chọn
-    if (value !== undefined && value !== null && query === "") {
-      const selected = options.find((o) => o.id === value);
-      if (selected) setQuery(selected.name);
-    }
-    // Khi query rỗng, show tất cả item khả dụng (onSearch("") trả về all)
     setLoading(true);
     onSearch(query)
       .then((opts) => setOptions(opts))
       .finally(() => setLoading(false));
-  }, [query, onSearch, value]);
+  }, [query, onSearch]);
+
+  // Effect 2: handle clearing value and filling query from value
+  React.useEffect(() => {
+    // Nếu input rỗng và value khác undefined, clear value
+    if (query === "" && value !== undefined && value !== null) {
+      onChange(undefined);
+      // Không fill lại query từ value khi user vừa xoá
+      return;
+    }
+    // Chỉ fill lại query từ value nếu query rỗng và value vừa được set (ví dụ khi chọn từ dropdown)
+    if (query === "" && value !== undefined && value !== null) {
+      const selected = options.find((o) => o.id === value);
+      if (selected) setQuery(selected.name);
+    }
+    // Không fill lại query từ value khi user đang nhập (query khác rỗng)
+  }, [value, options, query, onChange]);
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (
@@ -65,6 +78,9 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
       {label && (
         <label className="block font-medium mb-1" htmlFor={label}>
           {label}
+          {optional && (
+            <span className="text-gray-400 ml-1">(không bắt buộc)</span>
+          )}
         </label>
       )}
       <Input
@@ -75,11 +91,25 @@ const AsyncComboBox: React.FC<AsyncComboBoxProps> = ({
         onFocus={() => setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
         onKeyDown={handleInputKeyDown}
-        placeholder={placeholder}
+        placeholder={optional ? placeholder || "-- Không chọn --" : placeholder}
         disabled={disabled}
         className={error ? "border-red-500" : ""}
         autoComplete="off"
       />
+      {optional && value !== undefined && value !== null && (
+        <button
+          type="button"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-lg bg-white px-1"
+          tabIndex={-1}
+          onClick={() => {
+            setQuery("");
+            onChange(undefined);
+          }}
+          aria-label="Xoá lựa chọn"
+        >
+          ×
+        </button>
+      )}
       {showDropdown && (options.length > 0 || loading) && (
         <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full mt-1 max-h-56 overflow-auto">
           {showCount && (

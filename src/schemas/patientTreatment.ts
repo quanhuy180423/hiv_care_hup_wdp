@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const customMedicationItemSchema = z.object({
+export const customMedicationItemSchema = z.object({
   medicineId: z.number().min(1, "Vui lòng chọn thuốc").optional(),
   medicineName: z.string().min(1, "Vui lòng nhập tên thuốc"),
   dosage: z.string().min(1, "Vui lòng nhập liều dùng/hàm lượng"),
@@ -12,7 +12,12 @@ const customMedicationItemSchema = z.object({
   schedule: z.string().optional(),
   notes: z.string().optional(),
   price: z.number().optional(),
+  source: z.enum(["protocol", "custom", "edited"]).optional(),
+  protocolMedicineId: z.number().optional(),
+  deleted: z.boolean().optional(),
 });
+
+export type CustomMedicationItem = z.infer<typeof customMedicationItemSchema>;
 
 export const patientTreatmentSchema = z
   .object({

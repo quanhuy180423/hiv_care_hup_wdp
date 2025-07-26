@@ -99,7 +99,9 @@ const appointmentSchema = z
 
 const RegisterAppointment = () => {
   const navigation = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
+  console.log(user);
+  console.log(userProfile);
   const [selectedDate, setSelectedDate] = useState("");
   const [availableSlots, setAvailableSlots] = useState<Slot[]>(slots);
   const [step, setStep] = useState(1);
@@ -357,7 +359,8 @@ const RegisterAppointment = () => {
       <div className="relative">
         <img
           src={
-            getAvatarUrl(doctor.user.avatar || "") || "/images/default-avatar.png"
+            getAvatarUrl(doctor.user.avatar || "") ||
+            "/images/default-avatar.png"
           }
           alt={doctor.user.name}
           className="w-14 h-14 rounded-full object-cover border-2 border-purple-400"
