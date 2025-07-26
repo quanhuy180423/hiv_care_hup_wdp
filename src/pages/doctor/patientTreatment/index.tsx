@@ -2,22 +2,54 @@ import { PatientTreatmentDetailDialog } from "@/components/doctor/PatientTreatme
 import { PatientTreatmentTable } from "@/components/doctor/PatientTreatmentTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAppointmentsByDoctor } from "@/hooks/useAppointments";
 import {
   useCreatePatientTreatment,
   useDeletePatientTreatment,
-  usePatientTreatments,
+  usePatientTreatmentsByDoctor,
   useUpdatePatientTreatment,
 } from "@/hooks/usePatientTreatments";
-import type { PatientTreatmentType } from "@/types/patientTreatment";
+import useAuthStore from "@/store/authStore";
+import type { Appointment } from "@/types/appointment";
+import type { PatientTreatmentType as BasePatientTreatmentType } from "@/types/patientTreatment";
 import { FileX2, Loader2, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+// Extend PatientTreatmentType to include appointment info
+export interface PatientTreatmentWithAppointment
+  extends BasePatientTreatmentType {
+  appointmentStatus?: Appointment["status"];
+  appointmentId?: Appointment["id"];
+  isAnonymous?: boolean;
+}
+
+// Paginated data type for treatments
+interface PaginatedTreatmentData {
+  data: BasePatientTreatmentType[];
+  meta?: { total: number };
+}
+
+function isPaginatedTreatmentData(obj: unknown): obj is PaginatedTreatmentData {
+  return (
+    !!obj &&
+    typeof obj === "object" &&
+    Array.isArray((obj as PaginatedTreatmentData).data)
+  );
+}
+
 const DoctorPatientTreatments = () => {
+  // Lấy doctorId từ store
+  const doctorIdFromUser = useAuthStore((s) => {
+    const docId = s.userProfile?.doctorId ?? s.userProfile?.doctorId;
+    if (typeof docId === "string") return Number(docId);
+    if (typeof docId === "number") return docId;
+    return undefined;
+  });
   const [search, setSearch] = useState("");
   const [selectedTreatment, setSelectedTreatment] =
-    useState<PatientTreatmentType | null>(null);
+    useState<PatientTreatmentWithAppointment | null>(null);
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
@@ -27,32 +59,62 @@ const DoctorPatientTreatments = () => {
     data: treatmentsDataRaw,
     isLoading: isLoadingPatientTreatments,
     refetch: refetchTreatments,
-  } = usePatientTreatments({
-    page,
-    limit: pageSize,
-    search,
-    sortBy: "startDate",
-    sortOrder: "desc",
-  });
+  } = usePatientTreatmentsByDoctor(
+    doctorIdFromUser !== undefined ? doctorIdFromUser : "",
+    {
+      page,
+      limit: pageSize,
+      sortBy: "startDate",
+      sortOrder: "desc",
+    }
+  );
 
-  // Transform the raw data into a format suitable for the table
+  // Lấy danh sách lịch hẹn của bác sĩ
+  const { data: appointmentsData } = useAppointmentsByDoctor(
+    doctorIdFromUser ?? 0,
+    { page: 1, limit: 1000 }
+  );
+
+  // Lấy đúng mảng appointments từ appointmentsData (có thể là paginated object)
+  const appointmentsList: Appointment[] = useMemo(() => {
+    if (Array.isArray(appointmentsData)) return appointmentsData;
+    return appointmentsData?.data ?? [];
+  }, [appointmentsData]);
+  console.log("appointmentsList:", appointmentsList);
+
+  // Build appointmentMap theo userId (patientId)
+  const appointmentMap: Record<number, Appointment> = useMemo(() => {
+    const map = appointmentsList.reduce((acc, apt) => {
+      if (typeof apt.userId === "number") acc[apt.userId] = apt;
+      return acc;
+    }, {} as Record<number, Appointment>);
+    console.log("appointmentMap:", map);
+    return map;
+  }, [appointmentsList]);
+
+  // Gộp trạng thái appointment vào treatment (memoized)
   const treatmentsData = useMemo(() => {
-    if (
-      treatmentsDataRaw &&
-      typeof treatmentsDataRaw === "object" &&
-      Array.isArray((treatmentsDataRaw as { data?: unknown }).data)
-    ) {
-      const { data, meta } = treatmentsDataRaw as {
-        data: PatientTreatmentType[];
-        meta?: { total: number };
-      };
+    if (isPaginatedTreatmentData(treatmentsDataRaw)) {
+      const merged: PatientTreatmentWithAppointment[] =
+        treatmentsDataRaw.data.map((t) => {
+          const apt = appointmentMap[t.patientId];
+          return {
+            ...t,
+            appointmentStatus: apt?.status,
+            appointmentId: apt?.id,
+            isAnonymous: t.isAnonymous,
+          };
+        });
+      console.log("merged treatments:", merged);
       return {
-        data,
-        meta: meta ?? { total: 0 },
+        data: merged,
+        meta: treatmentsDataRaw.meta ?? { total: merged.length },
       };
     }
     return { data: [], meta: { total: 0 } };
-  }, [treatmentsDataRaw]);
+  }, [treatmentsDataRaw, appointmentMap]);
+
+  console.log(`merged treatments:`, treatmentsData);
 
   useEffect(() => {
     if (
@@ -99,11 +161,11 @@ const DoctorPatientTreatments = () => {
     }
   };
 
-  const handleShowDetail = (treatment: PatientTreatmentType) => {
+  const handleShowDetail = (treatment: PatientTreatmentWithAppointment) => {
     setSelectedTreatment(treatment);
   };
 
-  const handleEdit = (treatment: PatientTreatmentType) => {
+  const handleEdit = (treatment: PatientTreatmentWithAppointment) => {
     navigate(`/doctor/patient-treatments/${treatment.id}/edit`);
   };
 

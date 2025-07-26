@@ -103,7 +103,9 @@ const appointmentSchema = z
 
 const RegisterAppointment = () => {
   const navigation = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
+  console.log(user);
+  console.log(userProfile);
   const [selectedDate, setSelectedDate] = useState("");
   const [step, setStep] = useState(1);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
