@@ -63,13 +63,15 @@ export const useDeleteTestResult = () => {
 };
 
 export const useTestResultsByPatientTreatmentId = (
-  patientTreatmentId: number
+  patientTreatmentId: number,
+  query?: Query
 ) => {
   return useQuery<TestResult[]>({
     queryKey: ["testResults", "patientTreatment", patientTreatmentId],
     queryFn: async () => {
       const res = await testResultService.getByPatientTreatmentId(
-        patientTreatmentId
+        patientTreatmentId,
+        query
       );
       return res.data?.data || [];
     },

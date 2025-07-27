@@ -463,7 +463,7 @@ export const staffRoutes: RouteConfig[] = [
     allowedRoles: ["STAFF"],
   },
   {
-    path: "/staff/payments/:userId",
+    path: "/staff/payments/:userId/:appointmentTime",
     component: UserPayment,
     title: "Người dùng thanh toán",
     description: "Quản lý thanh toán của người dùng",

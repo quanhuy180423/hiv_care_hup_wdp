@@ -97,7 +97,7 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
               console.log(res);
               const patientTreatments = res.data[0];
               navigate(
-                `/doctor/patient-treatments/${patientTreatments.id}/consultation`
+                `/doctor/patient-treatments/${patientTreatments?.id}/consultation`
               );
             }}
             className="flex items-center cursor-pointer"
@@ -144,7 +144,11 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
         {appointment.status !== "COMPLETED" &&
           appointment.status !== "CANCELLED" && (
             <DropdownMenuItem
-              onClick={() => navigate(`/staff/payments/${appointment.userId}`)}
+              onClick={() =>
+                navigate(
+                  `/staff/payments/${appointment.userId}/${appointment.appointmentTime}`
+                )
+              }
               className="cursor-pointer"
             >
               Thanh toán
