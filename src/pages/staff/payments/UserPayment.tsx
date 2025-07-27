@@ -105,8 +105,6 @@ const UserPayment: React.FC = () => {
     fetchActiveTreatmentsUser();
   }, [fetchActiveTreatmentsUser]);
 
-
-
   const handlePayment = async () => {
     if (!selectedAppointment && !selectedPatientTreatment) return;
     setPayLoading(true);
@@ -188,7 +186,13 @@ const UserPayment: React.FC = () => {
         // Close the payment method modal
         setIsModalOpen(false);
         // Open the QR code modal
-        setIsQRModalOpen(true);
+        if (paymentMethod?.method === "CASH") {
+          toast.success("Thanh toán thành công, không cần quét mã QR");
+          setIsQRModalOpen(false);
+          setIsPaymentProcessing(false);
+        } else {
+          setIsQRModalOpen(true);
+        }
       }
     } catch (error) {
       console.error("Error processing payment:", error);
