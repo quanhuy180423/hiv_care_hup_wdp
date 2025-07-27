@@ -37,7 +37,7 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
   return (
     <div className="mt-4">
       <div className="font-semibold text-sm text-gray-700 mb-1">
-        Thuốc được thêm
+        Thuốc chỉ định
       </div>
       <div className="space-y-2">
         {customMeds.map((med, idx) => {

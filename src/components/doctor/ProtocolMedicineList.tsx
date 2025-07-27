@@ -181,7 +181,7 @@ export default function ProtocolMedicineList({
 
             {isEditing && editForm && (
               <div className="bg-white border rounded p-4 mt-2">
-                <div className="font-semibold mb-2">Sửa thuốc phác đồ</div>
+                <div className="font-semibold mb-2">Lấy thuốc từ phác đồ</div>
                 <form
                   onSubmit={async (e: FormEvent<HTMLFormElement>) => {
                     e.preventDefault();

@@ -224,7 +224,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
       {/* Danh sách thuốc trong phác đồ */}
       <div className="mb-8">
         <div className="font-semibold text-base mb-2 flex items-center gap-2">
-          Danh sách thuốc trong phác đồ
+          Phác đồ mẫu
           {protocol?.medicines && (
             <span className="text-xs text-gray-400">
               (
