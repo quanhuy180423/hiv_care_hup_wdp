@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+import { calculateEndDate, parseDate } from "@/lib/utils/patientTreatmentUtils";
 import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import {
   patientTreatmentSchema,
@@ -10,7 +12,7 @@ import { treatmentProtocolService } from "@/services/treatmentProtocolService";
 import useAuthStore from "@/store/authStore";
 import type { Appointment } from "@/types/appointment";
 import type { ErrorResponse } from "@/types/common";
-import type { Medicine } from "@/types/medicine";
+import type { DurationUnit, Medicine } from "@/types/medicine";
 import type { PatientTreatmentFormSubmit } from "@/types/patientTreatment";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -109,12 +111,17 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
       { limit: 10 }
     );
     const appointments: Appointment[] = res.data?.data || [];
-    const uniquePatients: Record<number, { id: number; name: string }> = {};
+    console.log(`appointments`, appointments);
+    const uniquePatients: Record<
+      number,
+      { id: number; name: string; appointmentStatus?: string }
+    > = {};
     appointments.forEach((appt) => {
       if (appt.user && appt.userId && !uniquePatients[appt.userId]) {
         uniquePatients[appt.userId] = {
           id: appt.userId,
           name: appt.user.name || "",
+          appointmentStatus: appt.status,
         };
       }
     });
@@ -242,7 +249,20 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
         }));
         setValue("customMedications", meds);
       }
-      setValue("endDate", calculateEndDate(protocol));
+
+      const startDate = protocol.startDate
+        ? parseDate(protocol.startDate)
+        : new Date();
+      setValue(
+        "endDate",
+        calculateEndDate(
+          {
+            ...protocol,
+            durationUnit: protocol.durationUnit as DurationUnit,
+          },
+          startDate instanceof Date ? startDate.toISOString().slice(0, 16) : ""
+        ) || undefined
+      );
     } catch {
       setProtocolDetail(null);
     }
@@ -300,7 +320,6 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     }
   };
 
-  // Handler: delete protocol medicine (xoá thuốc gốc)
   const handleDeleteProtocolMedicine = (protocolMedicineId: number) => {
     const currentMeds = (getValues("customMedications") ||
       []) as CustomMedicationItem[];
@@ -348,44 +367,13 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
     ]);
   };
 
-  // Helper: calculate end date
-  const calculateEndDate = (protocol: TreatmentProtocol): string => {
-    const startDateStr = protocol.startDate || new Date().toISOString();
-    let endDate = startDateStr;
-    if (protocol.durationValue && protocol.durationUnit) {
-      const start = new Date(startDateStr);
-      let addDays = 0;
-      switch (protocol.durationUnit) {
-        case "DAY":
-          addDays = protocol.durationValue;
-          break;
-        case "WEEK":
-          addDays = protocol.durationValue * 7;
-          break;
-        case "MONTH":
-          start.setMonth(start.getMonth() + protocol.durationValue);
-          break;
-        case "YEAR":
-          start.setFullYear(start.getFullYear() + protocol.durationValue);
-          break;
-        default:
-          addDays = protocol.durationValue;
-      }
-      if (addDays > 0) {
-        start.setDate(start.getDate() + addDays);
-      }
-      endDate = start.toISOString().slice(0, 16);
-    }
-    return endDate;
-  };
-
   return (
-    <div className="w-full mx-auto">
-      <div className="bg-primary/5 px-6 py-4 border-b">
-        <h2 className="text-xl font-bold text-primary">
+    <div className={cn("w-full mx-auto")}>
+      <div className={cn("bg-primary/5 px-6 py-4 border-b")}>
+        <h2 className={cn("text-xl font-bold text-primary")}>
           Tạo điều trị bệnh nhân
           {doctorNameFromStorage && (
-            <span className="block text-base font-medium text-gray-700">
+            <span className={cn("block text-base font-medium text-gray-700")}>
               bởi <strong>{doctorNameFromStorage}</strong>
             </span>
           )}
@@ -395,20 +383,24 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
         onSubmit={handleSubmit(
           async (values) => {
             setSubmitError(null);
+            // Clean: tách logic chuyển đổi, gom biến
+            const doctorId =
+              typeof values.doctorId === "string"
+                ? Number(values.doctorId)
+                : values.doctorId!;
+            const customMedications = Array.isArray(values.customMedications)
+              ? values.customMedications
+              : [];
+            const endDate = values.endDate ?? "";
             try {
               const data: PatientTreatmentFormSubmit = {
                 patientId: values.patientId!,
                 protocolId: values.protocolId!,
-                doctorId:
-                  typeof values.doctorId === "string"
-                    ? Number(values.doctorId)
-                    : values.doctorId!,
-                customMedications: Array.isArray(values.customMedications)
-                  ? values.customMedications
-                  : [],
+                doctorId,
+                customMedications,
                 notes: values.notes,
                 startDate: values.startDate,
-                endDate: values.endDate ?? "",
+                endDate,
                 total: values.total!,
               };
               onSubmit(data, autoEndExisting);
@@ -455,13 +447,13 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
             toast.error(errorMsg);
           }
         )}
-        className="space-y-8 px-6 py-4 rounded-xl"
+        className={cn("space-y-8 px-6 py-4 rounded-xl")}
       >
-        <div className="mb-2">
-          <h2 className="text-lg font-semibold text-primary mb-1">
+        <div className={cn("mb-2")}>
+          <h2 className={cn("text-lg font-semibold text-primary mb-1")}>
             Thông tin điều trị
           </h2>
-          <p className="text-gray-500 text-sm mb-2">
+          <p className={cn("text-gray-500 text-sm mb-2")}>
             Vui lòng nhập đầy đủ thông tin để tạo điều trị cho bệnh nhân.
           </p>
         </div>
@@ -514,7 +506,11 @@ export const PatientTreatmentForm: React.FC<PatientTreatmentFormProps> = ({
           isSubmitting={isSubmitting}
         />
         {submitError && (
-          <p className="text-red-600 text-sm mt-4 border border-red-200 rounded p-2 bg-red-50">
+          <p
+            className={cn(
+              "text-red-600 text-sm mt-4 border border-red-200 rounded p-2 bg-red-50"
+            )}
+          >
             {submitError}
           </p>
         )}

@@ -97,7 +97,7 @@ export const PatientTreatmentDetailDialog = ({
         tabIndex={-1}
         aria-modal="true"
         role="dialog"
-        className="sm:max-w-[550px] md:max-w-[600px] lg:max-w-[650px] max-h-screen overflow-y-auto bg-white rounded-xl shadow-lg p-6 z-50"
+        className="sm:max-w-xl md:max-w-2xl lg:max-w-3xl max-h-screen overflow-y-auto bg-white rounded-xl shadow-lg p-6 z-50"
       >
         <DialogHeader>
           <DialogTitle>
@@ -301,30 +301,59 @@ export const PatientTreatmentDetailDialog = ({
                 </div>
                 {detail.customMedications &&
                 detail.customMedications.length > 0 ? (
-                  <ul className="list-disc ml-6 text-sm space-y-1">
+                  <ul className="ml-0 md:ml-2 flex flex-col gap-2 mt-2">
                     {detail.customMedications.map(
                       (
                         med: (typeof detail.customMedications)[number],
                         idx: number
                       ) => (
-                        <li key={idx}>
-                          <span className="font-medium">
-                            {med.medicineName}
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors px-3 py-2 border border-gray-100 shadow-sm"
+                        >
+                          {/* Icon thuốc */}
+                          <span className="mt-0.5 text-primary">
+                            <svg
+                              width="18"
+                              height="18"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M7.5 7.5l9 9M8.25 19.5a4.5 4.5 0 1 1 0-9h7.5a4.5 4.5 0 1 1 0 9h-7.5z" />
+                              <path d="M15.75 4.5a4.5 4.5 0 0 1 0 9h-7.5a4.5 4.5 0 1 1 0-9h7.5z" />
+                            </svg>
                           </span>
-                          {med.dosage && (
-                            <span className="ml-1">- {med.dosage}</span>
-                          )}
-                          {med.notes && (
-                            <span className="ml-2 text-xs text-gray-400">
-                              [{med.notes}]
-                            </span>
-                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span
+                                className="font-semibold text-gray-900 truncate max-w-[120px] md:max-w-[180px]"
+                                title={med.medicineName}
+                              >
+                                {med.medicineName}
+                              </span>
+                              {med.dosage && (
+                                <span className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-0.5">
+                                  {med.dosage}
+                                </span>
+                              )}
+                              {med.notes && (
+                                <span
+                                  className="text-xs text-blue-500 bg-blue-50 rounded px-2 py-0.5"
+                                  title={med.notes}
+                                >
+                                  {med.notes}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </li>
                       )
                     )}
                   </ul>
                 ) : (
-                  <span className="ml-2 text-gray-500">
+                  <span className="ml-2 text-gray-500 italic">
                     Không có thuốc bổ sung
                   </span>
                 )}
