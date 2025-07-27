@@ -30,6 +30,12 @@ export const getColumns = (currentPage: number, pageSize: number): ColumnDef<App
     header: "Thời gian khám",
     cell: ({ row }) =>
       formatUtcDateManually(row.original.appointmentTime, "dd/MM/yyyy HH:mm"),
+    sortingFn: (rowA, rowB) => {
+      const dateA = new Date(rowA.original.appointmentTime).getTime();
+      const dateB = new Date(rowB.original.appointmentTime).getTime();
+      return dateA - dateB;
+    },
+    enableSorting: true,
   },
   {
     accessorKey: "doctor.user.name",

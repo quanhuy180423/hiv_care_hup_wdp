@@ -998,9 +998,11 @@ const HomePage = () => {
               Hãy liên hệ ngay để được tư vấn và điều trị kịp thời.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
-                Đặt Lịch Khám
-              </button>
+              <Link to="services/appointment/register">
+                <button className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors cursor-pointer">
+                  Đặt Lịch Khám
+                </button>
+              </Link>
               <button className="border-2 border-purple-600 text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
                 Tư Vấn Miễn Phí
               </button>
