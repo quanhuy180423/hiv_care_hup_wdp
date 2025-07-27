@@ -129,3 +129,12 @@ export type CustomMedication = {
   protocolMedicineId?: number;
   deleted?: boolean;
 };
+
+export enum MedicineUnit {
+  TABLET = "tablet",
+  AMPOULE = "ampoule",
+  ML = "ml",
+  SACHET = "sachet",
+  BOTTLE = "bottle",
+  OTHER = "other",
+}
