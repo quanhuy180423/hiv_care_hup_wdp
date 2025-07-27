@@ -36,6 +36,7 @@ import type {
   PatientTreatmentType,
 } from "@/types/patientTreatment";
 import { translateInterpretation } from "@/types/testResult";
+import { MeetingRecordListForPatient } from "./components/MeetingRecordListForPatient";
 
 function translateTreatmentStatus(status: string) {
   switch (status) {
@@ -71,7 +72,9 @@ export default function TreatmentSchedule() {
   } = useActivePatientTreatmentsByPatient(patientId);
 
   const treatmentList = treatments?.data.data || [];
-  const activeTreatmentList = activeTreatmentsData?.data || [];
+  const activeTreatmentList = activeTreatmentsData?.data?.length
+  ? [activeTreatmentsData.data[0]]
+  : [];
 
   const renderTreatmentCard = (
     treatment: PatientTreatmentType | ActivePatientTreatment
@@ -197,106 +200,114 @@ export default function TreatmentSchedule() {
           <Separator />
 
           {/* Medications Section */}
-          <div className="grid grid-cols-1 gap-2">
-            <h3 className="font-medium flex items-center gap-2">
-              <Pill className="w-4 h-4 text-primary" />
-              Thuốc điều trị
-            </h3>
-            {/* Protocol Medicines */}
-            {treatment.protocol?.medicines &&
-              treatment.protocol.medicines.length > 0 && (
-                <div className="space-y-3">
+          {((treatment.protocol?.medicines &&
+            treatment.protocol.medicines.length > 0) ||
+            (treatment.customMedications &&
+              treatment.customMedications.length > 0)) && (
+            <div className="grid grid-cols-1 gap-2">
+              <h3 className="font-medium flex items-center gap-2">
+                <Pill className="w-4 h-4 text-primary" />
+                Thuốc điều trị
+              </h3>
+              {/* Protocol Medicines */}
+              {treatment.protocol?.medicines &&
+                treatment.protocol.medicines.length > 0 && (
                   <div className="space-y-3">
-                    {treatment.protocol.medicines.map((med) => (
-                      <div
-                        key={med.id}
-                        className="flex gap-3 p-3 bg-muted/30 rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <p className="font-medium flex items-center gap-2">
-                            {med.medicine?.name || "Thuốc không xác định"}
-                            <Badge variant="secondary" className="text-xs h-5">
-                              {med.medicine?.dose || "Liều không xác định"}
-                            </Badge>
-                          </p>
-                          <div className="grid grid-cols-3 gap-2 mt-1">
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Liều dùng
-                              </p>
-                              <p className="text-sm">{med.dosage}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Thời gian
-                              </p>
-                              <p className="text-sm">
-                                {med.durationValue}{" "}
-                                {med.durationUnit?.toLowerCase()}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Cách dùng
-                              </p>
-                              <p className="text-sm">
-                                {med.notes || "Theo chỉ định"}
-                              </p>
+                    <div className="space-y-3">
+                      {treatment.protocol.medicines.map((med) => (
+                        <div
+                          key={med.id}
+                          className="flex gap-3 p-3 bg-muted/30 rounded-lg"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium flex items-center gap-2">
+                              {med.medicine?.name || "Thuốc không xác định"}
+                              <Badge
+                                variant="secondary"
+                                className="text-xs h-5"
+                              >
+                                {med.medicine?.dose || "Liều không xác định"}
+                              </Badge>
+                            </p>
+                            <div className="grid grid-cols-3 gap-2 mt-1">
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Liều dùng
+                                </p>
+                                <p className="text-sm">{med.dosage}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Thời gian
+                                </p>
+                                <p className="text-sm">
+                                  {med.durationValue}{" "}
+                                  {med.durationUnit?.toLowerCase()}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Cách dùng
+                                </p>
+                                <p className="text-sm">
+                                  {med.notes || "Theo chỉ định"}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-            {/* Custom Medications */}
-            {treatment.customMedications &&
-              treatment.customMedications.length > 0 && (
-                <div className="space-y-3">
+              {/* Custom Medications */}
+              {treatment.customMedications &&
+                treatment.customMedications.length > 0 && (
                   <div className="space-y-3">
-                    {treatment.customMedications.map((med, index) => (
-                      <div
-                        key={index}
-                        className="flex gap-3 p-3 bg-muted/30 rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <p className="font-medium flex items-center gap-2">
-                            {med.medicineName || "Thuốc đặc biệt"}
-                          </p>
-                          <div className="grid grid-cols-3 gap-2 mt-1">
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Liều dùng
-                              </p>
-                              <p className="text-sm">{med.dosage}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Thời gian
-                              </p>
-                              <p className="text-sm">
-                                {med.durationValue}{" "}
-                                {med.durationUnit?.toLowerCase()}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Cách dùng
-                              </p>
-                              <p className="text-sm">
-                                {med.schedule || "Theo chỉ định"}
-                              </p>
+                    <div className="space-y-3">
+                      {treatment.customMedications.map((med, index) => (
+                        <div
+                          key={index}
+                          className="flex gap-3 p-3 bg-muted/30 rounded-lg"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium flex items-center gap-2">
+                              {med.medicineName || "Thuốc đặc biệt"}
+                            </p>
+                            <div className="grid grid-cols-3 gap-2 mt-1">
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Liều dùng
+                                </p>
+                                <p className="text-sm">{med.dosage}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Thời gian
+                                </p>
+                                <p className="text-sm">
+                                  {med.durationValue}{" "}
+                                  {med.durationUnit?.toLowerCase()}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Cách dùng
+                                </p>
+                                <p className="text-sm">
+                                  {med.schedule || "Theo chỉ định"}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-          </div>
+                )}
+            </div>
+          )}
 
           {/* Tests Section - Placeholder */}
           {hasTestResults && (
@@ -425,7 +436,7 @@ export default function TreatmentSchedule() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <ClipboardList className="w-6 h-6" />
@@ -505,6 +516,8 @@ export default function TreatmentSchedule() {
           )}
         </TabsContent>
       </Tabs>
+      <MeetingRecordListForPatient
+       />
     </div>
   );
 }

@@ -45,6 +45,9 @@ interface DataTableProps<TData, TValue> {
   currentPage?: number;
   pageSize?: number;
   totalItems?: number;
+  initialState?: {
+    sorting?: SortingState;
+  };
 }
 
 export function DataTable<TData, TValue>({
@@ -58,8 +61,11 @@ export function DataTable<TData, TValue>({
   currentPage = 1,
   pageSize = 10,
   totalItems,
+  initialState,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>(
+    initialState?.sorting ?? []
+  );
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -87,6 +93,7 @@ export function DataTable<TData, TValue>({
     // Disable built-in pagination if using server-side pagination
     manualPagination: enablePagination && !!pageCount,
     pageCount: pageCount || 0,
+    initialState,
   });
 
   // Override pagination handlers for server-side pagination
@@ -100,22 +107,31 @@ export function DataTable<TData, TValue>({
   }, [enablePagination, onPageChange, onPageSizeChange, currentPage, table]);
 
   // Custom pagination handlers
-  const handlePageChange = React.useCallback((pageIndex: number) => {
-    if (onPageChange) {
-      onPageChange(pageIndex + 1);
-    }
-  }, [onPageChange]);
+  const handlePageChange = React.useCallback(
+    (pageIndex: number) => {
+      if (onPageChange) {
+        onPageChange(pageIndex + 1);
+      }
+    },
+    [onPageChange]
+  );
 
-  const handlePageSizeChange = React.useCallback((newPageSize: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(newPageSize);
-    }
-  }, [onPageSizeChange]);
+  const handlePageSizeChange = React.useCallback(
+    (newPageSize: number) => {
+      if (onPageSizeChange) {
+        onPageSizeChange(newPageSize);
+      }
+    },
+    [onPageSizeChange]
+  );
 
   console.log(data);
-  console.log('table.getRowModel().rows:', table.getRowModel().rows);
-  console.log('table.getRowModel().rows.length:', table.getRowModel().rows.length);
-  console.log('isLoading:', isLoading);
+  console.log("table.getRowModel().rows:", table.getRowModel().rows);
+  console.log(
+    "table.getRowModel().rows.length:",
+    table.getRowModel().rows.length
+  );
+  console.log("isLoading:", isLoading);
 
   return (
     <div className="space-y-4">
@@ -127,13 +143,35 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                    <TableHead
+                      key={header.id}
+                      className={
+                        header.column.getCanSort()
+                          ? "cursor-pointer select-none"
+                          : ""
+                      }
+                      onClick={
+                        header.column.getCanSort()
+                          ? header.column.getToggleSortingHandler()
+                          : undefined
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.column.getCanSort() && (
+                          <>
+                            {header.column.getIsSorted() === "asc" && (
+                              <span className="text-xs">▲</span>
+                            )}
+                            {header.column.getIsSorted() === "desc" && (
+                              <span className="text-xs">▼</span>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </TableHead>
                   );
                 })}
@@ -184,7 +222,7 @@ export function DataTable<TData, TValue>({
       {enablePagination && (
         <div className="flex items-center justify-between px-2">
           <div className="flex-1 text-sm text-muted-foreground">
-            {totalItems && `Tổng cộng ${totalItems} mục` || ""}
+            {(totalItems && `Tổng cộng ${totalItems} mục`) || ""}
           </div>
           <div className="flex items-center space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">

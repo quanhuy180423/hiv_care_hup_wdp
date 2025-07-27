@@ -71,12 +71,16 @@ import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { formatDate } from "@/lib/utils/dates/formatDate";
 import { getAvatarUrl } from "@/lib/utils/uploadImage/uploadImage";
 import type { DoctorScheduleByDate } from "@/types/doctor";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
 const appointmentSchema = z
   .object({
     userId: z.number(),
     doctorId: z.number().optional(),
-    serviceId: z.number().nonnegative("Vui lòng chọn dịch vụ"),
+    serviceId: z
+      .number({ required_error: "Vui lòng chọn dịch vụ" })
+      .min(1, "Vui lòng chọn dịch vụ"),
     appointmentDate: z.string().nonempty("Vui lòng chọn ngày"),
     appointmentTime: z.string().nonempty("Vui lòng chọn khung giờ"),
     isAnonymous: z.boolean(),
@@ -99,11 +103,15 @@ const appointmentSchema = z
 
 const RegisterAppointment = () => {
   const navigation = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
+  console.log(user);
+  console.log(userProfile);
   const [selectedDate, setSelectedDate] = useState("");
-  const [availableSlots, setAvailableSlots] = useState<Slot[]>(slots);
   const [step, setStep] = useState(1);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [doctorSlots, setDoctorSlots] = useState<Slot[]>([]);
+  const [dialogLoading, setDialogLoading] = useState(false);
 
   const services = useServices({ page: 1, limit: 100 });
   const { data: doctors } = useDoctorSchedulesByDate(
@@ -114,7 +122,7 @@ const RegisterAppointment = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     watch,
     setValue,
     trigger,
@@ -176,83 +184,44 @@ const RegisterAppointment = () => {
         setValue("isAnonymous", false);
         setValue("type", "OFFLINE");
       }
-
-      if (watch("appointmentDate")) {
-        const filtered = filterSlotsByService(
-          slots,
-          selectedService.startTime,
-          selectedService.endTime
-        );
-        setAvailableSlots(filtered);
-        // Nếu slot đã chọn không còn trong filtered, reset
-        if (
-          watch("appointmentTime") &&
-          !filtered.some(
-            (slot) => `${slot.start}-${slot.end}` === watch("appointmentTime")
-          )
-        ) {
-          setValue("appointmentTime", "");
-        }
-      }
-    }
-    // Khi đổi service, reset slot nếu đã chọn ngày
-    if (selectedService && watch("appointmentDate")) {
-      handleDateChange(watch("appointmentDate"));
-    }
-    // eslint-disable-next-line
-  }, [selectedService]);
-
-  const handleDateChange = (date: string) => {
-    if (date !== watch("appointmentDate")) {
+      // Reset các trường liên quan khi đổi service
+      setSelectedDate("");
+      setValue("appointmentDate", "");
+      setSelectedDoctorId(null);
+      setValue("doctorId", 0);
+      setDoctorSlots([]);
       setValue("appointmentTime", "");
     }
-    setSelectedDate(date);
-    setValue("appointmentDate", date);
+  }, [selectedService, setValue]);
 
-    if (!selectedService) {
-      setAvailableSlots([]);
-      return;
-    }
-
-    // Lọc slot theo thời gian của service
-    let filteredSlots = filterSlotsByService(
-      slots,
-      selectedService.startTime,
-      selectedService.endTime
-    );
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selected = new Date(date);
-    selected.setHours(0, 0, 0, 0);
-
-    if (selected < today) {
-      toast.error("Vui lòng chọn ngày từ hôm nay trở đi");
-      setAvailableSlots([]);
-      return;
-    }
-
-    const now = new Date();
-    const isToday = selected.getTime() === today.getTime();
-
-    if (isToday) {
-      const currentTime = now.getHours() * 60 + now.getMinutes();
+  useEffect(() => {
+    if (selectedDoctorId && selectedService && selectedDate) {
+      // Lấy slot trống của bác sĩ này
+      const doctorAppointments = staffAppointments.data?.data.filter(
+        (appt) => appt.doctorId === selectedDoctorId
+      );
+      let filteredSlots = filterSlotsByService(
+        slots,
+        selectedService.startTime,
+        selectedService.endTime
+      );
+      // Loại bỏ slot đã có appointment
       filteredSlots = filteredSlots.filter((slot) => {
-        const [hours, minutes] = slot.start.split(":").map(Number);
-        const slotTime = hours * 60 + minutes;
-        return slotTime > currentTime;
+        const slotStr = `${slot.start}-${slot.end}`;
+        return !doctorAppointments?.some((appt) => {
+          const apptSlot = `${appt.appointmentTime.slice(11, 16)}-${new Date(
+            new Date(appt.appointmentTime).getTime() + 30 * 60000
+          )
+            .toISOString()
+            .slice(11, 16)}`;
+          return apptSlot === slotStr;
+        });
       });
-      setAvailableSlots(filteredSlots);
-
-      if (filteredSlots.length === 0) {
-        toast.error(
-          "Không có khung giờ trống cho hôm nay. Vui lòng chọn ngày khác."
-        );
-      }
+      setDoctorSlots(filteredSlots);
     } else {
-      setAvailableSlots(filteredSlots);
+      setDoctorSlots([]);
     }
-  };
+  }, [selectedDoctorId, selectedService, selectedDate, staffAppointments.data]);
 
   // Validate từng bước trước khi chuyển step
   const nextStep = async () => {
@@ -329,10 +298,13 @@ const RegisterAppointment = () => {
         toast.success("Đặt lịch hẹn thành công!");
         navigation("/user/appointments");
       },
+      onSettled: () => {
+        setDialogLoading(false);
+      },
     });
   };
 
-  const DoctorCardMini = ({
+   const DoctorCard = ({
     doctor,
     isSelected,
     isAvailable,
@@ -345,41 +317,58 @@ const RegisterAppointment = () => {
   }) => (
     <div
       onClick={onClick}
-      className={`cursor-pointer bg-white rounded-xl border-2 p-4 flex items-center gap-4 shadow-sm transition-all duration-200
+      className={`cursor-pointer bg-white rounded-xl border-2 p-6 shadow-lg transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 h-full relative
       ${
         isSelected
-          ? "border-purple-600 ring-2 ring-purple-200"
+          ? "border-purple-600 ring-2 ring-purple-200 bg-purple-50"
           : "border-gray-200 hover:border-purple-400"
       }
       ${!isAvailable ? "opacity-60 pointer-events-none" : ""}
     `}
     >
-      <div className="relative">
-        <img
-          src={
-            getAvatarUrl(doctor.user.avatar || "") || "/images/default-avatar.png"
-          }
-          alt={doctor.user.name}
-          className="w-14 h-14 rounded-full object-cover border-2 border-purple-400"
-        />
-      </div>
-      <div className="flex-1">
-        <div className="font-semibold text-base text-gray-900">
-          {doctor.user.name}
-        </div>
-        <div className="text-xs text-gray-500">
-          {doctor.specialization || "Bác sĩ đa khoa"}
-        </div>
-        <div className="flex items-center gap-1 mt-1">
-          <span
-            className={`w-2 h-2 rounded-full ${
+      <div className="flex flex-col items-center text-center space-y-4">
+        <div className="relative">
+          <img
+            src={
+              getAvatarUrl(doctor.user.avatar || "") ||
+              "/images/default-avatar.png"
+            }
+            alt={doctor.user.name}
+            className="w-20 h-20 rounded-full object-cover border-4 border-purple-400 shadow-md"
+          />
+          <div
+            className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-3 border-white ${
               isAvailable ? "bg-emerald-500" : "bg-rose-500"
             }`}
-          ></span>
-          <span className="text-xs">{isAvailable ? "Có sẵn" : "Bận"}</span>
+          />
         </div>
+        
+        <div className="space-y-2">
+          <h3 className="font-bold text-lg text-gray-900 leading-tight">
+            {doctor.user.name}
+          </h3>
+          <p className="text-sm text-gray-600 font-medium">
+            {doctor.specialization || "Bác sĩ đa khoa"}
+          </p>
+          
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isAvailable ? "bg-emerald-500" : "bg-rose-500"
+              }`}
+            />
+            <span className="text-xs font-medium">
+              {isAvailable ? "Có sẵn" : "Bận"}
+            </span>
+          </div>
+        </div>
+        
+        {isSelected && (
+          <div className="absolute top-4 right-4">
+            <CheckCircle className="w-6 h-6 text-purple-600" />
+          </div>
+        )}
       </div>
-      {isSelected && <CheckCircle className="w-5 h-5 text-purple-600" />}
     </div>
   );
 
@@ -465,11 +454,11 @@ const RegisterAppointment = () => {
             </Select>
           )}
         />
-        {errors.serviceId && (
+        {errors.serviceId && !watch("serviceId") ? (
           <p className="text-red-500 text-sm mt-1">
             {errors.serviceId.message}
           </p>
-        )}
+        ) : null}
       </div>
       {/* Hiển thị thông tin service đã chọn */}
       {selectedService && (
@@ -558,111 +547,132 @@ const RegisterAppointment = () => {
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Date Selection */}
-        <div className="space-y-3">
-          <Label
-            htmlFor="appointmentDate"
-            className="text-gray-700 font-semibold flex items-center gap-2"
-          >
-            <CalendarDays className="w-5 h-5 text-purple-600" />
-            Chọn Ngày <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <Controller
-            name="appointmentDate"
-            control={control}
-            render={({ field }) => (
-              <Input
-                type="date"
-                {...field}
-                min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => {
-                  field.onChange(e.target.value);
-                  handleDateChange(e.target.value);
-                }}
-                className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
-              />
-            )}
-          />
-          {errors.appointmentDate && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.appointmentDate.message}
-            </p>
+      {/* Chọn ngày */}
+      <div className="space-y-2 w-sm">
+        <Label>
+          Chọn ngày <span className="text-red-500">*</span>
+        </Label>
+        <Controller
+          name="appointmentDate"
+          control={control}
+          render={({ field }) => (
+            <Input
+              type="date"
+              {...field}
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => {
+                field.onChange(e.target.value);
+                setSelectedDate(e.target.value);
+                setSelectedDoctorId(null);
+                setValue("doctorId", 0);
+              }}
+            />
           )}
-        </div>
-        {/* Time Slot Selection */}
-        <div className="space-y-3">
-          <Label
-            htmlFor="appointmentTime"
-            className="text-gray-700 font-semibold flex items-center gap-2"
-          >
-            <Clock className="w-5 h-5 text-purple-600" />
-            Chọn Khung Giờ <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <Controller
-            name="appointmentTime"
-            control={control}
-            render={({ field }) => (
-              <Select
-                onValueChange={field.onChange}
-                value={field.value || ""}
-                disabled={!selectedDate}
-              >
-                <SelectTrigger
-                  className={`w-full ${
-                    !selectedDate ? "bg-gray-50 text-gray-400" : ""
-                  } border-gray-300 focus:ring-purple-500 focus:border-purple-500`}
-                >
-                  <SelectValue
-                    placeholder={
-                      !selectedDate
-                        ? "Vui lòng chọn ngày trước"
-                        : "Chọn khung giờ"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent className="flex items-center bg-white ">
-                  {availableSlots.length === 0 ? (
-                    <div className="p-2 text-center text-gray-500">
-                      Không có khung giờ trống
-                    </div>
-                  ) : (
-                    availableSlots.map((slot, index) => (
-                      <SelectItem
-                        key={index}
-                        value={`${slot.start}-${slot.end}`}
-                        className="flex items-center hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 ease-in-out"
-                      >
-                        <span className="mr-2">⏰</span>
-                        {slot.start} - {slot.end}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.appointmentTime && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.appointmentTime.message}
-            </p>
-          )}
-        </div>
+        />
+        {errors.appointmentDate && !watch("appointmentDate") ? (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.appointmentDate.message}
+          </p>
+        ) : null}
       </div>
+      {/* Carousel chọn bác sĩ */}
+      {selectedService?.type !== "CONSULT" && (
+        <div className="space-y-4">
+          <Label className="text-lg font-semibold flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-purple-600" />
+            Chọn bác sĩ
+          </Label>
+          {availableDoctors?.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg">
+              <UserCheck className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-lg font-medium">Không có bác sĩ nào trống ngày này</p>
+              <p className="text-sm">Vui lòng chọn ngày khác</p>
+            </div>
+          ) : (
+            <div className="relative">
+              <Swiper
+                modules={[Navigation, Pagination, Autoplay]}
+                spaceBetween={20}
+                slidesPerView={1}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 30,
+                  },
+                  1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                  },
+                  1280: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                  },
+                }}
+                loop={(availableDoctors || []).length > 4}
+                autoplay={{
+                  delay: 3000,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                }}
+                pagination={{
+                  clickable: true,
+                  dynamicBullets: true,
+                }}
+                navigation={true}
+                className="pb-12 [&_.swiper-pagination-bullet]:bg-purple-600 [&_.swiper-pagination-bullet]:opacity-50 [&_.swiper-pagination-bullet-active]:bg-purple-700 [&_.swiper-pagination-bullet-active]:opacity-100 [&_.swiper-button-next]:text-purple-600 [&_.swiper-button-prev]:text-purple-600 [&_.swiper-button-next]:bg-white [&_.swiper-button-prev]:bg-white [&_.swiper-button-next]:rounded-full [&_.swiper-button-prev]:rounded-full [&_.swiper-button-next]:w-10 [&_.swiper-button-prev]:w-10 [&_.swiper-button-next]:h-10 [&_.swiper-button-prev]:h-10 [&_.swiper-button-next]:shadow-lg [&_.swiper-button-prev]:shadow-lg [&_.swiper-button-next:after]:text-base [&_.swiper-button-prev:after]:text-base [&_.swiper-button-next:after]:font-bold [&_.swiper-button-prev:after]:font-bold"
+              >
+                {availableDoctors?.map((doctor) => (
+                  <SwiperSlide key={doctor.id}>
+                    <DoctorCard
+                      doctor={doctor}
+                      isAvailable={true}
+                      isSelected={selectedDoctorId === doctor.id}
+                      onClick={() => {
+                        setSelectedDoctorId(doctor.id);
+                        setValue("doctorId", doctor.id);
+                      }}
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          )}
+          {errors.doctorId && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.doctorId.message}
+            </p>
+          )}
+        </div>
+      )}
       <div className="flex justify-between">
         <Button
           type="button"
           variant="outline"
-          onClick={prevStep}
           className="cursor-pointer"
+          onClick={prevStep}
         >
           <ChevronLeft className="w-4 h-4 mr-1" /> Quay lại
         </Button>
         <Button
           type="button"
           variant="outline"
-          onClick={nextStep}
           className="cursor-pointer"
+          onClick={async () => {
+            if (selectedService?.type === "CONSULT") {
+              const valid = await trigger(["appointmentDate"]);
+              if (!valid) return toast.error("Vui lòng chọn ngày!");
+              setStep(3);
+            } else {
+              const valid = await trigger(["appointmentDate", "doctorId"]);
+              if (!valid) return toast.error("Vui lòng chọn ngày và bác sĩ!");
+              setStep(3);
+            }
+          }}
+          disabled={selectedService?.type !== "CONSULT" && !selectedDoctorId}
         >
           Tiếp tục <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
@@ -673,38 +683,82 @@ const RegisterAppointment = () => {
   const renderStep3 = () => (
     <div className="space-y-6">
       {/* Doctor Selection */}
-      {selectedService?.type !== "CONSULT" && (
-        <div className="space-y-3">
-          <Label
-            htmlFor="doctorId"
-            className="text-gray-700 font-semibold flex items-center gap-2"
-          >
-            <Stethoscope className="w-5 h-5 text-purple-600" />
-            Chọn Bác Sĩ <span className="text-red-500 ml-1">*</span>
-          </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {availableDoctors?.length === 0 && (
-              <div className="col-span-full p-4 text-center text-gray-500 border rounded-lg">
-                Không còn bác sĩ nào trống khung giờ này
-              </div>
-            )}
-            {availableDoctors?.map((doctor) => (
-              <DoctorCardMini
-                key={doctor.id}
-                doctor={doctor}
-                isAvailable={true}
-                isSelected={watch("doctorId") === doctor.id}
-                onClick={() => setValue("doctorId", doctor.id)}
-              />
-            ))}
-          </div>
-          {errors.doctorId && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.doctorId.message}
-            </p>
-          )}
-        </div>
-      )}
+      <div className="space-y-2 w-sm">
+        <Label>
+          Chọn khung giờ <span className="text-red-500">*</span>
+        </Label>
+        <Controller
+          name="appointmentTime"
+          control={control}
+          render={({ field }) => {
+            // Nếu là CONSULT, slot lấy theo service, không cần bác sĩ
+            if (selectedService?.type === "CONSULT") {
+              const consultSlots = filterSlotsByService(
+                slots,
+                selectedService.startTime,
+                selectedService.endTime
+              );
+              return (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={!selectedDate}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn khung giờ" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {consultSlots.length === 0 ? (
+                      <div className="p-2 text-center text-gray-500">
+                        Không có khung giờ trống
+                      </div>
+                    ) : (
+                      consultSlots.map((slot, idx) => (
+                        <SelectItem
+                          key={idx}
+                          value={`${slot.start}-${slot.end}`}
+                        >
+                          {slot.start} - {slot.end}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              );
+            }
+            // Nếu không phải CONSULT, slot lấy theo bác sĩ đã chọn
+            return (
+              <Select
+                onValueChange={field.onChange}
+                value={field.value || ""}
+                disabled={!selectedDoctorId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn khung giờ" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  {doctorSlots.length === 0 ? (
+                    <div className="p-2 text-center text-gray-500">
+                      Không có khung giờ trống
+                    </div>
+                  ) : (
+                    doctorSlots.map((slot, idx) => (
+                      <SelectItem key={idx} value={`${slot.start}-${slot.end}`}>
+                        {slot.start} - {slot.end}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            );
+          }}
+        />
+        {errors.appointmentTime && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.appointmentTime.message}
+          </p>
+        )}
+      </div>
       {/* Notes */}
       <div className="space-y-3">
         <Label
@@ -742,15 +796,11 @@ const RegisterAppointment = () => {
           variant="outline"
           className="cursor-pointer"
           onClick={async () => {
-            // Validate trước khi mở dialog
-            const valid = await trigger([
-              ...(selectedService?.type !== "CONSULT" ? ["doctorId"] : []),
-              "notes",
-            ] as (keyof AppointmentFormValues)[]);
-            if (!valid) return;
+            const valid = await trigger(["appointmentTime"]);
+            if (!valid) return toast.error("Vui lòng chọn khung giờ!");
             setIsConfirmDialogOpen(true);
           }}
-          disabled={isSubmitting}
+          disabled={!watch("appointmentTime")}
         >
           Đặt lịch
         </Button>
@@ -980,17 +1030,21 @@ const RegisterAppointment = () => {
               variant="outline"
               onClick={() => setIsConfirmDialogOpen(false)}
               className="flex items-center gap-2 border-gray-300 hover:bg-gray-100 cursor-pointer"
+              disabled={dialogLoading}
             >
               <ArrowLeft className="w-4 h-4" />
               Quay lại chỉnh sửa
             </Button>
             <Button
               type="button"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
+              onClick={() => {
+                setDialogLoading(true);
+                handleSubmit(onSubmit)();
+              }}
+              disabled={dialogLoading}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold flex items-center gap-2 px-6 cursor-pointer"
             >
-              {isSubmitting ? (
+              {dialogLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Đang xử lý...

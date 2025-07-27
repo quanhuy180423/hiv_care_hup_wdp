@@ -56,12 +56,12 @@ const PatientProtocolSection: React.FC<PatientProtocolSectionProps> = ({
           value={field.value}
           onSearch={searchProtocols}
           onChange={(val) => {
-            const num = Number(val);
-            field.onChange(
-              !isNaN(num) && val !== undefined && val !== null && val !== ""
-                ? num
-                : undefined
-            );
+            if (val === "" || val === undefined || val === null) {
+              field.onChange(undefined);
+            } else {
+              const num = Number(val);
+              field.onChange(!isNaN(num) ? num : undefined);
+            }
           }}
           placeholder="Nhập tên phác đồ điều trị"
           label="Phác đồ điều trị"

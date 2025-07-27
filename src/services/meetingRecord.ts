@@ -35,6 +35,19 @@ export const meetingRecordService = {
     return res.data;
   },
 
+  getMeetingRecordByPatientId: async (
+    id: number,
+    params: MeetingRecordQueryParams
+  ): Promise<MeetingRecordListResponse> => {
+    const res = await apiClient.get<MeetingRecordListResponse>(
+      `/meeting-record/patient/${id}`,
+      {
+        params,
+      }
+    );
+    return res.data;
+  },
+
   createMeetingRecord: async (
     payload: MeetingRecordFormValues
   ): Promise<MeetingRecordResponse> => {

@@ -1,30 +1,7 @@
+import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import type { PaginatedResponse } from "./common";
 
-export interface CustomMedicationItem {
-  medicineId?: number;
-  medicineName: string;
-  dosage: string;
-  unit?: string;
-  frequency?: string;
-  time?: string;
-  durationValue?: number;
-  durationUnit?: string;
-  schedule?: string;
-  notes?: string;
-  price?: number;
-}
-
-export interface CustomMedications {
-  additionalMeds: CustomMedicationItem[];
-}
-
-export type TreatmentMedicineSubmit = {
-  medicineId: number;
-  dosage: string;
-  duration: string;
-  notes?: string;
-};
-
+// --- User/Patient/Doctor Types ---
 export interface UserInfo {
   id: number;
   name: string;
@@ -35,11 +12,23 @@ export interface PatientInfo extends UserInfo {
   phoneNumber: string;
 }
 
+export interface DoctorInfo {
+  id: number;
+  userId: number;
+  specialization: string;
+  certifications: string[];
+  isAvailable: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user: UserInfo;
+}
+
+// --- Medicine/Protocol Types ---
 export interface MedicineInfo {
   id: number;
   name: string;
-  description: string;
-  unit: string;
+  status?: boolean;
+  isAnonymous?: boolean; // Added isAnonymous
   dose: string;
   price: string;
   createdAt: string;
@@ -72,16 +61,17 @@ export interface ProtocolInfo {
   medicines: ProtocolMedicineInfo[];
 }
 
-export interface DoctorInfo {
-  id: number;
-  userId: number;
-  specialization: string;
-  certifications: string[];
-  isAvailable: boolean;
-  createdAt: string;
-  updatedAt: string;
-  user: UserInfo;
+// --- Custom Medication Types ---
+export interface CustomMedications {
+  additionalMeds: CustomMedicationItem[];
 }
+
+export type TreatmentMedicineSubmit = {
+  medicineId: number;
+  dosage: string;
+  duration: string;
+  notes?: string;
+};
 
 export interface Test {
   id: number;
@@ -130,6 +120,7 @@ export interface PatientTreatmentType {
   createdAt: string;
   updatedAt: string;
   status?: boolean;
+  isAnonymous?: boolean;
   patient?: PatientInfo;
   protocol?: ProtocolInfo;
   doctor?: DoctorInfo;
@@ -145,6 +136,34 @@ export interface PatientTreatmentsResponse {
   statusCode: number;
   message: string;
 }
+
+export interface ActivePatientTreatment {
+  id: number;
+  patientId: number;
+  protocolId: number;
+  doctorId: number;
+  customMedications?: CustomMedicationItem[];
+  notes?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  createdById: number;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
+  status?: boolean;
+  isAnonymous?: boolean;
+  patient?: PatientInfo;
+  protocol?: ProtocolInfo;
+  doctor?: DoctorInfo;
+  createdBy?: UserInfo;
+  testResults: TestResult[];
+  isCurrent: boolean;
+  isStarted: boolean;
+  daysRemaining: number | null;
+  treatmentStatus: string;
+}
+
+export type ActivePatientTreatmentType = ActivePatientTreatment;
 
 export interface PatientTreatmentQueryParams {
   page?: number;
@@ -203,37 +222,26 @@ export interface EndActiveTreatmentsResult {
   affectedTreatmentIds: number[];
 }
 
-export interface ActivePatientTreatmentType {
+export interface PatientTreatmentType {
   id: number;
   patientId: number;
   protocolId: number;
   doctorId: number;
+  customMedications?: CustomMedicationItem[];
+  notes?: string | null;
   startDate: string;
-  endDate?: string;
-}
-
-export interface ActivePatientTreatment {
-  id: number;
-  patientId: number;
-  protocolId: number;
-  doctorId: number;
-  customMedications: CustomMedicationItem[];
-  notes: string;
-  startDate: string;
-  endDate?: string;
+  endDate?: string | null;
   createdById: number;
   total: number;
-  status: boolean;
   createdAt: string;
   updatedAt: string;
-  patient: PatientInfo;
-  protocol: ProtocolInfo;
-  doctor: DoctorInfo;
-  createdBy: UserInfo;
-  isCurrent: boolean;
-  isStarted: boolean;
-  daysRemaining: number | null;
-  treatmentStatus: string;
+  status?: boolean;
+  isAnonymous?: boolean;
+  patient?: PatientInfo;
+  protocol?: ProtocolInfo;
+  doctor?: DoctorInfo;
+  createdBy?: UserInfo;
+  testResults: TestResult[];
 }
 
 export interface ActivePatientTreatmentsResponse {
@@ -270,6 +278,7 @@ export type PatientTreatmentFormSubmit = {
   startDate: string;
   endDate?: string;
   total: number;
+  isAnonymous?: boolean; // Added isAnonymous
 };
 
 export type CreatePatientTreatmentInput = {
@@ -279,6 +288,8 @@ export type CreatePatientTreatmentInput = {
   startDate: string;
   endDate?: string;
   notes?: string;
+  customMedications?: CustomMedicationItem[];
+  isAnonymous?: boolean; // Added isAnonymous
 };
 
 export type PatientTreatmentResponse = {
@@ -288,3 +299,32 @@ export type PatientTreatmentResponse = {
 export type UpdatePatientTreatmentInput = Partial<CreatePatientTreatmentInput>;
 
 export type PatientTreatmentQuery = PatientTreatmentQueryParams;
+
+export interface PatientTreatmentDetailResponse {
+  data: PatientTreatmentType & {
+    customMedications?: Array<{
+      dosage: string;
+      schedule?: string;
+      frequency?: string;
+      durationUnit?: string;
+      medicineName: string;
+      durationValue?: number;
+      medicineId?: number | string;
+      notes?: string;
+    }>;
+    protocol?: ProtocolInfo & {
+      medicines?: Array<
+        ProtocolMedicineInfo & {
+          medicine?: MedicineInfo;
+        }
+      >;
+    };
+    doctor?: DoctorInfo & {
+      user?: UserInfo;
+    };
+    createdBy?: UserInfo;
+    patient?: PatientInfo;
+  };
+  statusCode: number;
+  message: string;
+}

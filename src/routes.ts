@@ -60,10 +60,10 @@ import CategoryBlogManagement from "./pages/staff/categoriesBlog";
 import DoctorAppointments from "./pages/doctor/appointments";
 import DoctorPatientTreatments from "./pages/doctor/patientTreatment";
 import DoctorSchedule from "./pages/doctor/schedule";
-import TreatmentProtocols from "./pages/doctor/treatmentProtocols";
 
 // User specific pages
 import TestManagement from "./pages/admin/test";
+import ConsultationPage from "./pages/doctor/patientTreatment/pages/consultation";
 import CreateDoctorPatientTreatmentPage from "./pages/doctor/patientTreatment/pages/create";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import TestResultPage from "./pages/doctor/testResult";
@@ -72,6 +72,7 @@ import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
+import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
 
 // Route definition interface
 export interface RouteConfig {
@@ -80,7 +81,14 @@ export interface RouteConfig {
   title: string;
   description?: string;
   protected?: boolean; // Require authentication
-  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE"; // Expanded layout types
+  layout?:
+    | "ADMIN"
+    | "DOCTOR"
+    | "STAFF"
+    | "PATIENT"
+    | "AUTH"
+    | "USER_PROFILE"
+    | "MEETING"; // Expanded layout types
   icon?: LucideIcon; // Icon for navigation
   showInNav?: boolean; // Show in main navigation
   allowedRoles?: UserRole[]; // Allowed user roles
@@ -174,7 +182,7 @@ export const routes: RouteConfig[] = [
     title: "Lịch sử cuộc họp",
     description: "Xem lịch sử cuộc họp của bạn",
     protected: true,
-    layout: "PATIENT", // Can be adjusted to a more specific "MEETING" layout if needed
+    layout: "MEETING",
     icon: Calendar,
     showInNav: false,
     allowedRoles: ["PATIENT", "DOCTOR"],
@@ -512,14 +520,13 @@ export const doctorRoutes: RouteConfig[] = [
     allowedRoles: ["DOCTOR"],
   },
   {
-    path: "/doctor/treatment-protocols",
-    component: TreatmentProtocols,
-    title: "Phác đồ điều trị",
-    description: "Quản lý phác đồ điều trị",
+    path: "/doctor/patient-treatments/:id/consultation",
+    component: ConsultationPage,
+    title: "Hồ sơ bệnh án",
+    description: "Hồ sơ bệnh án cho bệnh nhân",
     protected: true,
     layout: "DOCTOR",
-    icon: Stethoscope,
-    showInNav: true,
+    showInNav: false,
     allowedRoles: ["DOCTOR"],
   },
   {
@@ -531,6 +538,16 @@ export const doctorRoutes: RouteConfig[] = [
     layout: "DOCTOR",
     icon: FlaskConical,
     showInNav: true,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "doctor/patient-treatments/:id/detail",
+    component: DetailPage,
+    title: "Chi tiết hồ sơ bệnh án",
+    description: "Chi tiết hồ sơ bệnh án cho bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    showInNav: false,
     allowedRoles: ["DOCTOR"],
   },
 ];
@@ -610,7 +627,6 @@ export const ROUTES = {
   DOCTOR_APPOINTMENTS: "/doctor/appointments",
   DOCTOR_SCHEDULE: "/doctor/schedule",
   DOCTOR_PATIENT_TREATMENTS: "/doctor/patient-treatments",
-  DOCTOR_TREATMENT_PROTOCOLS: "/doctor/treatment-protocols",
   DOCTOR_TEST_RESULTS: "/doctor/test-results",
 } as const;
 

@@ -5,10 +5,18 @@ import { AuthLayout } from "./layouts/AuthLayout";
 import { StaffLayout } from "./layouts/StaffLayout";
 import { UserProfileLayout } from "./layouts/UserProfileLayout";
 import { DoctorLayout } from "./layouts/DoctorLayout";
+import LayoutMeeting from "./layouts/LayoutMeeting";
 
 interface LayoutWrapperProps {
   children: ReactNode;
-  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE";
+  layout?:
+    | "ADMIN"
+    | "DOCTOR"
+    | "STAFF"
+    | "PATIENT"
+    | "AUTH"
+    | "USER_PROFILE"
+    | "MEETING";
 }
 
 export function LayoutWrapper({
@@ -26,6 +34,8 @@ export function LayoutWrapper({
       return <StaffLayout>{children}</StaffLayout>;
     case "USER_PROFILE":
       return <UserProfileLayout>{children}</UserProfileLayout>;
+    case "MEETING":
+      return <LayoutMeeting>{children}</LayoutMeeting>;
     default:
       return <UserLayout>{children}</UserLayout>;
   }

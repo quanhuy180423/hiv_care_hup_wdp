@@ -1,10 +1,17 @@
+/* Enhanced styles for medical consultation forms */
 .blog-content {
     font-family: "Inter", sans-serif;
     line-height: 1.75;
     color: #1f2937;
-    /* text-gray-800 */
     font-size: 1rem;
     word-break: break-word;
+}
+
+.blog-content.medical-form {
+    background: #fefefe;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .blog-content h1,
@@ -17,14 +24,21 @@
 
 .blog-content h1 {
     font-size: 2rem;
+    color: #1e40af;
 }
 
 .blog-content h2 {
     font-size: 1.5rem;
+    color: #1e40af;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dbeafe;
 }
 
 .blog-content h3 {
     font-size: 1.25rem;
+    color: #1e40af;
 }
 
 .blog-content p {
@@ -34,18 +48,15 @@
 .blog-content em {
     font-style: italic;
     color: #374151;
-    /* text-gray-700 */
 }
 
 .blog-content a {
     color: #2563eb;
-    /* blue-600 */
     text-decoration: underline;
 }
 
 .blog-content a:hover {
     color: #1e40af;
-    /* blue-800 */
 }
 
 .blog-content ul {
@@ -57,18 +68,86 @@
 .blog-content ol {
     list-style-type: decimal;
     padding-left: 1.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.blog-content ol>li {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.blog-content ol>li>strong {
+    color: #1e40af;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.75rem;
 }
 
 .blog-content li {
     margin-bottom: 0.5rem;
 }
 
+.blog-content ul[style*="list-style-type:none"] {
+    list-style: none;
+    padding-left: 1rem;
+}
+
+.blog-content ul[style*="list-style-type:none"] li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.blog-content ul[style*="list-style-type:none"] li:last-child {
+    border-bottom: none;
+}
+
+.blog-content input[type="checkbox"] {
+    margin-right: 0.75rem;
+    transform: scale(1.2);
+    accent-color: #3b82f6;
+}
+
+.blog-content u {
+    text-decoration: none;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 2px;
+    font-weight: 500;
+    color: #1f2937;
+    background: linear-gradient(to right, transparent 0%, transparent 100%);
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+}
+
+.blog-content div[style*="min-height"] {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    background: #ffffff;
+    margin: 0.75rem 0;
+}
+
+.blog-content div[style*="border-bottom:1px dotted"] {
+    border-bottom: 1px dotted #9ca3af !important;
+    min-height: 3rem;
+    background: #f9fafb;
+}
+
+.blog-content hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #dbeafe, #3b82f6, #dbeafe);
+    margin: 2rem 0;
+    border-radius: 1px;
+}
+
 .blog-content blockquote {
     border-left: 4px solid #e5e7eb;
     padding-left: 1rem;
     color: #6b7280;
-    /* gray-500 */
     font-style: italic;
     margin: 1.5rem 0;
 }
@@ -82,23 +161,59 @@
 }
 
 .blog-content strong {
-    font-weight: bold;
+    font-weight: 600;
+    color: #1f2937;
 }
 
 .blog-content table {
     width: 100%;
     border-collapse: collapse;
     margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .blog-content th,
 .blog-content td {
     border: 1px solid #d1d5db;
-    padding: 0.5rem;
+    padding: 0.75rem;
     text-align: left;
 }
 
 .blog-content th {
     background-color: #f3f4f6;
     font-weight: 600;
+    color: #374151;
+}
+
+/* Special styling for signature and confirmation sections */
+.blog-content p:has(strong):last-of-type,
+.blog-content p:contains("Xác nhận"),
+.blog-content p:contains("Chữ ký"),
+.blog-content p:contains("Ngày lập") {
+    background: #fef3c7;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #fbbf24;
+    margin-top: 1.5rem;
+}
+
+/* Print styles */
+@media print {
+    .blog-content.medical-form {
+        box-shadow: none;
+        padding: 1rem;
+    }
+
+    .blog-content ol>li {
+        background: transparent;
+        border-left: 2px solid #000;
+        break-inside: avoid;
+    }
+
+    .blog-content h2 {
+        color: #000;
+        border-bottom: 2px solid #000;
+    }
 }
