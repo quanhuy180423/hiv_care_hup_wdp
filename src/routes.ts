@@ -73,6 +73,7 @@ import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
 import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
+import UserPayment from "./pages/staff/payments/UserPayment";
 
 // Route definition interface
 export interface RouteConfig {
@@ -455,6 +456,17 @@ export const staffRoutes: RouteConfig[] = [
     component: CategoryBlogManagement,
     title: "Danh mục tin tức",
     description: "Quản lý danh mục tin tức",
+    protected: true,
+    layout: "STAFF",
+    icon: FileText,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
+  {
+    path: "/staff/payments/:userId/:appointmentTime",
+    component: UserPayment,
+    title: "Người dùng thanh toán",
+    description: "Quản lý thanh toán của người dùng",
     protected: true,
     layout: "STAFF",
     icon: FileText,

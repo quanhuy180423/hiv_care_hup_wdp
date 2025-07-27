@@ -15,7 +15,6 @@ import { usePatientTreatment } from "@/hooks/usePatientTreatments";
 import useAuthStore from "@/store/authStore";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import { TestResultList } from "./TestResultList";
 
 interface PatientTreatmentDetailDialogProps {
   open: boolean;
@@ -367,10 +366,6 @@ export const PatientTreatmentDetailDialog = ({
             >
               Xuất PDF hồ sơ bệnh án
             </Button>
-            {/* Danh sách test result */}
-            {typeof detail.id === "number" && (
-              <TestResultList patientTreatmentId={detail.id} />
-            )}
           </>
         )}
       </DialogContent>

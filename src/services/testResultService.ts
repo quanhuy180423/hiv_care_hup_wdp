@@ -85,10 +85,13 @@ export const testResultService = {
     return response.data;
   },
   async getByPatientTreatmentId(
-    patientTreatmentId: number
+    patientTreatmentId: number,
+    query?: Query
   ): Promise<ResTestResult> {
     const response = await apiClient.get<ResTestResult>(
-      `/test-results/patient-treatment/${patientTreatmentId}`
+      `/test-results/patient-treatment/${patientTreatmentId}/?page=${
+        query?.page || 1
+      }&limit=${query?.limit || 100}`
     );
     return response.data;
   },
