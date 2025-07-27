@@ -72,7 +72,9 @@ export default function TreatmentSchedule() {
   } = useActivePatientTreatmentsByPatient(patientId);
 
   const treatmentList = treatments?.data.data || [];
-  const activeTreatmentList = activeTreatmentsData?.data || [];
+  const activeTreatmentList = activeTreatmentsData?.data?.length
+  ? [activeTreatmentsData.data[0]]
+  : [];
 
   const renderTreatmentCard = (
     treatment: PatientTreatmentType | ActivePatientTreatment
@@ -434,7 +436,7 @@ export default function TreatmentSchedule() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <ClipboardList className="w-6 h-6" />

@@ -101,6 +101,9 @@ export const useUpdateAppointment = () => {
       appointmentService.updateAppointment(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments-staff"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments-user"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments-doctor"] });
     },
   });
 };
