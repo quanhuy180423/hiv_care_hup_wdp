@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
-import { translateStatus } from "@/lib/utils/status/translateStatus";
+// import { translateStatus } from "@/lib/utils/status/translateStatus";
 import TestResultCreate from "@/pages/doctor/testResult/components/TestResultCreate";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
 import {
@@ -23,26 +23,26 @@ import {
   useAppointmentModalStore,
 } from "@/store/appointmentStore";
 import { useMeetingRecordDialogStore } from "@/store/meetingRecordStore";
-import type { Appointment, AppointmentStatus } from "@/types/appointment";
+import type { Appointment } from "@/types/appointment";
 import { MoreVertical, Stethoscope } from "lucide-react";
 import { useState } from "react";
 
-const STATUS_FLOW: AppointmentStatus[] = [
-  "PENDING",
-  "PAID",
-  "CANCELLED",
-  "COMPLETED",
-];
+// const STATUS_FLOW: AppointmentStatus[] = [
+//   "PENDING",
+//   "PAID",
+//   "CANCELLED",
+//   "COMPLETED",
+// ];
 
-const getNextStatus = (
-  current: AppointmentStatus
-): AppointmentStatus | null => {
-  const index = STATUS_FLOW.indexOf(current);
-  if (index >= 0 && index < STATUS_FLOW.length - 1) {
-    return STATUS_FLOW[index + 1];
-  }
-  return null;
-};
+// const getNextStatus = (
+//   current: AppointmentStatus
+// ): AppointmentStatus | null => {
+//   const index = STATUS_FLOW.indexOf(current);
+//   if (index >= 0 && index < STATUS_FLOW.length - 1) {
+//     return STATUS_FLOW[index + 1];
+//   }
+//   return null;
+// };
 
 interface Props {
   appointment: Appointment;
@@ -58,15 +58,15 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
 
   const navigate = useNavigate();
 
-  const handleChangeStatus = () => {
-    const nextStatus = getNextStatus(appointment.status);
-    if (!nextStatus) return;
+  // const handleChangeStatus = () => {
+  //   const nextStatus = getNextStatus(appointment.status);
+  //   if (!nextStatus) return;
 
-    changeStatus({
-      id: appointment.id,
-      status: nextStatus,
-    });
-  };
+  //   changeStatus({
+  //     id: appointment.id,
+  //     status: nextStatus,
+  //   });
+  // };
 
   const handleCancelAppointment = () => {
     changeStatus({
@@ -88,35 +88,38 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="bg-white">
-        {ALLOW_CONSULT_STATUSES.includes(
-          (appointment.status || "").toUpperCase()
-        ) && (
+        {["PAID"].includes((appointment.status || "").toUpperCase()) &&
+          appointment.type !== "ONLINE" && (
+            <DropdownMenuItem
+              onClick={async () => {
+                const patientId = appointment.userId;
+                const res = await patientTreatmentService.getActiveByPatient(
+                  patientId
+                );
+                console.log(res);
+                const patientTreatments = res.data[0];
+                navigate(
+                  `/doctor/patient-treatments/${patientTreatments?.id}/consultation`
+                );
+              }}
+              className="flex items-center cursor-pointer"
+            >
+              <Stethoscope className="w-4 h-4 mr-2" />
+              Khám ngay
+            </DropdownMenuItem>
+          )}
+        {appointment.type !== "ONLINE" && (
           <DropdownMenuItem
-            onClick={async () => {
-              const patientId = appointment.userId;
-              const res = await patientTreatmentService.getActiveByPatient(
-                patientId
-              );
-              console.log(res);
-              const patientTreatments = res.data[0];
-              navigate(
-                `/doctor/patient-treatments/${patientTreatments.id}/consultation`
-              );
-            }}
-            className="flex items-center cursor-pointer"
+            onClick={handleOpenTestResultForm}
+            onSelect={(e) => e.preventDefault()}
+            className="cursor-pointer"
           >
-            <Stethoscope className="w-4 h-4 mr-2" />
-            Khám ngay
+            Thêm kết quả xét nghiệm
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem
-          onClick={handleOpenTestResultForm}
-          onSelect={(e) => e.preventDefault()}
-          className="cursor-pointer"
-        >
-          Thêm kết quả xét nghiệm
-        </DropdownMenuItem>
+
         <Dialog open={showTestResultForm} onOpenChange={setShowTestResultForm}>
           <DialogContent className="max-w-2xl bg-white">
             <DialogHeader>
@@ -147,12 +150,16 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
         )}
         {appointment.status !== "COMPLETED" &&
           appointment.status !== "CANCELLED" &&
-          getNextStatus(appointment.status) && (
+          appointment.type !== "ONLINE" && (
             <DropdownMenuItem
-              onClick={handleChangeStatus}
+              onClick={() =>
+                navigate(
+                  `/staff/payments/${appointment.userId}/${appointment.appointmentTime}`
+                )
+              }
               className="cursor-pointer"
             >
-              Chuyển sang: {translateStatus(getNextStatus(appointment.status)!)}
+              Thanh toán
             </DropdownMenuItem>
           )}
         {appointment.status !== "CANCELLED" &&

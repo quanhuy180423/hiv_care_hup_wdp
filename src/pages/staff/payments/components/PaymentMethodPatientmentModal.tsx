@@ -1,0 +1,315 @@
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import type {
+  ActivePatientTreatment,
+  TestResult,
+} from "@/types/patientTreatment";
+import type { PaymentMethod } from "@/services/paymentService";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "../../../../lib/utils/numbers/formatCurrency";
+import { formatDate } from "../../../../lib/utils/dates/formatDate";
+import type { CustomMedicationItem } from "@/schemas/patientTreatment";
+import { Card } from "@/components/ui/card";
+
+// Define formatDateTime inline
+const formatDateTime = (iso: string | undefined) => {
+  if (!iso) return "";
+  const date = new Date(iso);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+};
+
+interface PaymentMethodPatientmentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedTreatment?: ActivePatientTreatment | null;
+  paymentMethod: PaymentMethod | null;
+  setPaymentMethod: (method: PaymentMethod) => void;
+  onConfirm: () => void;
+  isLoading?: boolean;
+}
+
+const PaymentMethodPatientmentModal: React.FC<
+  PaymentMethodPatientmentModalProps
+> = ({
+  isOpen,
+  onClose,
+  selectedTreatment,
+  paymentMethod,
+  setPaymentMethod,
+  onConfirm,
+  isLoading = false,
+}) => {
+  // Ensure treatment is properly typed and checked
+  const treatment = selectedTreatment ?? ({} as ActivePatientTreatment);
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="min-w-4xl bg-white max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Thông tin thanh toán điều trị</DialogTitle>
+        </DialogHeader>
+        {selectedTreatment && (
+          <div className="space-y-4">
+            {/* Reuse PatientTreatmentCard for detailed information */}
+            <div className="flex flex-col gap-3">
+              {/* Header Section */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <h3 className="font-bold text-xl text-primary flex items-center gap-2">
+                  Điều trị #{treatment.id}
+                  {treatment.isCurrent && (
+                    <Badge variant="default" className="text-xs">
+                      Hiện tại
+                    </Badge>
+                  )}
+                </h3>
+                <div className="flex items-center gap-2">
+                  {treatment.treatmentStatus && (
+                    <Badge className="text-sm font-semibold">
+                      {treatment.treatmentStatus
+                        ? "Đã thanh toán"
+                        : "Chưa thanh toán"}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
+                {treatment.patient?.name && (
+                  <p>
+                    <span className="font-semibold">Bệnh nhân:</span>{" "}
+                    {treatment.patient.name} ({treatment.patient.email}{" "}
+                    {treatment.patient.phoneNumber &&
+                      `- ${treatment.patient.phoneNumber}`}
+                    )
+                  </p>
+                )}
+                {treatment.doctor?.user?.name && (
+                  <p>
+                    <span className="font-semibold">Bác sĩ:</span>{" "}
+                    {treatment.doctor.user.name} (
+                    {treatment.doctor.specialization})
+                  </p>
+                )}
+                {treatment.protocol?.name && (
+                  <p>
+                    <span className="font-semibold">Phác đồ:</span>{" "}
+                    {treatment.protocol.name} (Bệnh:{" "}
+                    {treatment.protocol.targetDisease})
+                  </p>
+                )}
+                <p>
+                  <span className="font-semibold">Tổng chi phí:</span>{" "}
+                  <span className="text-lg font-bold text-green-700">
+                    {formatCurrency(treatment.total)}
+                  </span>
+                </p>
+                <p>
+                  <span className="font-semibold">Ngày bắt đầu:</span>{" "}
+                  {formatDateTime(treatment.startDate)}
+                </p>
+                {treatment.endDate && (
+                  <p>
+                    <span className="font-semibold">Ngày kết thúc:</span>{" "}
+                    {formatDateTime(treatment.endDate)}
+                  </p>
+                )}
+                {treatment.daysRemaining !== null && treatment.isCurrent && (
+                  <p>
+                    <span className="font-semibold">Số ngày còn lại:</span>{" "}
+                    {treatment.daysRemaining} ngày
+                  </p>
+                )}
+              </div>
+
+              {treatment.notes && (
+                <div className="p-3 bg-gray-100 rounded-md text-sm text-gray-600">
+                  <span className="font-semibold">Ghi chú:</span>{" "}
+                  {treatment.notes}
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Custom Medications Section */}
+              {treatment.customMedications &&
+                treatment.customMedications.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-base font-semibold text-gray-800">
+                      Thuốc chỉ định ({treatment.customMedications.length})
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
+                      {treatment.customMedications.map(
+                        (med: CustomMedicationItem, medIndex: number) => (
+                          <Card
+                            key={medIndex}
+                            className="p-3 bg-white border border-gray-200 flex flex-col gap-1 text-sm"
+                          >
+                            <p className="font-semibold text-primary">
+                              {med.medicineName}
+                            </p>
+                            <p>
+                              Liều dùng:{" "}
+                              <span className="font-medium">{med.dosage}</span>
+                            </p>
+                            {med.unit && (
+                              <p>
+                                Đơn vị:{" "}
+                                <span className="font-medium">{med.unit}</span>
+                              </p>
+                            )}
+                            {med.frequency && (
+                              <p>
+                                Tần suất:{" "}
+                                <span className="font-medium">
+                                  {med.frequency}
+                                </span>
+                              </p>
+                            )}
+                            {med.time && (
+                              <p>
+                                Thời gian:{" "}
+                                <span className="font-medium">{med.time}</span>
+                              </p>
+                            )}
+                            {med.durationValue && med.durationUnit && (
+                              <p>
+                                Thời gian điều trị:{" "}
+                                <span className="font-medium">
+                                  {med.durationValue} {med.durationUnit}
+                                </span>
+                              </p>
+                            )}
+                            {med.notes && (
+                              <p>
+                                Ghi chú:{" "}
+                                <span className="text-gray-600">
+                                  {med.notes}
+                                </span>
+                              </p>
+                            )}
+                            {med.price !== undefined && (
+                              <p>
+                                Giá:{" "}
+                                <span className="font-medium">
+                                  {formatCurrency(med.price)}
+                                </span>
+                              </p>
+                            )}
+                          </Card>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Test Results Section */}
+              {treatment.testResults && treatment.testResults.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-base font-semibold text-gray-800">
+                    Kết quả xét nghiệm ({treatment.testResults.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
+                    {treatment.testResults.map((result: TestResult) => (
+                      <Card
+                        key={result.id}
+                        className="p-3 bg-white border border-gray-200 flex flex-col gap-1 text-sm"
+                      >
+                        <p className="font-semibold text-primary">
+                          {result.test?.name || "Xét nghiệm không rõ tên"}
+                        </p>
+                        <p>
+                          Kết quả:{" "}
+                          <span className="font-medium">
+                            {result.rawResultValue} {result.unit}
+                          </span>
+                        </p>
+                        <p>
+                          Diễn giải:{" "}
+                          <span className="font-medium">
+                            {result.interpretation}
+                          </span>
+                        </p>
+                        <p>
+                          Ngày:{" "}
+                          <span className="font-medium">
+                            {formatDate(result.resultDate)}
+                          </span>
+                        </p>
+                        {result.notes && (
+                          <p>
+                            Ghi chú:{" "}
+                            <span className="text-gray-600">
+                              {result.notes}
+                            </span>
+                          </p>
+                        )}
+                        {result.test?.price && (
+                          <p>
+                            Giá:{" "}
+                            <span className="font-medium">
+                              {formatCurrency(result.test.price)}
+                            </span>
+                          </p>
+                        )}
+                        <Badge
+                          variant={
+                            result.status === "FINAL" ? "success" : "secondary"
+                          }
+                          className="mt-1 self-start"
+                        >
+                          Trạng thái: {result.status}
+                        </Badge>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Select
+                value={paymentMethod?.method || undefined}
+                onValueChange={(value) =>
+                  setPaymentMethod({ method: value } as PaymentMethod)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn phương thức thanh toán" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CASH">Tiền mặt</SelectItem>
+                  <SelectItem value="BANK_TRANSFER">Chuyển khoản</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button
+            onClick={onConfirm}
+            disabled={isLoading || !paymentMethod?.method}
+          >
+            {isLoading ? "Đang xử lý..." : "Xác nhận phương thức"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default PaymentMethodPatientmentModal;
