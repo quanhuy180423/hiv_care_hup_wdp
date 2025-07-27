@@ -81,7 +81,14 @@ export interface RouteConfig {
   title: string;
   description?: string;
   protected?: boolean; // Require authentication
-  layout?: "ADMIN" | "DOCTOR" | "STAFF" | "PATIENT" | "AUTH" | "USER_PROFILE"; // Expanded layout types
+  layout?:
+    | "ADMIN"
+    | "DOCTOR"
+    | "STAFF"
+    | "PATIENT"
+    | "AUTH"
+    | "USER_PROFILE"
+    | "MEETING"; // Expanded layout types
   icon?: LucideIcon; // Icon for navigation
   showInNav?: boolean; // Show in main navigation
   allowedRoles?: UserRole[]; // Allowed user roles
@@ -175,7 +182,7 @@ export const routes: RouteConfig[] = [
     title: "Lịch sử cuộc họp",
     description: "Xem lịch sử cuộc họp của bạn",
     protected: true,
-    layout: "PATIENT", // Can be adjusted to a more specific "MEETING" layout if needed
+    layout: "MEETING",
     icon: Calendar,
     showInNav: false,
     allowedRoles: ["PATIENT", "DOCTOR"],
