@@ -11,10 +11,12 @@ export const customMedicationItemSchema = z.object({
   durationUnit: z.string().optional(),
   schedule: z.string().optional(),
   notes: z.string().optional(),
-  price: z.number().optional(),
+  unitPrice: z.number().optional(),
+  quantity: z.number().optional(),
   source: z.enum(["protocol", "custom", "edited"]).optional(),
   protocolMedicineId: z.number().optional(),
   deleted: z.boolean().optional(),
+  price: z.number().optional(),
 });
 
 export type CustomMedicationItem = z.infer<typeof customMedicationItemSchema>;

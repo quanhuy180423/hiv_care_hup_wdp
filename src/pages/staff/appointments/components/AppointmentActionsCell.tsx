@@ -94,7 +94,7 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
               const res = await patientTreatmentService.getActiveByPatient(
                 patientId
               );
-
+              console.log(res);
               const patientTreatments = res.data[0];
               navigate(
                 `/doctor/patient-treatments/${patientTreatments.id}/consultation`
