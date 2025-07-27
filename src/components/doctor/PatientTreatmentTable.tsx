@@ -1,5 +1,6 @@
+import { cn } from "@/lib/utils";
+import { endOfDay, parseDate } from "@/lib/utils/patientTreatmentUtils";
 import type { PatientTreatmentWithAppointment } from "@/pages/doctor/patientTreatment/index";
-import useAuthStore from "@/store/authStore";
 import { Eye, Stethoscope } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +19,7 @@ export interface PatientTreatmentTableProps {
 export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
   props
 ) => {
-  const { treatments, onShowDetail } = props;
+  const { treatments } = props;
 
   // Filter state
   const [searchText, setSearchText] = useState("");
@@ -27,7 +28,6 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Filter logic
   const filteredTreatments = useMemo(() => {
     return treatments.filter((t) => {
       // Search
@@ -51,13 +51,19 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
           ? true
           : String(t.isAnonymous) === isAnonymous;
 
-      // Start date
-      const matchesStartDate =
-        !startDate || (t.startDate && t.startDate >= startDate);
-
-      // End date
-      const matchesEndDate =
-        !endDate || (t.endDate ? t.endDate <= endDate : true);
+      // Date filter
+      let matchesStartDate = true;
+      let matchesEndDate = true;
+      if (startDate) {
+        const filterStart = parseDate(startDate);
+        const treatStart = parseDate(t.startDate);
+        matchesStartDate = !!treatStart && treatStart >= filterStart!;
+      }
+      if (endDate) {
+        const filterEnd = endOfDay(parseDate(endDate) ?? new Date(0));
+        const treatEnd = t.endDate ? parseDate(t.endDate) : undefined;
+        matchesEndDate = treatEnd ? treatEnd <= filterEnd : true;
+      }
 
       return (
         matchesSearch &&
@@ -76,16 +82,8 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
     setStartDate("");
     setEndDate("");
   };
-  const { userProfile } = useAuthStore();
-
-  console.log(treatments);
 
   const navigate = useNavigate();
-
-  // Xử lý khi nhấn nút tạo/cập nhật phác đồ: chuyển sang trang mới
-  // const handleCreateOrUpdateProtocol = (t: PatientTreatmentWithAppointment) => {
-  //   navigate(`/doctor/patient-treatments/${t.id}/protocol`);
-  // };
 
   return (
     <>
@@ -104,7 +102,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
       />
       <div className="overflow-x-auto">
         <div className="flex items-center justify-between mb-2"></div>
-        <table className="w-full text-sm border rounded-xl overflow-hidden">
+        <table className="w-full text-sm border rounded-xl overflow-hidden min-w-[900px]">
           <thead>
             <tr className="bg-gray-50 text-gray-700">
               <th className="p-3 border-b font-medium w-12">No</th>
@@ -118,24 +116,40 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
             </tr>
           </thead>
           <tbody>
-            {filteredTreatments.map((t, idx) => {
-              return (
+            {filteredTreatments.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={8}
+                  className="py-8 text-center text-gray-400 text-base"
+                >
+                  Không có hồ sơ phù hợp.
+                </td>
+              </tr>
+            ) : (
+              filteredTreatments.map((t, idx) => (
                 <tr
                   key={t.id}
-                  className={`border-b transition hover:bg-primary/5 text-center ${
+                  className={`border-b transition hover:bg-primary/10 text-center group ${
                     idx % 2 === 1 ? "bg-gray-50" : ""
                   }`}
                 >
                   <td className="p-3 text-gray-900 font-medium">{idx + 1}</td>
-                  <td className="p-3 text-gray-900 font-medium">
-                    {t.isAnonymous ? (
-                      <span className="italic text-gray-500">Ẩn danh</span>
-                    ) : (
-                      t.patient?.name || "-"
-                    )}
+                  <td
+                    className="p-3 text-gray-900 font-medium max-w-[180px] truncate"
+                    title={t.patient?.name || "-"}
+                  >
+                    {t.patient?.name || "-"}
                   </td>
-                  <td className="p-3 text-gray-700">{userProfile?.name}</td>
-                  <td className="p-3 text-gray-700">
+                  <td
+                    className="p-3 text-gray-700 max-w-[160px] truncate"
+                    title={t.doctor?.user?.name || "-"}
+                  >
+                    {t.doctor?.user?.name || "-"}
+                  </td>
+                  <td
+                    className="p-3 text-gray-700 max-w-[160px] truncate"
+                    title={t.protocol?.name || "-"}
+                  >
                     {t.protocol?.name || "-"}
                   </td>
                   <td className="p-3 text-gray-700">
@@ -143,71 +157,141 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                   </td>
                   <td className="p-3">
                     {t.status ? (
-                      <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold animate-pulse">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-50 text-green-700 text-xs font-semibold border border-green-200">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                         Đang điều trị
                       </span>
                     ) : (
-                      <span className="inline-block px-2 py-1 rounded bg-gray-200 text-gray-400 text-xs font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-gray-400 text-xs font-semibold border border-gray-200">
+                        <span className="w-2 h-2 rounded-full bg-gray-400"></span>
                         Đã kết thúc
                       </span>
                     )}
                   </td>
                   {/* Trạng thái lịch hẹn */}
                   <td className="p-3">
-                    {t.appointmentStatus === "PAID" && (
-                      <span className="inline-block px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-semibold">
-                        Đã xác nhận
-                      </span>
-                    )}
-                    {t.appointmentStatus === "PENDING" && (
-                      <span className="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-700 text-xs font-semibold">
-                        Đang chờ
-                      </span>
-                    )}
-                    {t.appointmentStatus === "COMPLETED" && (
-                      <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
-                        Hoàn thành
-                      </span>
-                    )}
-                    {t.appointmentStatus === "CANCELLED" && (
-                      <span className="inline-block px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">
-                        Đã hủy
-                      </span>
-                    )}
-                    {!t.appointmentStatus && (
-                      <span className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-400 text-xs font-semibold">
-                        Không có lịch hẹn
-                      </span>
-                    )}
+                    {(() => {
+                      // Ưu tiên appointmentStatus, fallback sang appointment?.status nếu có
+                      let apptStatusRaw = t.appointmentStatus || t.status || "";
+                      if (typeof apptStatusRaw !== "string") apptStatusRaw = "";
+                      const apptStatus = apptStatusRaw.toUpperCase();
+                      const statusMap: Record<
+                        string,
+                        {
+                          label: string;
+                          color: string;
+                          bg: string;
+                          border: string;
+                          dot: string;
+                        }
+                      > = {
+                        PAID: {
+                          label: "Đã xác nhận",
+                          color: "text-blue-700",
+                          bg: "bg-blue-50",
+                          border: "border-blue-200",
+                          dot: "bg-blue-500",
+                        },
+                        PENDING: {
+                          label: "Đang chờ",
+                          color: "text-yellow-700",
+                          bg: "bg-yellow-50",
+                          border: "border-yellow-200",
+                          dot: "bg-yellow-400",
+                        },
+                        COMPLETED: {
+                          label: "Hoàn thành",
+                          color: "text-green-700",
+                          bg: "bg-green-50",
+                          border: "border-green-200",
+                          dot: "bg-green-500",
+                        },
+                        CANCELLED: {
+                          label: "Đã hủy",
+                          color: "text-red-700",
+                          bg: "bg-red-50",
+                          border: "border-red-200",
+                          dot: "bg-red-500",
+                        },
+                      };
+                      if (statusMap[apptStatus]) {
+                        const s = statusMap[apptStatus];
+                        return (
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold border",
+                              s.bg,
+                              s.color,
+                              s.border
+                            )}
+                          >
+                            <span
+                              className={cn("w-2 h-2 rounded-full", s.dot)}
+                            ></span>
+                            {s.label}
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-50 text-gray-400 text-xs font-semibold border border-gray-200">
+                          <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                          Không có lịch hẹn
+                        </span>
+                      );
+                    })()}
                   </td>
-                  <td className="p-3 flex flex-wrap gap-2 justify-center">
+                  <td className="p-3 flex flex-wrap gap-2 justify-center min-w-[120px]">
                     {/* Chỉ render nút Khám ngay khi điều trị chưa kết thúc, chưa có phác đồ và trạng thái lịch hẹn phù hợp */}
                     {t.status !== false &&
                       !t.protocol &&
-                      ["PENDING", "PAID"].includes(
-                        (t.appointmentStatus || "").toUpperCase()
-                      ) && (
-                        <Button
-                          className="inline-flex items-center justify-center min-w-[40px] h-9 rounded bg-blue-500 hover:bg-blue-600 border-none text-white font-medium text-xs focus:ring-2 focus:ring-blue-400"
-                          onClick={() =>
-                            navigate(
-                              `/doctor/patient-treatments/${t.id}/consultation`
-                            )
-                          }
-                          aria-label="Khám ngay"
-                          type="button"
-                        >
-                          <Stethoscope className="w-5 h-5" />
-                          <span className="ml-1">Khám ngay</span>
-                        </Button>
+                      (() => {
+                        let apptStatusRaw =
+                          t.appointmentStatus || t.status || "";
+                        if (typeof apptStatusRaw !== "string")
+                          apptStatusRaw = "";
+                        return apptStatusRaw.toUpperCase() === "PAID";
+                      })() && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                className={cn(
+                                  "inline-flex items-center justify-center min-w-[40px] h-9 rounded border-none text-white font-medium text-xs focus:ring-2 focus:ring-blue-400 shadow",
+                                  "bg-blue-500 hover:bg-blue-600"
+                                )}
+                                onClick={() =>
+                                  navigate(
+                                    `/doctor/patient-treatments/${t.id}/consultation`
+                                  )
+                                }
+                                aria-label="Khám ngay"
+                                type="button"
+                              >
+                                <Stethoscope className="w-5 h-5" />
+                                <span className="ml-1">Khám ngay</span>
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Bắt đầu khám cho bệnh nhân này
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                     {/* Đã có phác đồ: chỉ cho phép xem chi tiết, không cho cập nhật (ẩn nút Cập nhật) */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
                           <Button
-                            className="inline-flex items-center justify-center min-w-[40px] h-9 rounded text-primary hover:bg-primary/10 transition text-xs font-medium focus:ring-2 focus:ring-primary/40"
-                            onClick={() => t.id && onShowDetail(t)}
+                            className={cn(
+                              "inline-flex items-center justify-center min-w-[40px] h-9 rounded text-primary transition text-xs font-medium focus:ring-2 focus:ring-primary/40 shadow",
+                              "hover:bg-primary/10"
+                            )}
+                            onClick={() =>
+                              t.id &&
+                              navigate(
+                                `/doctor/patient-treatments/${t.id}/detail`
+                              )
+                            }
                             aria-label="Xem chi tiết hồ sơ"
                             disabled={!t.id}
                             tabIndex={t.id ? 0 : -1}
@@ -221,8 +305,8 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                     </Tooltip>
                   </td>
                 </tr>
-              );
-            })}
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -3,6 +3,7 @@ interface User {
   name: string;
   email: string;
   avatar: string | null;
+  phoneNumber: string | null;
 }
 
 interface Appointment {
@@ -76,7 +77,7 @@ export interface MeetingRecordResponse {
 export interface MeetingRecordQueryParams {
   page?: number;
   limit?: number;
-  search: string;
+  search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
   recordedById?: number;

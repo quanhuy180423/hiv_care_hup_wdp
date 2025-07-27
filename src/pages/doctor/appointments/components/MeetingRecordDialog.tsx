@@ -144,6 +144,7 @@ export default function MeetingRecordDialog() {
           setOpenForm(false);
           setInitialData(null);
         }}
+        appointment={appointment!}
         appointmentId={appointmentId!}
         recordedById={appointment?.doctor?.id || 0}
         initialData={initialData}

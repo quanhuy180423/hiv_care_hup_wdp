@@ -159,6 +159,54 @@
     background-color: transparent !important;
 }
 
+/* List styles for ProseMirror (Tiptap) */
+.ProseMirror ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.ProseMirror ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.ProseMirror li {
+    margin-bottom: 0.5rem;
+}
+
+/* Nếu bạn muốn style cho checkbox list (task list) của Tiptap */
+.ProseMirror li[data-checked] {
+    list-style-type: none;
+    position: relative;
+    padding-left: 2em;
+}
+
+.ProseMirror li[data-checked]::before {
+    content: '';
+    position: absolute;
+    left: 0.2em;
+    top: 0.5em;
+    width: 1em;
+    height: 1em;
+    border: 1.5px solid #2563eb;
+    border-radius: 0.2em;
+    background: #fff;
+}
+
+.ProseMirror li[data-checked="true"]::after {
+    content: '';
+    position: absolute;
+    left: 0.45em;
+    top: 0.8em;
+    width: 0.5em;
+    height: 0.25em;
+    border-left: 2px solid #2563eb;
+    border-bottom: 2px solid #2563eb;
+    transform: rotate(-45deg);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .ProseMirror {
