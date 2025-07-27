@@ -16,6 +16,7 @@ export const customMedicationItemSchema = z.object({
   source: z.enum(["protocol", "custom", "edited"]).optional(),
   protocolMedicineId: z.number().optional(),
   deleted: z.boolean().optional(),
+  price: z.number().optional(),
 });
 
 export type CustomMedicationItem = z.infer<typeof customMedicationItemSchema>;
