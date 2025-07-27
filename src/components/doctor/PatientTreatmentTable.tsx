@@ -1,8 +1,13 @@
 import { cn } from "@/lib/utils";
 import { endOfDay, parseDate } from "@/lib/utils/patientTreatmentUtils";
+import { translateStatus } from "@/lib/utils/status/translateStatus";
 import type { PatientTreatmentWithAppointment } from "@/pages/doctor/patientTreatment/index";
-import { Eye, Stethoscope } from "lucide-react";
+
+import { appointmentService } from "@/services/appointmentService";
+import type { AppointmentStatus } from "@/types/appointment";
+import { CheckCircle, Eye, Stethoscope } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -110,7 +115,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
               <th className="p-3 border-b font-medium">Tên Bác sĩ</th>
               <th className="p-3 border-b font-medium">Phác đồ</th>
               <th className="p-3 border-b font-medium">Ngày bắt đầu</th>
-              <th className="p-3 border-b font-medium">Trạng thái</th>
+              {/* <th className="p-3 border-b font-medium">Trạng thái</th> */}
               <th className="p-3 border-b font-medium">Trạng thái lịch hẹn</th>
               <th className="p-3 border-b font-medium">Thao tác</th>
             </tr>
@@ -155,30 +160,17 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                   <td className="p-3 text-gray-700">
                     {t.startDate ? t.startDate.slice(0, 10) : "-"}
                   </td>
-                  <td className="p-3">
-                    {t.status ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-50 text-green-700 text-xs font-semibold border border-green-200">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        Đang điều trị
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-gray-400 text-xs font-semibold border border-gray-200">
-                        <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                        Đã kết thúc
-                      </span>
-                    )}
-                  </td>
                   {/* Trạng thái lịch hẹn */}
                   <td className="p-3">
                     {(() => {
-                      // Ưu tiên appointmentStatus, fallback sang appointment?.status nếu có
-                      let apptStatusRaw = t.appointmentStatus || t.status || "";
-                      if (typeof apptStatusRaw !== "string") apptStatusRaw = "";
-                      const apptStatus = apptStatusRaw.toUpperCase();
-                      const statusMap: Record<
-                        string,
+                      const apptStatusRaw = t.appointmentStatus || "";
+                      const apptStatus =
+                        typeof apptStatusRaw === "string"
+                          ? apptStatusRaw.toUpperCase()
+                          : "";
+                      const statusColorMap: Record<
+                        AppointmentStatus,
                         {
-                          label: string;
                           color: string;
                           bg: string;
                           border: string;
@@ -186,36 +178,33 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                         }
                       > = {
                         PAID: {
-                          label: "Đã xác nhận",
                           color: "text-blue-700",
                           bg: "bg-blue-50",
                           border: "border-blue-200",
                           dot: "bg-blue-500",
                         },
                         PENDING: {
-                          label: "Đang chờ",
                           color: "text-yellow-700",
                           bg: "bg-yellow-50",
                           border: "border-yellow-200",
                           dot: "bg-yellow-400",
                         },
                         COMPLETED: {
-                          label: "Hoàn thành",
                           color: "text-green-700",
                           bg: "bg-green-50",
                           border: "border-green-200",
                           dot: "bg-green-500",
                         },
                         CANCELLED: {
-                          label: "Đã hủy",
                           color: "text-red-700",
                           bg: "bg-red-50",
                           border: "border-red-200",
                           dot: "bg-red-500",
                         },
                       };
-                      if (statusMap[apptStatus]) {
-                        const s = statusMap[apptStatus];
+                      if (apptStatus in statusColorMap) {
+                        const s =
+                          statusColorMap[apptStatus as AppointmentStatus];
                         return (
                           <span
                             className={cn(
@@ -228,7 +217,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                             <span
                               className={cn("w-2 h-2 rounded-full", s.dot)}
                             ></span>
-                            {s.label}
+                            {translateStatus(apptStatus as AppointmentStatus)}
                           </span>
                         );
                       }
@@ -241,16 +230,10 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                     })()}
                   </td>
                   <td className="p-3 flex flex-wrap gap-2 justify-center min-w-[120px]">
-                    {/* Chỉ render nút Khám ngay khi điều trị chưa kết thúc, chưa có phác đồ và trạng thái lịch hẹn phù hợp */}
+                    {/* Nút Khám ngay: chỉ hiển thị khi chưa kết thúc điều trị, chưa có phác đồ và appointmentStatus === 'PAID' */}
                     {t.status !== false &&
                       !t.protocol &&
-                      (() => {
-                        let apptStatusRaw =
-                          t.appointmentStatus || t.status || "";
-                        if (typeof apptStatusRaw !== "string")
-                          apptStatusRaw = "";
-                        return apptStatusRaw.toUpperCase() === "PAID";
-                      })() && (
+                      t.appointmentStatus === "PAID" && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span>
@@ -277,7 +260,52 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                           </TooltipContent>
                         </Tooltip>
                       )}
-                    {/* Đã có phác đồ: chỉ cho phép xem chi tiết, không cho cập nhật (ẩn nút Cập nhật) */}
+                    {/* Nút kết thúc điều trị: chỉ hiển thị khi chưa kết thúc điều trị, appointmentStatus khác PENDING và COMPLETED */}
+                    {t.status !== false &&
+                      t.appointmentStatus !== "PENDING" &&
+                      t.appointmentStatus !== "COMPLETED" && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                className={cn(
+                                  "inline-flex items-center justify-center min-w-[40px] h-9 rounded border-none text-white font-medium text-xs focus:ring-2 focus:ring-red-400 shadow",
+                                  "bg-red-500 hover:bg-red-600"
+                                )}
+                                onClick={async () => {
+                                  if (typeof t.appointmentId !== "number") {
+                                    toast.error(
+                                      "Không tìm thấy lịch hẹn hợp lệ để kết thúc điều trị."
+                                    );
+                                    return;
+                                  }
+                                  try {
+                                    await appointmentService.changeStatusAppointment(
+                                      t.appointmentId,
+                                      { status: "COMPLETED" }
+                                    );
+                                    props.onRefresh?.();
+                                  } catch (err) {
+                                    toast.error(
+                                      `Không thể kết thúc điều trị: ${
+                                        err instanceof Error
+                                          ? err.message
+                                          : "Lỗi không xác định"
+                                      }`
+                                    );
+                                  }
+                                }}
+                                aria-label="Kết thúc điều trị"
+                                type="button"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                <span className="ml-1">Kết thúc</span>
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>Kết thúc điều trị</TooltipContent>
+                        </Tooltip>
+                      )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>

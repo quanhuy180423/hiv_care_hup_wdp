@@ -1,4 +1,3 @@
-import { apiClient } from "@/services/apiClient";
 import type {
   ActivePatientTreatmentsResponse,
   ActivePatientTreatmentsSummary,
@@ -15,6 +14,7 @@ import type {
   TreatmentComplianceStats,
   TreatmentCostAnalysis,
 } from "@/types/patientTreatment";
+import { apiClient } from "./apiClient";
 
 const API_URL = "/patient-treatments";
 

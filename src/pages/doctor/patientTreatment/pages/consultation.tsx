@@ -10,25 +10,25 @@ import {
   calculateEndDate,
   hasDurationFields,
 } from "@/lib/utils/patientTreatmentUtils";
-import type { CustomMedicineFormValues } from "@/schemas/medicine";
 import { CustomMedicineSchema } from "@/schemas/medicine";
 import type { CustomMedicationItem } from "@/schemas/patientTreatment";
 import { medicineService } from "@/services/medicineService";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
 import { treatmentProtocolService } from "@/services/treatmentProtocolService";
 import type { Medicine } from "@/types/medicine";
+import { DurationUnit, MedicationSchedule } from "@/types/medicine";
 import type {
   PatientTreatmentType,
   ProtocolMedicineInfo,
 } from "@/types/patientTreatment";
 import type { TreatmentProtocol } from "@/types/treatmentProtocol";
-import { MedicationSchedule } from "@/types/treatmentProtocol";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import { z } from "zod";
 
 export default function ConsultationPage() {
   const [protocolMedDeletedIdxs, setProtocolMedDeletedIdxs] = useState<
@@ -97,17 +97,19 @@ export default function ConsultationPage() {
     reset,
     watch,
     formState: { errors, isSubmitting: isAddingMed },
-  } = useForm<CustomMedicineFormValues>({
+  } = useForm<z.infer<typeof CustomMedicineSchema>>({
     resolver: zodResolver(CustomMedicineSchema),
     defaultValues: {
       medicineName: "",
       dosage: "",
       unit: "",
       durationValue: "",
-      durationUnit: undefined,
+      durationUnit: DurationUnit.DAY,
+      quantity: 1,
       frequency: "",
-      schedule: undefined,
+      schedule: MedicationSchedule.MORNING,
       notes: "",
+      unitPrice: undefined,
     },
   });
 
@@ -284,22 +286,38 @@ export default function ConsultationPage() {
     };
   }, [protocol]);
 
-  // ===== Handlers =====
-
-  const onAddCustomMed = (values: CustomMedicineFormValues) => {
-    setCustomMeds((prev) => [
-      ...prev,
-      {
-        ...values,
-        durationValue:
-          values.durationValue === "" || values.durationValue === undefined
-            ? undefined
-            : Number(values.durationValue),
-        medicineId: undefined,
-      },
-    ]);
-    setAddMedOpen(false);
-  };
+  /**
+   * Tính tổng giá thuốc dựa trên quantity (số lượng), không nhân với liều lượng (dosage).
+   * Nếu có quantity, trả về unitPrice * quantity. Nếu không, chỉ trả về unitPrice.
+   */
+  function calcUnitPrice(
+    med: Partial<
+      CustomMedicationItem & {
+        price?: number;
+        unitPrice?: number;
+        quantity?: number;
+      }
+    >,
+    found?: Medicine
+  ): number {
+    let unitPrice = 0;
+    if (typeof med.unitPrice === "number" && !isNaN(med.unitPrice)) {
+      unitPrice = med.unitPrice;
+    } else if (typeof med.price === "number" && !isNaN(med.price)) {
+      unitPrice = med.price;
+    } else if (
+      found &&
+      typeof found.price === "number" &&
+      !isNaN(found.price)
+    ) {
+      unitPrice = found.price;
+    }
+    const quantity =
+      typeof med.quantity === "number" && !isNaN(med.quantity)
+        ? med.quantity
+        : 1;
+    return unitPrice * quantity;
+  }
 
   const handleSubmitForm = async () => {
     setFormError(null);
@@ -330,6 +348,7 @@ export default function ConsultationPage() {
             .map((med) => {
               const found = medicines.find((m) => m.name === med.medicineName);
               if (!found) return undefined;
+              const unitPrice = calcUnitPrice(med, found);
               return {
                 medicineId: found.id,
                 medicineName: med.medicineName,
@@ -344,8 +363,21 @@ export default function ConsultationPage() {
                 schedule: med.schedule
                   ? String(med.schedule).toUpperCase()
                   : undefined,
-                frequency: med.frequency ?? "",
+                frequency:
+                  typeof med.frequency === "string" &&
+                  med.frequency.trim() !== ""
+                    ? med.frequency
+                    : "1 lần/ngày",
                 notes: med.notes,
+                price:
+                  typeof found.price === "number"
+                    ? found.price
+                    : Number(found.price) || 0,
+                unitPrice,
+                quantity:
+                  typeof med.quantity === "number" && !isNaN(med.quantity)
+                    ? med.quantity
+                    : 1,
               };
             })
             .filter((med): med is NonNullable<typeof med> => med !== undefined)
@@ -357,7 +389,7 @@ export default function ConsultationPage() {
         doctorId:
           typeof patientData?.doctorId === "number" ? patientData.doctorId : 1,
         startDate,
-        endDate,
+        endDate: endDate || startDate, // ensure endDate is always present
         notes,
         customMedications: mappedCustomMeds,
         total: 0,
@@ -365,6 +397,7 @@ export default function ConsultationPage() {
 
       // Update or create patient treatment
       if (patientData?.id && protocol) {
+        console.log("Updated patient treatment:", payload);
         await updatePatientTreatmentMutation.mutateAsync({
           id: patientData.id,
           data: payload,
@@ -372,6 +405,7 @@ export default function ConsultationPage() {
         toast.success("Cập nhật hồ sơ điều trị thành công!");
         navigate("/doctor/patient-treatments");
       } else {
+        console.log("Created new patient treatment:", payload);
         await patientTreatmentService.create(payload, true);
         toast.success("Tạo hồ sơ điều trị thành công!");
         await refetch(); // Sync UI
@@ -543,7 +577,6 @@ export default function ConsultationPage() {
           watch={watch}
           reset={reset}
           handleSubmit={handleSubmit}
-          onAddCustomMed={onAddCustomMed}
           startDate={startDate}
           setStartDate={setStartDate}
           endDate={endDate}

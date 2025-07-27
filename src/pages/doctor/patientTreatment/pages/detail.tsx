@@ -71,20 +71,22 @@ const DetailPage = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-10 tracking-tight">
-        🩺 Patient Treatment Overview
+        🩺 Thông tin điều trị bệnh nhân
       </h1>
 
       <div className="bg-white shadow rounded-xl p-6 space-y-8">
-        {/* Section: General Info + Timeline */}
+        {/* Thông tin chung + Thời gian */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* General Info */}
+          {/* Thông tin chung */}
           <section>
             <h2 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-              General Info
+              Thông tin chung
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex gap-2">
-                <span className="font-medium w-28 text-primary">Patient:</span>
+                <span className="font-medium w-28 text-primary">
+                  Bệnh nhân:
+                </span>
                 <span>
                   {detail.patient?.name || "-"}{" "}
                   {detail.patient?.phoneNumber && (
@@ -95,7 +97,7 @@ const DetailPage = () => {
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="font-medium w-28 text-primary">Doctor:</span>
+                <span className="font-medium w-28 text-primary">Bác sĩ:</span>
                 <span>
                   {detail.doctor?.user?.name || userProfile?.name || "-"}
                 </span>
@@ -149,10 +151,10 @@ const DetailPage = () => {
             </div>
           </section>
 
-          {/* Timeline & Cost */}
+          {/* Thời gian & Chi phí */}
           <section>
             <h2 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-              Timeline & Cost
+              Thời gian & Chi phí
             </h2>
             <div className="space-y-3 text-sm">
               {[
@@ -168,7 +170,7 @@ const DetailPage = () => {
                   label: "Tổng chi phí:",
                   value: (
                     <span className="text-red-600 font-semibold">
-                      {detail.total?.toLocaleString() ?? "-"} VND
+                      {detail.total?.toLocaleString() ?? "-"} VNĐ
                     </span>
                   ),
                 },
@@ -205,37 +207,40 @@ const DetailPage = () => {
           </section>
         </div>
 
-        {/* Section: Medicines */}
+        {/* Thuốc */}
         <div className="bg-gray-50 rounded-lg p-5 border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
-            Medicines
+            Thuốc
           </h2>
 
-          {/* Protocol Medicines */}
+          {/* Thuốc theo phác đồ */}
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-semibold text-primary">
-                Protocol Medicines
+                Thuốc theo phác đồ
               </span>
               <span className="text-xs text-gray-500">
-                (Total: {filteredProtocolMeds.length})
+                (Tổng: {filteredProtocolMeds.length})
               </span>
             </div>
             {filteredProtocolMeds.length > 0 ? (
-              <table className="w-full text-sm border rounded-md">
-                <thead className="bg-gray-100">
+              <table className={cn("w-full text-sm border rounded-md")}>
+                <thead className={cn("bg-gray-100")}>
                   <tr>
-                    <th className="p-2 text-left">Medicine</th>
-                    <th className="p-2 text-left">Dosage</th>
-                    <th className="p-2 text-left">Notes</th>
+                    <th className={cn("p-2 text-left")}>Tên thuốc</th>
+                    <th className={cn("p-2 text-left")}>Liều dùng</th>
+                    <th className={cn("p-2 text-left")}>Ghi chú</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredProtocolMeds.map((med) => (
-                    <tr key={med.id} className="border-t hover:bg-gray-50">
-                      <td className="p-2">{med.medicine?.name || "-"}</td>
-                      <td className="p-2">{med.dosage || "-"}</td>
-                      <td className="p-2 text-gray-500 text-xs">
+                    <tr
+                      key={med.id}
+                      className={cn("border-t hover:bg-gray-50")}
+                    >
+                      <td className={cn("p-2")}>{med.medicine?.name || "-"}</td>
+                      <td className={cn("p-2")}>{med.dosage || "-"}</td>
+                      <td className={cn("p-2 text-gray-500 text-xs")}>
                         {med.notes || "-"}
                       </td>
                     </tr>
@@ -243,38 +248,50 @@ const DetailPage = () => {
                 </tbody>
               </table>
             ) : (
-              <span className="text-gray-500 ml-1">No protocol medicines</span>
+              <span className="text-gray-500 ml-1">
+                Không có thuốc theo phác đồ
+              </span>
             )}
           </div>
 
-          {/* Custom Medicines */}
+          {/* Thuốc kê thêm */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-semibold text-primary">
-                Custom Medicines
-              </span>
+              <span className="font-semibold text-primary">Thuốc kê thêm</span>
               <span className="text-xs text-gray-500">
-                (Total: {customMeds.length})
+                (Tổng: {customMeds.length})
               </span>
             </div>
             {customMeds.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className={cn("space-y-2")}>
                 {customMeds.map((med, idx) => (
                   <li
                     key={idx}
-                    className="bg-white rounded-md shadow-sm border p-3"
+                    className={cn("bg-white rounded-md shadow-sm border p-3")}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
-                      <span className="font-semibold text-gray-900">
+                    <div
+                      className={cn(
+                        "flex flex-col sm:flex-row sm:items-center sm:gap-3"
+                      )}
+                    >
+                      <span className={cn("font-semibold text-gray-900")}>
                         {med.medicineName}
                       </span>
                       {med.dosage && (
-                        <span className="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5">
+                        <span
+                          className={cn(
+                            "text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5"
+                          )}
+                        >
                           {med.dosage}
                         </span>
                       )}
                       {med.notes && (
-                        <span className="text-xs text-blue-600 bg-blue-50 rounded px-2 py-0.5">
+                        <span
+                          className={cn(
+                            "text-xs text-blue-600 bg-blue-50 rounded px-2 py-0.5"
+                          )}
+                        >
                           {med.notes}
                         </span>
                       )}
@@ -284,13 +301,13 @@ const DetailPage = () => {
               </ul>
             ) : (
               <span className="ml-1 text-gray-500 italic">
-                No custom medicines
+                Không có thuốc kê thêm
               </span>
             )}
           </div>
         </div>
 
-        {/* Export PDF */}
+        {/* Xuất PDF */}
         <div className="mt-6 flex justify-center">
           <Button
             onClick={() => exportPatientTreatmentToPDF(detail)}
@@ -299,7 +316,7 @@ const DetailPage = () => {
               "bg-blue-600 hover:bg-blue-700"
             )}
           >
-            <span className="mr-2">📄</span> Export to PDF
+            <span className="mr-2">📄</span> Xuất PDF
           </Button>
         </div>
       </div>

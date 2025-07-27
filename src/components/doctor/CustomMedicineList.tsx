@@ -29,7 +29,6 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
   isEnded,
   setCustomMeds,
 }) => {
-  // State for the custom medicine being edited
   const [editCustomMedForm, setEditCustomMedForm] =
     useState<CustomMedicationItem | null>(null);
 
@@ -38,7 +37,7 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
   return (
     <div className="mt-4">
       <div className="font-semibold text-sm text-gray-700 mb-1">
-        Thuốc bổ sung:
+        Thuốc được thêm
       </div>
       <div className="space-y-2">
         {customMeds.map((med, idx) => {
@@ -57,7 +56,14 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
                   setCustomMeds((prev) => prev.filter((_, i) => i !== idx))
                 }
               />
-
+              <div className="flex flex-wrap gap-4 text-xs text-gray-500 mt-1 ml-2">
+                {med.quantity !== undefined && (
+                  <span>
+                    Số lượng:{" "}
+                    <span className="font-semibold">{med.quantity}</span>
+                  </span>
+                )}
+              </div>
               <div className="absolute top-2 right-2 flex gap-2 opacity-80 group-hover:opacity-100">
                 <Button
                   size="icon"
@@ -65,7 +71,6 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
                   onClick={() => {
                     if (isEnded) return;
                     setEditingCustomMedIdx(idx);
-                    // initialize form with current values
                     setEditCustomMedForm({ ...med });
                   }}
                   title="Sửa"
@@ -94,7 +99,6 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
-
               {isEditing && editCustomMedForm && (
                 <div className="bg-white border rounded p-4 mt-2">
                   <div className="font-semibold mb-2">Sửa thuốc bổ sung</div>
@@ -204,12 +208,14 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
                         Tần suất
                       </label>
                       <Input
-                        value={editCustomMedForm.frequency}
+                        value={editCustomMedForm.frequency ?? "1 lần/ngày"}
                         onChange={(e) =>
                           setEditCustomMedForm(
                             (f) => f && { ...f, frequency: e.target.value }
                           )
                         }
+                        placeholder="1 lần/ngày"
+                        disabled={true}
                       />
                     </div>
                     <div>
@@ -247,6 +253,28 @@ const CustomMedicineList: React.FC<CustomMedicineListProps> = ({
                         onChange={(e) =>
                           setEditCustomMedForm(
                             (f) => f && { ...f, notes: e.target.value }
+                          )
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">
+                        Số lượng
+                      </label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={editCustomMedForm.quantity ?? "1"}
+                        onChange={(e) =>
+                          setEditCustomMedForm(
+                            (f) =>
+                              f && {
+                                ...f,
+                                quantity:
+                                  e.target.value === ""
+                                    ? undefined
+                                    : Number(e.target.value),
+                              }
                           )
                         }
                       />
