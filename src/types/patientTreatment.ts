@@ -160,7 +160,7 @@ export interface ActivePatientTreatment {
   isCurrent: boolean;
   isStarted: boolean;
   daysRemaining: number | null;
-  treatmentStatus: string;
+  treatmentStatus: boolean;
 }
 
 export type ActivePatientTreatmentType = ActivePatientTreatment;

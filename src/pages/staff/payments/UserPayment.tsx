@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { appointmentService } from "@/services/appointmentService";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
 import type { Appointment } from "@/types/appointment";
@@ -14,8 +13,6 @@ import {
   type PaymentResponse,
 } from "@/services/paymentService";
 import { toast } from "react-hot-toast";
-
-import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 import PaymentMethodDialog from "./components/PaymentMethodDialog";
 import AppointmentCard from "./components/AppointmentCard";
 import PatientTreatmentCard from "./components/PatientTreatmentCard";
@@ -32,7 +29,6 @@ const UserPayment: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [orderLoading] = useState<number | null>(null);
   const [order, setOrder] = useState<PaymentResponse | null>(null);
-  const { mutate: changeStatus } = useChangeAppointmentStatus();
   const [payment, setPayment] = useState<PaymentResponse[] | []>([]);
   // Modal state
   const [selectedAppointment, setSelectedAppointment] =
@@ -58,16 +54,6 @@ const UserPayment: React.FC = () => {
     setSelectedPatientTreatment(treatment);
     setIsModalOpen(true);
   };
-
-  const handleCancelAppointment = useCallback(
-    (appointmentId: number) => {
-      changeStatus({
-        id: appointmentId,
-        status: "PAID",
-      });
-    },
-    [changeStatus]
-  );
 
   // --- Patient Treatments State & Logic ---
   const [patientTreatment, setPatientTreatment] = useState<
@@ -119,10 +105,7 @@ const UserPayment: React.FC = () => {
     fetchActiveTreatmentsUser();
   }, [fetchActiveTreatmentsUser]);
 
-  const totalUnpaid = patientTreatment.reduce(
-    (sum, t) => sum + (t.status ? t.total : 0),
-    0
-  );
+
 
   const handlePayment = async () => {
     if (!selectedAppointment && !selectedPatientTreatment) return;
@@ -225,7 +208,6 @@ const UserPayment: React.FC = () => {
           (p) => p.appointmentId === appointment.id && p.orderStatus === "PAID"
         );
         if (paymentMatch) {
-          handleCancelAppointment(appointment.id);
           // Check if this is the selected appointment being paid
           if (
             selectedAppointment?.id === appointment.id &&
@@ -286,7 +268,6 @@ const UserPayment: React.FC = () => {
     isPaymentProcessing,
     fetchActiveTreatmentsUser,
     fetchOrders,
-    handleCancelAppointment,
   ]);
   return (
     <>
@@ -301,17 +282,11 @@ const UserPayment: React.FC = () => {
               <div className="font-semibold text-lg text-primary">
                 Danh sách điều trị cần thanh toán
               </div>
-              <div className="text-sm text-gray-700">
-                Tổng cần thanh toán:{" "}
-                <span className="font-bold text-red-600">
-                  {formatCurrency(totalUnpaid)}
-                </span>
-              </div>
             </div>
             {patientTreatment.length > 0 ? (
               <div className="space-y-3">
                 {patientTreatment.map((treatment) =>
-                  treatment?.customMedications &&
+                  treatment?.customMedications ||
                   treatment?.testResults?.length > 0 ? (
                     <PatientTreatmentCard
                       key={treatment.id}

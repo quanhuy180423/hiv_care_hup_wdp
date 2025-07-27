@@ -32,7 +32,10 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
     return d.toLocaleDateString("vi-VN");
   };
 
-  const getTreatmentStatusVariant = (status: string) => {
+  const getTreatmentStatusVariant = (status: string | boolean) => {
+    if (typeof status === "boolean") {
+      return status ? "default" : "outline";
+    }
     switch (status) {
       case "ONGOING":
         return "default"; // or "success"
@@ -60,30 +63,31 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
           </h3>
           <div className="flex items-center gap-2">
             {treatment.treatmentStatus && (
-              <Badge
-                variant={getTreatmentStatusVariant(treatment.treatmentStatus)}
-                className="text-sm font-semibold"
-              >
-                {treatment.treatmentStatus === "ONGOING" && "Đang diễn ra"}
-                {treatment.treatmentStatus === "COMPLETED" && "Đã hoàn thành"}
-                {treatment.treatmentStatus === "DISCONTINUED" && "Đã dừng"}
-                {!["ONGOING", "COMPLETED", "DISCONTINUED"].includes(
-                  treatment.treatmentStatus
-                ) && treatment.treatmentStatus}
-              </Badge>
+              <>
+                <Badge
+                  variant={getTreatmentStatusVariant(treatment.treatmentStatus)}
+                  className="text-sm font-semibold"
+                >
+                  {treatment.treatmentStatus
+                    ? "Đã thanh toán"
+                    : "Chưa thanh toán"}
+                </Badge>
+                {!treatment.treatmentStatus && (
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => onOpenModal(treatment)}
+                      disabled={orderLoading === treatment.id}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                    >
+                      {orderLoading === treatment.id
+                        ? "Đang xử lý..."
+                        : "Thanh toán"}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={() => onOpenModal(treatment)}
-            disabled={orderLoading === treatment.id}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-          >
-            {orderLoading === treatment.id ? "Đang xử lý..." : "Thanh toán"}
-          </button>
         </div>
 
         <Separator />
@@ -112,12 +116,6 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
               {treatment.protocol.targetDisease})
             </p>
           )}
-          <p>
-            <span className="font-semibold">Tổng chi phí:</span>{" "}
-            <span className="text-lg font-bold text-green-700">
-              {formatCurrency(treatment.total)}
-            </span>
-          </p>
           <p>
             <span className="font-semibold">Ngày bắt đầu:</span>{" "}
             {formatDateTime(treatment.startDate)}
@@ -258,6 +256,14 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                             Ghi chú:{" "}
                             <span className="text-gray-600">
                               {result.notes}
+                            </span>
+                          </p>
+                        )}
+                        {result.test?.price && (
+                          <p>
+                            Giá:{" "}
+                            <span className="font-medium">
+                              {formatCurrency(result.test.price)}
                             </span>
                           </p>
                         )}

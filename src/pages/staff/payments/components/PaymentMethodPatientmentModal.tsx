@@ -56,22 +56,9 @@ const PaymentMethodPatientmentModal: React.FC<
 }) => {
   // Ensure treatment is properly typed and checked
   const treatment = selectedTreatment ?? ({} as ActivePatientTreatment);
-
-  const getTreatmentStatusVariant = (status: string) => {
-    switch (status) {
-      case "ONGOING":
-        return "secondary";
-      case "COMPLETED":
-        return "success";
-      case "DISCONTINUED":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="min-w-3xl bg-white">
+      <DialogContent className="min-w-4xl bg-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Thông tin thanh toán điều trị</DialogTitle>
         </DialogHeader>
@@ -91,21 +78,10 @@ const PaymentMethodPatientmentModal: React.FC<
                 </h3>
                 <div className="flex items-center gap-2">
                   {treatment.treatmentStatus && (
-                    <Badge
-                      variant={getTreatmentStatusVariant(
-                        treatment.treatmentStatus
-                      )}
-                      className="text-sm font-semibold"
-                    >
-                      {treatment.treatmentStatus === "ONGOING" &&
-                        "Đang diễn ra"}
-                      {treatment.treatmentStatus === "COMPLETED" &&
-                        "Đã hoàn thành"}
-                      {treatment.treatmentStatus === "DISCONTINUED" &&
-                        "Đã dừng"}
-                      {!["ONGOING", "COMPLETED", "DISCONTINUED"].includes(
-                        treatment.treatmentStatus
-                      ) && treatment.treatmentStatus}
+                    <Badge className="text-sm font-semibold">
+                      {treatment.treatmentStatus
+                        ? "Đã thanh toán"
+                        : "Chưa thanh toán"}
                     </Badge>
                   )}
                 </div>
@@ -281,6 +257,14 @@ const PaymentMethodPatientmentModal: React.FC<
                             Ghi chú:{" "}
                             <span className="text-gray-600">
                               {result.notes}
+                            </span>
+                          </p>
+                        )}
+                        {result.test?.price && (
+                          <p>
+                            Giá:{" "}
+                            <span className="font-medium">
+                              {formatCurrency(result.test.price)}
                             </span>
                           </p>
                         )}

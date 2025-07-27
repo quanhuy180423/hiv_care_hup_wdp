@@ -86,33 +86,38 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="bg-white">
-        {["PAID"].includes((appointment.status || "").toUpperCase()) && (
+        {["PAID"].includes((appointment.status || "").toUpperCase()) &&
+          appointment.type !== "ONLINE" && (
+            <DropdownMenuItem
+              onClick={async () => {
+                const patientId = appointment.userId;
+                const res = await patientTreatmentService.getActiveByPatient(
+                  patientId
+                );
+                console.log(res);
+                const patientTreatments = res.data[0];
+                navigate(
+                  `/doctor/patient-treatments/${patientTreatments?.id}/consultation`
+                );
+              }}
+              className="flex items-center cursor-pointer"
+            >
+              <Stethoscope className="w-4 h-4 mr-2" />
+              Khám ngay
+            </DropdownMenuItem>
+          )}
+        {appointment.type !== "ONLINE" && (
           <DropdownMenuItem
-            onClick={async () => {
-              const patientId = appointment.userId;
-              const res = await patientTreatmentService.getActiveByPatient(
-                patientId
-              );
-              console.log(res);
-              const patientTreatments = res.data[0];
-              navigate(
-                `/doctor/patient-treatments/${patientTreatments?.id}/consultation`
-              );
-            }}
-            className="flex items-center cursor-pointer"
+            onClick={handleOpenTestResultForm}
+            onSelect={(e) => e.preventDefault()}
+            className="cursor-pointer"
           >
-            <Stethoscope className="w-4 h-4 mr-2" />
-            Khám ngay
+            Thêm kết quả xét nghiệm
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem
-          onClick={handleOpenTestResultForm}
-          onSelect={(e) => e.preventDefault()}
-          className="cursor-pointer"
-        >
-          Thêm kết quả xét nghiệm
-        </DropdownMenuItem>
+
         <Dialog open={showTestResultForm} onOpenChange={setShowTestResultForm}>
           <DialogContent className="max-w-2xl bg-white">
             <DialogHeader>
@@ -142,7 +147,8 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
           </DropdownMenuItem>
         )}
         {appointment.status !== "COMPLETED" &&
-          appointment.status !== "CANCELLED" && (
+          appointment.status !== "CANCELLED" &&
+          appointment.type !== "ONLINE" && (
             <DropdownMenuItem
               onClick={() =>
                 navigate(
