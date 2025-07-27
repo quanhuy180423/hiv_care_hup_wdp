@@ -346,6 +346,7 @@ export default function ProtocolMedicineList({
                       }
                       placeholder="1 lần/ngày"
                       required
+                      disabled
                     />
                   </div>
                   <div>
