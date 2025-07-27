@@ -292,7 +292,7 @@ const PaymentMethodPatientmentModal: React.FC<
                   <SelectValue placeholder="Chọn phương thức thanh toán" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CASH">Tiền mặt</SelectItem>
+                  {/* <SelectItem value="CASH">Tiền mặt</SelectItem> */}
                   <SelectItem value="BANK_TRANSFER">Chuyển khoản</SelectItem>
                 </SelectContent>
               </Select>

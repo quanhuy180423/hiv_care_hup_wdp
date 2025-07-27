@@ -80,7 +80,7 @@ const PaymentMethodDialog: React.FC<PaymentMethodDialogProps> = ({
                 />
               </SelectTrigger>
               <SelectContent className="max-h-60 w-full">
-                <SelectItem value="CASH">Tiền mặt</SelectItem>
+                {/* <SelectItem value="CASH">Tiền mặt</SelectItem> */}
                 <SelectItem value="BANK_TRANSFER">Chuyển khoản</SelectItem>
               </SelectContent>
             </Select>
