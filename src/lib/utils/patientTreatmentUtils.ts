@@ -89,3 +89,21 @@ export function endOfDay(date: Date): Date {
   d.setHours(23, 59, 59, 999);
   return d;
 }
+
+export function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+export function getLatestPendingAppointment(
+  appointmentsList: Appointment[]
+): Appointment | undefined {
+  return appointmentsList
+    .filter((a) => a.status === "PENDING")
+    .sort(
+      (a, b) =>
+        new Date(b.appointmentTime).getTime() -
+        new Date(a.appointmentTime).getTime()
+    )[0];
+}

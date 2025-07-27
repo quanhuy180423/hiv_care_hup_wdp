@@ -8,16 +8,19 @@ import {
   usePatientTreatmentsByDoctor,
   useUpdatePatientTreatment,
 } from "@/hooks/usePatientTreatments";
-import { findMatchedAppointment } from "@/lib/utils/patientTreatmentUtils";
+import {
+  findMatchedAppointment,
+  getLatestPendingAppointment,
+} from "@/lib/utils/patientTreatmentUtils";
 import useAuthStore from "@/store/authStore";
+import type { CustomApiError } from "@/types/api";
 import type { Appointment } from "@/types/appointment";
 import type { PatientTreatmentType as BasePatientTreatmentType } from "@/types/patientTreatment";
-import { FileX2, Loader2, Plus } from "lucide-react";
+import { AlertTriangle, FileX2, Loader2, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-// Extend PatientTreatmentType to include appointment info
 export interface PatientTreatmentWithAppointment
   extends BasePatientTreatmentType {
   appointmentStatus?: Appointment["status"];
@@ -47,13 +50,12 @@ const DoctorPatientTreatments = () => {
     if (typeof docId === "number") return docId;
     return undefined;
   });
-  // const [search, setSearch] = useState("");
   const [selectedTreatment, setSelectedTreatment] =
     useState<PatientTreatmentWithAppointment | null>(null);
-  const navigate = useNavigate();
-
   const [page, setPage] = useState(1);
+  const [showPendingAlert, setShowPendingAlert] = useState(false);
   const pageSize = 10;
+  const navigate = useNavigate();
 
   const {
     data: treatmentsDataRaw,
@@ -131,6 +133,7 @@ const DoctorPatientTreatments = () => {
     };
   }, [treatmentsDataRaw, appointmentsList]);
 
+  // Toast error khi không load được danh sách
   useEffect(() => {
     if (
       !isLoadingPatientTreatments &&
@@ -148,6 +151,7 @@ const DoctorPatientTreatments = () => {
   const updateMutation = useUpdatePatientTreatment();
   const deleteMutation = useDeletePatientTreatment();
 
+  // Refetch khi mutation thành công, toast error khi mutation lỗi
   useEffect(() => {
     if (
       createMutation.isSuccess ||
@@ -156,14 +160,35 @@ const DoctorPatientTreatments = () => {
     ) {
       refetchTreatments();
     }
+    if (createMutation.isError && createMutation.error) {
+      const error = createMutation.error as CustomApiError;
+      toast.error(
+        error.message ||
+          "Không thể tạo hồ sơ điều trị. Vui lòng kiểm tra lại điều kiện nghiệp vụ hoặc liên hệ quản trị viên."
+      );
+    }
+    if (deleteMutation.isError && deleteMutation.error) {
+      toast.error("Xóa hồ sơ thất bại.");
+    }
   }, [
     createMutation.isSuccess,
     updateMutation.isSuccess,
     deleteMutation.isSuccess,
+    createMutation.isError,
+    createMutation.error,
+    deleteMutation.isError,
+    deleteMutation.error,
     refetchTreatments,
   ]);
 
+  const latestPendingAppointment =
+    getLatestPendingAppointment(appointmentsList);
+
   const handleAdd = () => {
+    if (latestPendingAppointment) {
+      setShowPendingAlert(true);
+      return;
+    }
     navigate("/doctor/patient-treatments/create");
   };
 
@@ -198,10 +223,27 @@ const DoctorPatientTreatments = () => {
         <Button
           className="inline-flex items-center gap-2 bg-primary text-black px-5 py-2 rounded-lg shadow transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50"
           onClick={handleAdd}
+          disabled={!!latestPendingAppointment}
         >
           <Plus className="w-5 h-5" />
           Thêm hồ sơ
         </Button>
+        {showPendingAlert && (
+          <div className="flex items-center gap-2 mt-2 text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-3 py-2">
+            <AlertTriangle className="w-5 h-5" />
+            <span>
+              Không thể tạo hồ sơ điều trị khi lịch hẹn gần nhất của bệnh nhân
+              đang ở trạng thái <b>Chờ xác nhận</b> (PENDING). Vui lòng xác nhận
+              hoặc huỷ lịch hẹn trước khi tạo hồ sơ mới.
+            </span>
+            <button
+              className="ml-auto text-sm underline"
+              onClick={() => setShowPendingAlert(false)}
+            >
+              Đóng
+            </button>
+          </div>
+        )}
       </div>
       <div className="mb-6 flex items-center justify-end w-full">
         {/* <div className="relative w-full max-w-xs">
