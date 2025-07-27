@@ -123,6 +123,8 @@ export const CustomMedicineSchema = z.object({
     ])
     .optional(),
   notes: z.string().max(200).optional(),
+  unitPrice: z.number().min(0).optional(),
+  quantity: z.number().min(1).optional(),
 });
 
 export type CustomMedicineFormValues = z.infer<typeof CustomMedicineSchema>;

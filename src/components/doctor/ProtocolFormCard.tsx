@@ -63,7 +63,6 @@ interface ProtocolFormCardProps {
   watch: UseFormWatch<CustomMedicineFormValues>;
   reset: UseFormReset<CustomMedicineFormValues>;
   handleSubmit: UseFormHandleSubmit<CustomMedicineFormValues>;
-  onAddCustomMed: (values: CustomMedicineFormValues) => void;
   startDate: string;
   setStartDate: (date: string) => void;
   endDate: string;
@@ -103,7 +102,6 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
   watch,
   reset,
   handleSubmit,
-  onAddCustomMed,
   startDate,
   setStartDate,
   endDate,
@@ -115,15 +113,14 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
   toast,
 }) => {
   const [customUnit, setCustomUnit] = useState("");
-  const [customFrequency, setCustomFrequency] = useState("");
 
   const medicineUnitOptions = [
-    { value: MedicineUnit.TABLET, label: "Tablet" },
-    { value: MedicineUnit.AMPOULE, label: "Ampoule" },
+    { value: MedicineUnit.TABLET, label: "Viên" },
+    { value: MedicineUnit.AMPOULE, label: "Ống" },
     { value: MedicineUnit.ML, label: "ml" },
-    { value: MedicineUnit.SACHET, label: "Sachet" },
-    { value: MedicineUnit.BOTTLE, label: "Bottle" },
-    { value: MedicineUnit.OTHER, label: "Other" },
+    { value: MedicineUnit.SACHET, label: "Gói" },
+    { value: MedicineUnit.BOTTLE, label: "Lọ" },
+    { value: MedicineUnit.OTHER, label: "Khác" },
   ];
 
   const protocolSelectItems = React.useMemo(() => {
@@ -142,8 +139,46 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
   }, [protocolOptions, protocolLoading]);
 
   const protocolSelectPlaceholder = protocolLoading
-    ? "Loading..."
-    : "Select protocol";
+    ? "Đang tải..."
+    : "Chọn phác đồ điều trị";
+
+  const handleAddCustomMed = (values: CustomMedicineFormValues) => {
+    setCustomMeds((prev) => {
+      const idx = prev.findIndex(
+        (m) =>
+          m.medicineName === values.medicineName &&
+          m.unit === values.unit &&
+          m.dosage === values.dosage
+      );
+      if (idx !== -1) {
+        // If exists, increase quantity
+        const updated = [...prev];
+        updated[idx] = {
+          ...updated[idx],
+          quantity:
+            (typeof updated[idx].quantity === "number"
+              ? updated[idx].quantity
+              : 1) +
+            (typeof values.quantity === "number" ? values.quantity : 1),
+        };
+        return updated;
+      }
+      // Else, add new
+      return [
+        ...prev,
+        {
+          ...values,
+          durationValue:
+            values.durationValue === "" || values.durationValue === undefined
+              ? undefined
+              : Number(values.durationValue),
+          medicineId: undefined,
+          quantity: typeof values.quantity === "number" ? values.quantity : 1,
+        },
+      ];
+    });
+    setAddMedOpen(false);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow p-7 col-span-1 md:col-span-2">
@@ -189,7 +224,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
       {/* Danh sách thuốc trong phác đồ */}
       <div className="mb-8">
         <div className="font-semibold text-base mb-2 flex items-center gap-2">
-          Thuốc trong phác đồ
+          Danh sách thuốc trong phác đồ
           {protocol?.medicines && (
             <span className="text-xs text-gray-400">
               (
@@ -261,7 +296,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
               Thêm thuốc bổ sung
             </div>
             <form
-              onSubmit={handleSubmit(onAddCustomMed)}
+              onSubmit={handleSubmit(handleAddCustomMed)}
               className="space-y-4 mt-2"
             >
               <div>
@@ -319,14 +354,14 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Liều dùng <span className="text-red-500">*</span>
                   </label>
                   <Input
                     {...register("dosage")}
-                    placeholder="VD: 1 viên/lần"
+                    placeholder="VD: 500mg"
                     disabled={isAddingMed}
                   />
                   {errors.dosage && (
@@ -351,7 +386,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                     disabled={isAddingMed}
                   >
                     <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <SelectValue placeholder="Select unit" />
+                      <SelectValue placeholder="Chọn đơn vị" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       {medicineUnitOptions.map((opt) => (
@@ -364,7 +399,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                   {watch("unit") === MedicineUnit.OTHER && (
                     <Input
                       className="mt-2"
-                      placeholder="Enter other unit"
+                      placeholder="Nhập đơn vị khác"
                       value={customUnit}
                       onChange={(e) => {
                         setCustomUnit(e.target.value);
@@ -379,6 +414,23 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                   {errors.unit && (
                     <div className="text-xs text-red-500 mt-1">
                       {errors.unit.message}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Số lượng <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    {...register("quantity", { valueAsNumber: true })}
+                    placeholder="1"
+                    disabled={isAddingMed}
+                  />
+                  {errors.quantity && (
+                    <div className="text-xs text-red-500 mt-1">
+                      {errors.quantity.message}
                     </div>
                   )}
                 </div>
@@ -403,7 +455,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Đơn vị TG <span className="text-red-500">*</span>
+                    Đơn vị thời gian <span className="text-red-500">*</span>
                   </label>
                   <Select
                     value={watch("durationUnit") || ""}
@@ -416,10 +468,9 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                     disabled={isAddingMed}
                   >
                     <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <SelectValue placeholder="Chọn đơn vị" />
+                      <SelectValue placeholder="Chọn đơn vị thời gian" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      {/* Không dùng value rỗng cho SelectItem, chỉ dùng placeholder ở SelectValue */}
                       <SelectItem value={DurationUnit.DAY}>Ngày</SelectItem>
                       <SelectItem value={DurationUnit.WEEK}>Tuần</SelectItem>
                       <SelectItem value={DurationUnit.MONTH}>Tháng</SelectItem>
@@ -434,53 +485,14 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Tần suất <span className="text-red-500">*</span>
+                    Tần suất (mặc định 1 lần/ngày)
                   </label>
-                  <Select
-                    value={watch("frequency") || ""}
-                    onValueChange={(val) => {
-                      if (val === "khác") {
-                        setCustomFrequency("");
-                        reset(
-                          { ...watch(), frequency: "khác" },
-                          { keepErrors: true, keepDirty: true }
-                        );
-                      } else {
-                        setCustomFrequency("");
-                        reset(
-                          { ...watch(), frequency: val },
-                          { keepErrors: true, keepDirty: true }
-                        );
-                      }
-                    }}
-                    disabled={isAddingMed}
-                  >
-                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <SelectValue placeholder="Chọn tần suất" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="1 lần/ngày">1 lần/ngày</SelectItem>
-                      <SelectItem value="2 lần/ngày">2 lần/ngày</SelectItem>
-                      <SelectItem value="3 lần/ngày">3 lần/ngày</SelectItem>
-                      <SelectItem value="4 lần/ngày">4 lần/ngày</SelectItem>
-                      <SelectItem value="khác">Khác</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {watch("frequency") === "khác" && (
-                    <Input
-                      className="mt-2"
-                      placeholder="Nhập tần suất khác"
-                      value={customFrequency}
-                      onChange={(e) => {
-                        setCustomFrequency(e.target.value);
-                        reset(
-                          { ...watch(), frequency: e.target.value },
-                          { keepErrors: true, keepDirty: true }
-                        );
-                      }}
-                      disabled={isAddingMed}
-                    />
-                  )}
+                  <Input
+                    {...register("frequency")}
+                    placeholder="1 lần/ngày"
+                    defaultValue="1 lần/ngày"
+                    disabled={true}
+                  />
                   {errors.frequency?.message && (
                     <div className="text-xs text-red-500 mt-1">
                       {String(errors.frequency.message)}
@@ -502,7 +514,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                     disabled={isAddingMed}
                   >
                     <SelectTrigger className="w-full h-10 border border-gray-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <SelectValue placeholder="Chọn thời điểm" />
+                      <SelectValue placeholder="Chọn thời điểm uống" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       <SelectItem value={MedicationSchedule.MORNING}>
@@ -529,7 +541,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
                 </label>
                 <Input
                   {...register("notes")}
-                  placeholder="Ghi chú thêm (tùy chọn)"
+                  placeholder="Nhập ghi chú thêm (tùy chọn)"
                   disabled={isAddingMed}
                 />
                 {errors.notes && (
@@ -569,7 +581,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
             className="block text-base font-semibold mb-2"
             htmlFor="startDate"
           >
-            * Ngày bắt đầu
+            * Ngày bắt đầu điều trị
           </label>
           <Input
             id="startDate"
@@ -588,7 +600,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
             className="block text-base font-semibold mb-2"
             htmlFor="endDate"
           >
-            Ngày kết thúc (tùy chọn)
+            Ngày kết thúc điều trị (tùy chọn)
           </label>
           <Input
             id="endDate"
@@ -605,7 +617,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
       {/* Ghi chú */}
       <div className="mb-6">
         <label className="block text-base font-semibold mb-2" htmlFor="notes">
-          Ghi chú
+          Ghi chú về phác đồ điều trị
         </label>
         <Textarea
           id="notes"
@@ -641,7 +653,7 @@ const ProtocolFormCard: React.FC<ProtocolFormCardProps> = ({
               Đang lưu...
             </span>
           ) : (
-            <>Tạo phác đồ điều trị</>
+            <>Lưu phác đồ điều trị</>
           )}
         </Button>
       </div>

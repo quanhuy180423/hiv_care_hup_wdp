@@ -65,7 +65,6 @@ export default function ProtocolMedicineList({
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Initialize form when entering edit mode
   useEffect(() => {
     if (
       editingProtocolMedIdx !== null &&
@@ -77,7 +76,7 @@ export default function ProtocolMedicineList({
         medicine: { name: med.medicine?.name || "" },
         dosage: med.dosage,
         unit: "viên",
-        frequency: "2 lần/ngày",
+        frequency: "1 lần/ngày",
         durationValue: med.durationValue,
         durationUnit: med.durationUnit || "",
         schedule: med.schedule || "",
@@ -92,9 +91,7 @@ export default function ProtocolMedicineList({
   }, [editingProtocolMedIdx, protocol]);
 
   if (!protocol || protocol.medicines.length === 0) {
-    return (
-      <div className="text-gray-400 italic">Chưa có thuốc trong phác đồ</div>
-    );
+    return <div className="text-gray-400 italic">Chưa có thuốc đề xuất</div>;
   }
 
   return (
@@ -339,41 +336,17 @@ export default function ProtocolMedicineList({
                     <label className="block text-xs font-medium mb-1">
                       Tần suất
                     </label>
-                    <Select
-                      value={editForm?.frequency ?? "2"}
-                      onValueChange={(val) =>
+                    <Input
+                      value={editForm?.frequency ?? "1 lần/ngày"}
+                      onChange={(e) =>
                         setEditForm((f) => ({
                           ...f,
-                          frequency: val,
+                          frequency: e.target.value,
                         }))
                       }
+                      placeholder="1 lần/ngày"
                       required
-                    >
-                      <SelectTrigger className="w-full border rounded px-2 text-xs h-10">
-                        <SelectValue placeholder="Chọn tần suất" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="1 lần/ngày">1 lần/ngày</SelectItem>
-                        <SelectItem value="2 lần/ngày">2 lần/ngày</SelectItem>
-                        <SelectItem value="3 lần/ngày">3 lần/ngày</SelectItem>
-                        <SelectItem value="4 lần/ngày">4 lần/ngày</SelectItem>
-                        <SelectItem value="khác">Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {editForm?.frequency === "khác" && (
-                      <Input
-                        className="mt-2"
-                        placeholder="Nhập tần suất khác"
-                        value={editForm?.frequency ?? ""}
-                        onChange={(e) =>
-                          setEditForm((f) => ({
-                            ...f,
-                            frequency: e.target.value,
-                          }))
-                        }
-                        required
-                      />
-                    )}
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1">
