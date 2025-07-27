@@ -290,10 +290,10 @@ const UserPayment: React.FC = () => {
   ]);
   return (
     <>
-      <Tabs defaultValue="patient-treatments" className="w-full">
+      <Tabs defaultValue="appointments" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="patient-treatments">Điều trị</TabsTrigger>
           <TabsTrigger value="appointments">Lịch hẹn</TabsTrigger>
+          <TabsTrigger value="patient-treatments">Điều trị</TabsTrigger>
         </TabsList>
         <TabsContent value="patient-treatments">
           <Card className="p-4">
@@ -310,16 +310,19 @@ const UserPayment: React.FC = () => {
             </div>
             {patientTreatment.length > 0 ? (
               <div className="space-y-3">
-                {patientTreatment.map((treatment) => (
-                  <PatientTreatmentCard
-                    key={treatment.id}
-                    onOpenModal={() =>
-                      handleOpenPatientTreatmentModal(treatment)
-                    }
-                    orderLoading={orderLoading}
-                    treatment={treatment}
-                  />
-                ))}
+                {patientTreatment.map((treatment) =>
+                  treatment?.customMedications &&
+                  treatment?.testResults?.length > 0 ? (
+                    <PatientTreatmentCard
+                      key={treatment.id}
+                      onOpenModal={() =>
+                        handleOpenPatientTreatmentModal(treatment)
+                      }
+                      orderLoading={orderLoading}
+                      treatment={treatment}
+                    />
+                  ) : null
+                )}
               </div>
             ) : (
               <div className="text-gray-600">

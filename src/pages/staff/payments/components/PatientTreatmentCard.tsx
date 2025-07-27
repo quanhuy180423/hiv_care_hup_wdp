@@ -25,7 +25,6 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
   treatment,
   orderLoading,
   onOpenModal,
-
 }) => {
   const formatDateTime = (iso: string | undefined) => {
     if (!iso) return "";
@@ -83,7 +82,7 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
             disabled={orderLoading === treatment.id}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
           >
-            {orderLoading === treatment.id ? "Đang xử lý..." : "Tạo order"}
+            {orderLoading === treatment.id ? "Đang xử lý..." : "Thanh toán"}
           </button>
         </div>
 

@@ -133,7 +133,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
               disabled={orderLoading === appointment.id}
               className="hover:scale-115 transition-transform"
             >
-              {orderLoading === appointment.id ? "Đang xử lý..." : "Tạo order"}
+              {orderLoading === appointment.id ? "Đang xử lý..." : "Thanh toán"}
             </Button>
           )}
         </div>
