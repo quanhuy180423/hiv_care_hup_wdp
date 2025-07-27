@@ -60,7 +60,7 @@ export const patientTreatmentService = {
     params: PatientTreatmentQueryParams
   ): Promise<PatientTreatmentsResponse> {
     const res = await apiClient.get<PatientTreatmentsResponse>(
-      `${API_URL}/user/${patientId}`,
+      `${API_URL}/patient/${patientId}`,
       {
         params,
       }

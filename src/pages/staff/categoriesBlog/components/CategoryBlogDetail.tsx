@@ -18,8 +18,6 @@ import {
   Eye,
   EyeOff,
   Tag,
-  Edit,
-  Trash2,
   Share2,
   BarChart3,
 } from "lucide-react";

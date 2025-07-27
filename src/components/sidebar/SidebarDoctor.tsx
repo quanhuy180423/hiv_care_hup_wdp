@@ -89,7 +89,7 @@ const sidebarNav = [
 export default function SidebarDoctor({ children }: DoctorLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   
   const handleLogout = () => {
     logout()
@@ -295,7 +295,7 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                 <div className="flex items-center justify-between px-8 py-4">
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">
-                      Chào mừng trở lại, Bác sĩ! 👩‍⚕️
+                      Chào mừng, Bác sĩ {user?.name}
                     </h2>
                     <p className="text-sm text-slate-600">
                       Hôm nay là {new Date().toLocaleDateString('vi-VN', { 
