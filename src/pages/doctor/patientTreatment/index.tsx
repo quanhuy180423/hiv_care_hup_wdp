@@ -215,7 +215,7 @@ const DoctorPatientTreatments = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
           Quản lý hồ sơ bệnh nhân
