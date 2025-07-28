@@ -18,20 +18,6 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onOpenModal,
   index,
 }) => {
-  const formatDateTime = (iso: string | undefined) => {
-    if (!iso) return { date: "", time: "" };
-    const d = new Date(iso);
-    return {
-      date: d.toLocaleDateString("vi-VN"),
-      time: d.toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-  };
-
-  const { date, time } = formatDateTime(appointment.appointmentTime);
-
   const statusMap: Record<
     string,
     {
@@ -73,8 +59,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="font-bold text-lg text-primary">#{index + 1}</span>{" "}
             <Badge variant="outline" className="text-sm font-normal">
-              <span className="font-medium">{date}</span> lúc{" "}
-              <span className="font-medium">{time}</span>
+              <span className="font-medium">{appointment.appointmentTime}</span>
             </Badge>
             <Badge
               variant={appointment.type === "ONLINE" ? "default" : "secondary"}

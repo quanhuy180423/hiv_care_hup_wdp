@@ -14,7 +14,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type { Appointment } from "@/types/appointment";
 import type { PaymentMethod } from "@/services/paymentService";
@@ -60,11 +59,7 @@ const PaymentMethodDialog: React.FC<PaymentMethodDialogProps> = ({
               <strong>Bác sĩ:</strong> {selectedAppointment.doctor.user.name}
             </p>
             <p>
-              <strong>Thời gian:</strong>{" "}
-              {format(
-                new Date(selectedAppointment.appointmentTime),
-                "dd/MM/yyyy HH:mm"
-              )}
+              <strong>Thời gian:</strong> {selectedAppointment.appointmentTime}
             </p>
 
             <Select
