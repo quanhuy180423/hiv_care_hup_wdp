@@ -65,15 +65,16 @@ import DoctorSchedule from "./pages/doctor/schedule";
 import TestManagement from "./pages/admin/test";
 import ConsultationPage from "./pages/doctor/patientTreatment/pages/consultation";
 import CreateDoctorPatientTreatmentPage from "./pages/doctor/patientTreatment/pages/create";
+import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
+import GenerateTest from "./pages/doctor/patientTreatment/pages/generate-test";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import TestResultPage from "./pages/doctor/testResult";
+import UserPayment from "./pages/staff/payments/UserPayment";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
-import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
-import UserPayment from "./pages/staff/payments/UserPayment";
 
 // Route definition interface
 export interface RouteConfig {
@@ -536,6 +537,16 @@ export const doctorRoutes: RouteConfig[] = [
     component: ConsultationPage,
     title: "Hồ sơ bệnh án",
     description: "Hồ sơ bệnh án cho bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    showInNav: false,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/patient-treatments/:id/generate-test",
+    component: GenerateTest,
+    title: "Tạo xét nghiệm",
+    description: "Tạo xét nghiệm cho bệnh nhân",
     protected: true,
     layout: "DOCTOR",
     showInNav: false,
