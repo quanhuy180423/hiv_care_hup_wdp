@@ -37,7 +37,6 @@ import {
   Save,
   X,
   Activity,
-  AlertCircle,
   CreditCard,
   Hash,
   Phone,
@@ -64,7 +63,6 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (editingAppointment) {
@@ -96,10 +94,6 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
         onSuccess: () => {
           toast.success("Cập nhật lịch khám thành công");
           onClose();
-          setError("");
-        },
-        onError: (err) => {
-          setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
         },
       }
     );
@@ -169,22 +163,10 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
           </DialogHeader>
         </div>
 
-        {error && (
-          <div className="mx-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <h4 className="text-sm font-medium text-red-800">
-                Có lỗi xảy ra
-              </h4>
-              <p className="text-sm text-red-600 mt-1">{error}</p>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {/* Patient and Doctor Section */}
           <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
-            <CardContent className="p-6">
+            <CardContent className="px-6">
               <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
                 <div className="p-2 bg-blue-50 rounded-lg">
                   <User className="h-5 w-5 text-blue-600" />
@@ -270,7 +252,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
 
           {/* Service Section */}
           <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
-            <CardContent className="p-6">
+            <CardContent className="px-6">
               <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
                 <div className="p-2 bg-emerald-50 rounded-lg">
                   <Activity className="h-5 w-5 text-emerald-600" />
@@ -363,7 +345,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
 
           {/* Schedule Section */}
           <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
-            <CardContent className="p-6">
+            <CardContent className="px-6">
               <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
                 <div className="p-2 bg-violet-50 rounded-lg">
                   <Clock className="h-5 w-5 text-violet-600" />
@@ -439,7 +421,7 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
 
           {/* Options Section */}
           <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
-            <CardContent className="p-6">
+            <CardContent className="px-6">
               <h3 className="text-lg font-semibold mb-6 flex items-center gap-3">
                 <div className="p-2 bg-amber-50 rounded-lg">
                   <FileText className="h-5 w-5 text-amber-600" />
@@ -593,10 +575,10 @@ const AppointmentFormDialog = ({ open, onClose }: Props) => {
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 cursor-pointer"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold transition-all duration-200 cursor-pointer"
               disabled={isPending}
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4" />
               Hủy bỏ
             </Button>
             <Button
