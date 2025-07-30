@@ -71,8 +71,8 @@ import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { formatDate } from "@/lib/utils/dates/formatDate";
 import { getAvatarUrl } from "@/lib/utils/uploadImage/uploadImage";
 import type { DoctorScheduleByDate } from "@/types/doctor";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
 const appointmentSchema = z
   .object({
@@ -114,9 +114,7 @@ const RegisterAppointment = () => {
   const [dialogLoading, setDialogLoading] = useState(false);
 
   const services = useServices({ page: 1, limit: 100 });
-  const { data: doctors } = useDoctorSchedulesByDate(
-    selectedDate || new Date().toISOString().split("T")[0]
-  );
+  const { data: doctors } = useDoctorSchedulesByDate(selectedDate);
   const { mutate: createAppointment } = useCreateAppointment();
 
   const {
@@ -304,7 +302,7 @@ const RegisterAppointment = () => {
     });
   };
 
-   const DoctorCard = ({
+  const DoctorCard = ({
     doctor,
     isSelected,
     isAvailable,
@@ -342,7 +340,7 @@ const RegisterAppointment = () => {
             }`}
           />
         </div>
-        
+
         <div className="space-y-2">
           <h3 className="font-bold text-lg text-gray-900 leading-tight">
             {doctor.user.name}
@@ -350,7 +348,7 @@ const RegisterAppointment = () => {
           <p className="text-sm text-gray-600 font-medium">
             {doctor.specialization || "Bác sĩ đa khoa"}
           </p>
-          
+
           <div className="flex items-center justify-center gap-2 mt-2">
             <span
               className={`w-2 h-2 rounded-full ${
@@ -362,7 +360,7 @@ const RegisterAppointment = () => {
             </span>
           </div>
         </div>
-        
+
         {isSelected && (
           <div className="absolute top-4 right-4">
             <CheckCircle className="w-6 h-6 text-purple-600" />
@@ -463,7 +461,7 @@ const RegisterAppointment = () => {
       {/* Hiển thị thông tin service đã chọn */}
       {selectedService && (
         <Card className="mt-4 border-2 border-purple-100 shadow-md">
-          <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+          <CardContent className="px-4 flex flex-col md:flex-row gap-4">
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
                 {selectedService.type === "CONSULT" ? (
@@ -486,12 +484,16 @@ const RegisterAppointment = () => {
                     ? "Xét nghiệm"
                     : "Điều trị"}
                 </Badge>
-                <Badge variant="outline">
-                  Giá:{" "}
-                  <span className="font-semibold ml-1">
-                    {Number(selectedService.price).toLocaleString()}₫
-                  </span>
-                </Badge>
+                {Number(selectedService.price) === 0 ? (
+                  <Badge variant="outline">Miễn phí</Badge>
+                ) : (
+                  <Badge variant="outline">
+                    Giá:{" "}
+                    <span className="font-semibold ml-1">
+                      {formatCurrency(selectedService.price)}
+                    </span>
+                  </Badge>
+                )}
                 <Badge variant="outline">
                   Thời gian: {selectedService.startTime} -{" "}
                   {selectedService.endTime}
@@ -582,10 +584,19 @@ const RegisterAppointment = () => {
             <UserCheck className="w-5 h-5 text-purple-600" />
             Chọn bác sĩ
           </Label>
-          {availableDoctors?.length === 0 ? (
+          {!selectedDate ? (
+            <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg">
+              <CalendarDays className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-lg font-medium">
+                Vui lòng chọn ngày trước khi chọn bác sĩ
+              </p>
+            </div>
+          ) : availableDoctors?.length === 0 ? (
             <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg">
               <UserCheck className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-              <p className="text-lg font-medium">Không có bác sĩ nào trống ngày này</p>
+              <p className="text-lg font-medium">
+                Không có bác sĩ nào trống ngày này
+              </p>
               <p className="text-sm">Vui lòng chọn ngày khác</p>
             </div>
           ) : (

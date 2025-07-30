@@ -48,7 +48,7 @@ export const StatsCards = ({
         const IconComponent = card.icon;
         return (
           <Card key={index} className="border-0 shadow-sm">
-            <CardContent className="p-4">
+            <CardContent className="px-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">
