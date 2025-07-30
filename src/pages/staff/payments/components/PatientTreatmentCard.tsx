@@ -1,19 +1,24 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/utils/numbers/formatCurrency"; // Assuming this utility is correct
-import type {
-  ActivePatientTreatment,
-  TestResult,
-} from "@/types/patientTreatment";
-import { Separator } from "@/components/ui/separator"; // Import Separator
+import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
+import type { ActivePatientTreatment } from "@/types/patientTreatment";
+import { Separator } from "@/components/ui/separator";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"; // Import Accordion
-import type { CustomMedicationItem } from "@/schemas/patientTreatment";
+  User,
+  Stethoscope,
+  Clock,
+  FileText,
+  Pill,
+  TestTube,
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+  CalendarDays,
+  DollarSign,
+} from "lucide-react";
+import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
 
 interface PatientTreatmentCardProps {
   treatment: ActivePatientTreatment;
@@ -26,21 +31,15 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
   orderLoading,
   onOpenModal,
 }) => {
-  const formatDateTime = (iso: string | undefined) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return d.toLocaleDateString("vi-VN");
-  };
-
   const getTreatmentStatusVariant = (status: string | boolean) => {
     if (typeof status === "boolean") {
-      return status ? "default" : "outline";
+      return status ? "success" : "warning";
     }
     switch (status) {
       case "ONGOING":
-        return "default"; // or "success"
+        return "default";
       case "COMPLETED":
-        return "secondary";
+        return "success";
       case "DISCONTINUED":
         return "destructive";
       default:
@@ -48,241 +47,478 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
     }
   };
 
+  const getTreatmentStatusLabel = (status: string | boolean) => {
+    if (typeof status === "boolean") {
+      return status ? "Đã thanh toán" : "Chờ thanh toán";
+    }
+    switch (status) {
+      case "ONGOING":
+        return "Đang điều trị";
+      case "COMPLETED":
+        return "Đã hoàn thành";
+      case "DISCONTINUED":
+        return "Đã dừng";
+      default:
+        return status;
+    }
+  };
+
+  const getTreatmentStatusIcon = (status: string | boolean) => {
+    if (typeof status === "boolean") {
+      return status ? (
+        <CheckCircle className="w-4 h-4" />
+      ) : (
+        <AlertCircle className="w-4 h-4" />
+      );
+    }
+    switch (status) {
+      case "ONGOING":
+        return <Clock className="w-4 h-4" />;
+      case "COMPLETED":
+        return <CheckCircle className="w-4 h-4" />;
+      case "DISCONTINUED":
+        return <AlertCircle className="w-4 h-4" />;
+      default:
+        return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  const totalPrice =
+    (treatment?.customMedications?.reduce(
+      (acc, medication) =>
+        acc + (medication?.price || 0) * Number(medication.durationValue),
+      0
+    ) || 0) +
+    (treatment?.testResults?.reduce(
+      (acc, result) => acc + Number(result?.test?.price || 0),
+      0
+    ) || 0);
+
   return (
-    <Card className="p-4 bg-gray-50 shadow-sm border border-gray-200">
-      <div className="flex flex-col gap-3">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-          <h3 className="font-bold text-xl text-primary flex items-center gap-2">
-            Điều trị #{treatment.id}
+    <Card className="p-6 bg-white shadow-lg border-l-4 border-l-green-500 hover:shadow-xl transition-shadow duration-200">
+      <div className="space-y-5">
+        {/* Header Section with Enhanced Visual Hierarchy */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="w-6 h-6 text-green-600" />
+              <h3 className="font-bold text-2xl text-green-800">
+                Điều trị #{treatment.id}
+              </h3>
+            </div>
             {treatment.isCurrent && (
-              <Badge variant="default" className="text-xs">
+              <Badge
+                variant="default"
+                className="bg-green-100 text-green-800 border-green-300"
+              >
+                <Clock className="w-3 h-3 mr-1" />
                 Hiện tại
               </Badge>
             )}
-          </h3>
-          <div className="flex items-center gap-2">
+          </div>
+
+          <div className="flex flex-col items-end gap-3">
+            {/* Treatment Status */}
             {treatment.treatmentStatus && (
-              <>
-                <Badge
-                  variant={getTreatmentStatusVariant(treatment.treatmentStatus)}
-                  className="text-sm font-semibold"
+              <Badge
+                variant={getTreatmentStatusVariant(treatment.treatmentStatus)}
+                className="text-sm font-semibold flex items-center gap-2 px-3 py-1"
+              >
+                {getTreatmentStatusIcon(treatment.treatmentStatus)}
+                {getTreatmentStatusLabel(treatment.treatmentStatus)}
+              </Badge>
+            )}
+
+            {/* Payment Status & Total Cost */}
+            <div className="text-right space-y-2">
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                <span className="text-2xl font-bold text-green-700">
+                  {formatCurrency(totalPrice)}
+                </span>
+              </div>
+              {treatment.status !== true && (
+                <Button
+                  onClick={() => onOpenModal(treatment)}
+                  disabled={orderLoading === treatment.id}
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md"
                 >
-                  {treatment.treatmentStatus
-                    ? "Đã thanh toán"
-                    : "Chưa thanh toán"}
-                </Badge>
-                {!treatment.treatmentStatus && (
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => onOpenModal(treatment)}
-                      disabled={orderLoading === treatment.id}
-                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                    >
-                      {orderLoading === treatment.id
-                        ? "Đang xử lý..."
-                        : "Thanh toán"}
-                    </button>
-                  </div>
+                  {orderLoading === treatment.id ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Đang xử lý...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      Tạo mã QR thanh toán
+                    </div>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <Separator className="my-4" />
+
+        {/* Patient & Doctor Information with Icons */}
+        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+          <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+            <User className="w-5 h-5 text-blue-600" />
+            Thông tin liên quan
+          </h4>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {treatment.patient?.name && (
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span className="font-semibold text-blue-800">Bệnh nhân</span>
+                </div>
+                <p className="font-semibold text-blue-900">
+                  {treatment.patient.name}
+                </p>
+                <p className="text-sm text-blue-700">
+                  {treatment.patient.email}
+                </p>
+                {treatment.patient.phoneNumber && (
+                  <p className="text-sm text-blue-700">
+                    📞 {treatment.patient.phoneNumber}
+                  </p>
                 )}
-              </>
+              </div>
+            )}
+
+            {treatment.doctor?.user?.name && (
+              <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Stethoscope className="w-4 h-4 text-purple-600" />
+                  <span className="font-semibold text-purple-800">
+                    Bác sĩ phụ trách
+                  </span>
+                </div>
+                <p className="font-semibold text-purple-900">
+                  {treatment.doctor.user.name}
+                </p>
+                <p className="text-sm text-purple-700">
+                  {treatment.doctor.specialization}
+                </p>
+              </div>
             )}
           </div>
         </div>
 
-        <Separator />
-
-        {/* Basic Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
-          {treatment.patient?.name && (
-            <p>
-              <span className="font-semibold">Bệnh nhân:</span>{" "}
-              {treatment.patient.name} ({treatment.patient.email}{" "}
-              {treatment.patient.phoneNumber &&
-                `- ${treatment.patient.phoneNumber}`}
-              )
+        {/* Treatment Protocol Information */}
+        {treatment.protocol?.name && (
+          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-5 h-5 text-green-600" />
+              <span className="font-semibold text-green-800">
+                Phác đồ điều trị
+              </span>
+            </div>
+            <p className="font-semibold text-green-900">
+              {treatment.protocol.name}
             </p>
-          )}
-          {treatment.doctor?.user?.name && (
-            <p>
-              <span className="font-semibold">Bác sĩ:</span>{" "}
-              {treatment.doctor.user.name} ({treatment.doctor.specialization})
+            <p className="text-sm text-green-700">
+              Bệnh: {treatment.protocol.targetDisease}
             </p>
-          )}
-          {treatment.protocol?.name && (
-            <p>
-              <span className="font-semibold">Phác đồ:</span>{" "}
-              {treatment.protocol.name} (Bệnh:{" "}
-              {treatment.protocol.targetDisease})
-            </p>
-          )}
-          <p>
-            <span className="font-semibold">Ngày bắt đầu:</span>{" "}
-            {formatDateTime(treatment.startDate)}
-          </p>
-          {treatment.endDate && (
-            <p>
-              <span className="font-semibold">Ngày kết thúc:</span>{" "}
-              {formatDateTime(treatment.endDate)}
-            </p>
-          )}
-          {treatment.daysRemaining !== null && treatment.isCurrent && (
-            <p>
-              <span className="font-semibold">Số ngày còn lại:</span>{" "}
-              {treatment.daysRemaining} ngày
-            </p>
-          )}
-        </div>
-
-        {treatment.notes && (
-          <div className="p-3 bg-gray-100 rounded-md text-sm text-gray-600">
-            <span className="font-semibold">Ghi chú:</span> {treatment.notes}
           </div>
         )}
 
-        <Separator />
+        {/* Timeline Information */}
+        <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+          <div className="flex items-center gap-2 mb-3">
+            <CalendarDays className="w-5 h-5 text-orange-600" />
+            <span className="font-semibold text-orange-800">
+              Thời gian điều trị
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p className="text-sm font-medium text-orange-700">
+                Ngày bắt đầu
+              </p>
+              <p className="font-semibold text-orange-900">
+                {formatUtcDateManually(treatment.startDate)}
+              </p>
+            </div>
+            {treatment.endDate && (
+              <div>
+                <p className="text-sm font-medium text-orange-700">
+                  Ngày kết thúc
+                </p>
+                <p className="font-semibold text-orange-900">
+                  {formatUtcDateManually(treatment.endDate)}
+                </p>
+              </div>
+            )}
+            {treatment.daysRemaining !== null && treatment.isCurrent && (
+              <div>
+                <p className="text-sm font-medium text-orange-700">
+                  Số ngày còn lại
+                </p>
+                <p className="font-semibold text-orange-900">
+                  {treatment.daysRemaining} ngày
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
-        {/* Accordion for detailed sections */}
-        <Accordion type="multiple" className="w-full">
-          {/* Custom Medications */}
-          {treatment.customMedications &&
-            treatment.customMedications.length > 0 && (
-              <AccordionItem value="custom-medications">
-                <AccordionTrigger className="text-base font-semibold text-gray-800">
-                  Thuốc chỉ định ({treatment.customMedications.length})
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-                    {treatment.customMedications.map(
-                      (med: CustomMedicationItem, medIndex: number) => (
-                        <Card
-                          key={medIndex}
-                          className="p-3 bg-white border border-gray-200 flex flex-col gap-1 text-sm"
-                        >
-                          <p className="font-semibold text-primary">
-                            {med.medicineName}
+        {/* Notes Section */}
+        {treatment.notes && (
+          <div className="bg-yellow-50 border-l-4 border-l-yellow-400 p-4 rounded-r-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 text-yellow-600" />
+              <span className="font-semibold text-yellow-800">
+                Ghi chú điều trị
+              </span>
+            </div>
+            <p className="text-yellow-700">{treatment.notes}</p>
+          </div>
+        )}
+
+        <Separator className="my-4" />
+
+        {/* Medications Section with Enhanced Display */}
+        {treatment.customMedications &&
+          treatment.customMedications.length > 0 && (
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center gap-2 mb-4">
+                <Pill className="w-5 h-5 text-blue-600" />
+                <h4 className="font-semibold text-blue-800">
+                  Thuốc điều trị ({treatment.customMedications.length})
+                </h4>
+              </div>
+
+              <div className="space-y-3">
+                {treatment.customMedications.map((medication, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Pill className="w-4 h-4 text-blue-600" />
+                          <h5 className="font-semibold text-blue-900">
+                            {medication.medicineName}
+                          </h5>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="font-medium text-blue-700">
+                              Liều lượng:
+                            </span>
+                            <p className="text-blue-800">{medication.dosage}</p>
+                          </div>
+                          {medication.unit && (
+                            <div>
+                              <span className="font-medium text-blue-700">
+                                Đơn vị:
+                              </span>
+                              <p className="text-blue-800">{medication.unit}</p>
+                            </div>
+                          )}
+                          {medication.frequency && (
+                            <div>
+                              <span className="font-medium text-blue-700">
+                                Tần suất:
+                              </span>
+                              <p className="text-blue-800">
+                                {medication.frequency}
+                              </p>
+                            </div>
+                          )}
+                          {medication.time && (
+                            <div>
+                              <span className="font-medium text-blue-700">
+                                Thời gian:
+                              </span>
+                              <p className="text-blue-800">{medication.time}</p>
+                            </div>
+                          )}
+                          {medication.durationValue &&
+                            medication.durationUnit && (
+                              <div>
+                                <span className="font-medium text-blue-700">
+                                  Thời gian điều trị:
+                                </span>
+                                <p className="text-blue-800">
+                                  {medication.durationValue}{" "}
+                                  {medication.durationUnit}
+                                </p>
+                              </div>
+                            )}
+                        </div>
+
+                        {medication.notes && (
+                          <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                            <span className="font-medium text-blue-700">
+                              Ghi chú:
+                            </span>
+                            <p className="text-blue-800 text-sm mt-1">
+                              {medication.notes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {medication.price !== undefined && (
+                        <div className="text-right">
+                          <div className="bg-green-100 rounded-lg p-3 border border-green-300">
+                            <p className="text-sm font-medium text-green-700">
+                              Thành tiền
+                            </p>
+                            <p className="text-lg font-bold text-green-800">
+                              {formatCurrency(
+                                medication.price *
+                                  Number(medication.durationValue)
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* Test Results Section with Enhanced Display */}
+        {treatment.testResults && treatment.testResults.length > 0 && (
+          <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+            <div className="flex items-center gap-2 mb-4">
+              <TestTube className="w-5 h-5 text-purple-600" />
+              <h4 className="font-semibold text-purple-800">
+                Kết quả xét nghiệm ({treatment.testResults.length})
+              </h4>
+            </div>
+
+            <div className="space-y-3">
+              {treatment.testResults.map((testResult, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg p-4 border border-purple-200 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TestTube className="w-4 h-4 text-purple-600" />
+                        <h5 className="font-semibold text-purple-900">
+                          {testResult.test?.name || "Xét nghiệm không rõ tên"}
+                        </h5>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="font-medium text-purple-700">
+                            Kết quả:
+                          </span>
+                          <p className="text-purple-800">
+                            {testResult.rawResultValue} {testResult.unit}
                           </p>
-                          <p>
-                            Liều dùng:{" "}
-                            <span className="font-medium">{med.dosage}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-purple-700">
+                            Diễn giải:
+                          </span>
+                          <p className="text-purple-800">
+                            {testResult.interpretation}
                           </p>
-                          {med.unit && (
-                            <p>
-                              Đơn vị:{" "}
-                              <span className="font-medium">{med.unit}</span>
-                            </p>
-                          )}
-                          {med.frequency && (
-                            <p>
-                              Tần suất:{" "}
-                              <span className="font-medium">
-                                {med.frequency}
-                              </span>
-                            </p>
-                          )}
-                          {med.time && (
-                            <p>
-                              Thời gian:{" "}
-                              <span className="font-medium">{med.time}</span>
-                            </p>
-                          )}
-                          {med.durationValue && med.durationUnit && (
-                            <p>
-                              Thời gian điều trị:{" "}
-                              <span className="font-medium">
-                                {med.durationValue} {med.durationUnit}
-                              </span>
-                            </p>
-                          )}
-                          {med.notes && (
-                            <p>
-                              Ghi chú:{" "}
-                              <span className="text-gray-600">{med.notes}</span>
-                            </p>
-                          )}
-                          {med.price !== undefined && (
-                            <p>
-                              Giá:{" "}
-                              <span className="font-medium">
-                                {formatCurrency(med.price)}
-                              </span>
-                            </p>
-                          )}
-                        </Card>
-                      )
+                        </div>
+                        <div>
+                          <span className="font-medium text-purple-700">
+                            Ngày thực hiện:
+                          </span>
+                          <p className="text-purple-800">
+                            {formatUtcDateManually(testResult.resultDate)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-purple-700">
+                            Trạng thái:
+                          </span>
+                          <Badge
+                            variant={
+                              testResult.status === "FINAL"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className={`text-xs ${
+                              testResult.status === "FINAL"
+                                ? "bg-green-100 text-green-800 border-green-300"
+                                : "bg-yellow-100 text-yellow-800 border-yellow-300"
+                            }`}
+                          >
+                            {testResult.status === "FINAL" ? (
+                              <div className="flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                Hoàn thành
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" />
+                                {testResult.status}
+                              </div>
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {testResult.notes && (
+                        <div className="mt-3 p-2 bg-purple-50 rounded border border-purple-200">
+                          <span className="font-medium text-purple-700">
+                            Ghi chú:
+                          </span>
+                          <p className="text-purple-800 text-sm mt-1">
+                            {testResult.notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {testResult.test?.price && (
+                      <div className="text-right">
+                        <div className="bg-green-100 rounded-lg p-3 border border-green-300">
+                          <p className="text-sm font-medium text-green-700">
+                            Chi phí
+                          </p>
+                          <p className="text-lg font-bold text-green-800">
+                            {formatCurrency(testResult.test.price)}
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            )}
-
-          {/* Test Results */}
-          {treatment.testResults && treatment.testResults.length > 0 && (
-            <AccordionItem value="test-results">
-              <AccordionTrigger className="text-base font-semibold text-gray-800">
-                Kết quả xét nghiệm ({treatment.testResults.length})
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-                  {treatment.testResults.map(
-                    (result: TestResult, resultIndex: number) => (
-                      <Card
-                        key={resultIndex}
-                        className="p-3 bg-white border border-gray-200 flex flex-col gap-1 text-sm"
-                      >
-                        <p className="font-semibold text-primary">
-                          {result.test?.name || "Xét nghiệm không rõ tên"}
-                        </p>
-                        <p>
-                          Kết quả:{" "}
-                          <span className="font-medium">
-                            {result.rawResultValue} {result.unit}
-                          </span>
-                        </p>
-                        <p>
-                          Diễn giải:{" "}
-                          <span className="font-medium">
-                            {result.interpretation}
-                          </span>
-                        </p>
-                        <p>
-                          Ngày:{" "}
-                          <span className="font-medium">
-                            {formatDateTime(result.resultDate)}
-                          </span>
-                        </p>
-                        {result.notes && (
-                          <p>
-                            Ghi chú:{" "}
-                            <span className="text-gray-600">
-                              {result.notes}
-                            </span>
-                          </p>
-                        )}
-                        {result.test?.price && (
-                          <p>
-                            Giá:{" "}
-                            <span className="font-medium">
-                              {formatCurrency(result.test.price)}
-                            </span>
-                          </p>
-                        )}
-                        <Badge
-                          variant={
-                            result.status === "FINAL" ? "success" : "secondary"
-                          }
-                          className="mt-1 self-start"
-                        >
-                          Trạng thái: {result.status}
-                        </Badge>
-                      </Card>
-                    )
-                  )}
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          )}
-        </Accordion>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Total Cost Summary */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border-2 border-green-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <DollarSign className="w-6 h-6 text-green-600" />
+              <h4 className="font-bold text-xl text-green-800">
+                Tổng chi phí điều trị
+              </h4>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-green-700">
+                {formatCurrency(totalPrice)}
+              </p>
+              <p className="text-sm text-green-600 font-medium">
+                Đã bao gồm tất cả dịch vụ
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </Card>
   );

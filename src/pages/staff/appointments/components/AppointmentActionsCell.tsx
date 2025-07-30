@@ -148,20 +148,18 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
             Biên bản cuộc họp
           </DropdownMenuItem>
         )}
-        {appointment.status !== "COMPLETED" &&
-          appointment.status !== "CANCELLED" &&
-          appointment.type !== "ONLINE" && (
-            <DropdownMenuItem
-              onClick={() =>
-                navigate(
-                  `/staff/payments/${appointment.userId}/${appointment.appointmentTime}`
-                )
-              }
-              className="cursor-pointer"
-            >
-              Thanh toán
-            </DropdownMenuItem>
-          )}
+        {appointment.type !== "ONLINE" && (
+          <DropdownMenuItem
+            onClick={() =>
+              navigate(
+                `/staff/payments/${appointment.userId}/${appointment.appointmentTime}`
+              )
+            }
+            className="cursor-pointer"
+          >
+            Thanh toán
+          </DropdownMenuItem>
+        )}
         {appointment.status !== "CANCELLED" &&
           appointment.status !== "COMPLETED" && (
             <ConfirmDelete
