@@ -25,18 +25,12 @@ interface Props {
 
 const getToday = () => new Date().toISOString().split("T")[0];
 
-const getTomorrow = () => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().split("T")[0];
-};
-
 export const AppointmentFilters = ({ onChange }: Props) => {
   const [filters, setFilters] = useState({
     status: "ALL",
     type: "ALL",
     dateFrom: getToday(),
-    dateTo: getTomorrow(),
+    dateTo: getToday(),
     search: "",
   });
 
@@ -90,7 +84,7 @@ export const AppointmentFilters = ({ onChange }: Props) => {
       status: "ALL",
       type: "ALL",
       dateFrom: getToday(),
-      dateTo: getTomorrow(),
+      dateTo: getToday(),
       search: "",
     });
   };

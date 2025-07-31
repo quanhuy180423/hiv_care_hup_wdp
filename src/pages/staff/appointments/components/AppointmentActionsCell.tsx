@@ -79,7 +79,7 @@ const AppointmentActionsCell = ({ appointment }: Props) => {
     setShowTestResultForm(true);
   };
 
-  const ALLOW_CONSULT_STATUSES = ["PAID", "CONFIRMED", "IN_PROGRESS"];
+  // const ALLOW_CONSULT_STATUSES = ["PAID", "CONFIRMED", "IN_PROGRESS"];
 
   return (
     <DropdownMenu>

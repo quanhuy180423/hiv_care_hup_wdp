@@ -18,7 +18,7 @@ export default function ManageAppointmentsPage() {
     page: 1,
     limit: 10,
     sortBy: "appointmentTime",
-    orderBy: "desc",
+    orderBy: "asc",
   });
   const { data, isLoading } = useAppointmentsByStaff(params);
   const { isOpen: isModalOpen, closeModal } = useAppointmentModalStore();
@@ -82,7 +82,7 @@ export default function ManageAppointmentsPage() {
           <CardContent className="px-2">
             <DataTable
               columns={getColumns(params.page || 1, params.limit || 10)}
-              data={data?.data || []}
+              data={(data?.data || []).slice().reverse()}
               isLoading={isLoading}
               enablePagination={true}
               currentPage={params.page || 1}
