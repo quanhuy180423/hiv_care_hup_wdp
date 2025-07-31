@@ -1,11 +1,17 @@
 import Breadcrumb from "@/components/doctor/Breadcrumb";
 import ProtocolFormCard from "@/components/doctor/ProtocolFormCard";
-import TestResultCreate from "@/pages/doctor/testResult/components/TestResultCreate";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   usePatientTreatment,
   useUpdatePatientTreatment,
 } from "@/hooks/usePatientTreatments";
+import { useTestResultsByPatientTreatmentId } from "@/hooks/useTestResult";
 import {
   calculateEndDate,
   hasDurationFields,
@@ -28,16 +34,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { useTestResultsByPatientTreatmentId } from "@/hooks/useTestResult";
-import TestResultDetail from "../../testResult/components/TestResultDetail";
 import { z } from "zod";
+import TestResultDetail from "../../testResult/components/TestResultDetail";
 
 export default function ConsultationPage() {
   const [protocolMedDeletedIdxs, setProtocolMedDeletedIdxs] = useState<
@@ -524,40 +522,86 @@ export default function ConsultationPage() {
       </h1>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
         {/* Patient Info Card */}
-        <div className="bg-white rounded-2xl shadow p-7 min-h-[350px] flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                <UserCircle2 className="w-14 h-14 text-gray-300" />
+        <div className="bg-white rounded-2xl shadow p-8 min-h-[350px] flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-shrink-0 flex flex-col items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                <UserCircle2 className="w-16 h-16 text-gray-300" />
               </div>
-              <div>
-                <div className="font-semibold text-lg">
-                  {patient?.name || ""}
+              <div className="font-bold text-lg text-primary text-center">
+                {patient?.name || ""}
+              </div>
+            </div>
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+              <div className="text-sm">
+                <div className="font-semibold mb-1">Thông tin cá nhân</div>
+                <div>
+                  <span className="font-medium">SĐT:</span>{" "}
+                  <span className="text-gray-700">
+                    {patient?.phoneNumber || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Email:</span>{" "}
+                  <span className="text-gray-700">{patient?.email || "-"}</span>
+                </div>
+              </div>
+              <div className="text-sm">
+                <div className="font-semibold mb-1">Thông tin y tế</div>
+                <div>
+                  <span className="font-medium">Phác đồ hiện tại:</span>
+                  <span className="text-gray-700">
+                    {patientData?.protocol?.name || "-"}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="text-sm mb-3 space-y-1">
-              <div className="font-semibold mb-1">Thông tin cá nhân</div>
-              <div>
-                <span className="font-medium">SĐT:</span>{" "}
-                <span className="text-gray-700">
-                  {patient?.phoneNumber || "-"}
-                </span>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mt-2 mb-3">
+              Kết quả xét nghiệm
+            </h3>
+            {testResultsData && testResultsData.length > 0 ? (
+              <Accordion type="multiple" className="w-full">
+                {testResultsData.map((result) => (
+                  <AccordionItem key={result.id} value={`test-${result.id}`}>
+                    <AccordionTrigger className="text-left">
+                      <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+                        <span className="font-medium text-primary">
+                          {result.test?.name || "Xét nghiệm không rõ tên"}
+                        </span>
+                        <span className="text-xs text-gray-500 md:ml-auto">
+                          {new Date(result.createdAt).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </span>
+                        <span
+                          className={[
+                            "inline-block text-xs px-2 py-1 rounded-full font-semibold ml-2",
+                            result.status === "Completed"
+                              ? "bg-green-100 text-green-700 border border-green-200"
+                              : result.status === "Pending"
+                              ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                              : "bg-gray-200 text-gray-600 border border-gray-300",
+                          ].join(" ")}
+                        >
+                          {result.status || "-"}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="pt-4">
+                        <TestResultDetail TestResult={result} />
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                Chưa có kết quả xét nghiệm nào
               </div>
-              <div>
-                <span className="font-medium">Email:</span>{" "}
-                <span className="text-gray-700">{patient?.email || "-"}</span>
-              </div>
-            </div>
-            <div className="text-sm mt-5 space-y-1">
-              <div className="font-semibold mb-1">Thông tin y tế</div>
-              <div>
-                <span className="font-medium">Phác đồ hiện tại:</span>
-                <span className="text-gray-700">
-                  {patientData?.protocol?.name || "-"}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
         {/* Protocol Form Card */}
@@ -599,50 +643,6 @@ export default function ConsultationPage() {
           handleSubmitForm={handleSubmitForm}
           toast={toast}
         />
-      </div>
-      <div className="mt-10 flex flex-col gap-6">
-        <div className="bg-white rounded-lg shadow-lg w-full p-6 relative">
-          <h2 className="text-xl font-semibold mb-4">Tạo yêu cầu xét nghiệm</h2>
-          <TestResultCreate patientId={patient?.id} patient={patient} />
-        </div>
-        <Card className="bg-white">
-          <CardHeader>
-            <h3 className="text-xl font-semibold">Kết quả xét nghiệm</h3>
-          </CardHeader>
-          <CardContent>
-            {testResultsData && testResultsData.length > 0 ? (
-              <Accordion type="multiple" className="w-full">
-                {testResultsData.map((result) => (
-                  <AccordionItem key={result.id} value={`test-${result.id}`}>
-                    <AccordionTrigger className="text-left">
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">
-                          {result.test?.name || "Xét nghiệm không rõ tên"}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          Ngày:{" "}
-                          {new Date(result.createdAt).toLocaleDateString(
-                            "vi-VN"
-                          )}{" "}
-                          - Trạng thái: {result.status}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="pt-4">
-                        <TestResultDetail TestResult={result} />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                Chưa có kết quả xét nghiệm nào
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

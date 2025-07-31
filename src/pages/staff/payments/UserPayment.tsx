@@ -319,10 +319,10 @@ const UserPayment: React.FC = () => {
             {appointments.length === 0 ? (
               <div className="text-gray-600">Không có lịch hẹn nào.</div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 min">
                 {appointments.map((a) => (
                   <AppointmentCard
-                    index={a.id}
+                    key={a.id}
                     appointment={a}
                     orderLoading={orderLoading}
                     onOpenModal={handleOpenModal}
@@ -375,6 +375,8 @@ const UserPayment: React.FC = () => {
         qrCodeUrl={order?.paymentUrl || ""}
         orderCode={order?.orderCode || ""}
         amount={order?.totalAmount || 0}
+        bankInfo={order?.bankInfo}
+        title="Thanh toán phí khám bệnh HIV"
       />
     </>
   );

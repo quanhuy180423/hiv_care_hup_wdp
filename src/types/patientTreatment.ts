@@ -31,6 +31,7 @@ export interface MedicineInfo {
   isAnonymous?: boolean; // Added isAnonymous
   dose: string;
   price: string;
+  unit?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,6 +45,7 @@ export interface ProtocolMedicineInfo {
   durationUnit: string;
   schedule: string;
   notes: string;
+  frequency?: string;
   createdAt: string;
   updatedAt: string;
   medicine: MedicineInfo;
@@ -58,6 +60,8 @@ export interface ProtocolInfo {
   updatedById: number;
   createdAt: string;
   updatedAt: string;
+  durationValue?: number;
+  durationUnit?: string;
   medicines: ProtocolMedicineInfo[];
 }
 

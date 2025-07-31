@@ -5,7 +5,7 @@ import type { PatientTreatmentWithAppointment } from "@/pages/doctor/patientTrea
 
 import { appointmentService } from "@/services/appointmentService";
 import type { AppointmentStatus } from "@/types/appointment";
-import { CheckCircle, Eye, Stethoscope } from "lucide-react";
+import { CheckCircle, Eye, Stethoscope, TestTube2 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -306,6 +306,32 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                           <TooltipContent>Kết thúc điều trị</TooltipContent>
                         </Tooltip>
                       )}
+                    {/* Tạo xét nghiệm */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button
+                            className={cn(
+                              "inline-flex items-center justify-center min-w-[40px] h-9 rounded text-primary transition text-xs font-medium focus:ring-2 focus:ring-primary/40 shadow",
+                              "hover:bg-primary/10"
+                            )}
+                            onClick={() =>
+                              t.id &&
+                              navigate(
+                                `/doctor/patient-treatments/${t.id}/generate-test`
+                              )
+                            }
+                            aria-label="Tạo xét nghiệm"
+                            disabled={!t.id}
+                            tabIndex={t.id ? 0 : -1}
+                          >
+                            <TestTube2 className="w-5 h-5" />
+                            <span className="sr-only">Tạo xét nghiệm</span>
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>Tạo yêu cầu xét nghiệm</TooltipContent>
+                    </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
