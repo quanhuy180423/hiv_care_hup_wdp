@@ -209,10 +209,10 @@ export const usePatientTreatmentsByDoctor = (
         return {
           data: res.data,
           meta: {
-            page: 1,
-            limit: res.data.length,
-            total: res.data.length,
-            totalPages: 1,
+            page: res.data.meta.page,
+            limit: res.data.meta.limit,
+            total: res.data.meta.total,
+            totalPages: res.data.meta.totalPages,
           },
         };
       }

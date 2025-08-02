@@ -522,7 +522,7 @@ export default function ConsultationPage() {
       </h1>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
         {/* Patient Info Card */}
-        <div className="bg-white rounded-2xl shadow p-8 min-h-[350px] flex flex-col gap-6">
+        <div className="bg-white rounded-2xl shadow p-8 max-h-[450px] flex flex-col gap-6">
           <div className="flex flex-col items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-100 to-blue-200 flex items-center justify-center shadow">
               <UserCircle2 className="w-16 h-16 text-blue-400" />
@@ -568,54 +568,6 @@ export default function ConsultationPage() {
               </div>
             </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mt-2 mb-3">
-              Kết quả xét nghiệm
-            </h3>
-            {testResultsData && testResultsData.length > 0 ? (
-              <Accordion type="multiple" className="w-full">
-                {testResultsData.map((result) => (
-                  <AccordionItem key={result.id} value={`test-${result.id}`}>
-                    <AccordionTrigger className="text-left">
-                      <div className="flex flex-col md:flex-row md:items-center md:gap-4">
-                        <span className="font-medium text-primary text-base">
-                          {result.test?.name || "Xét nghiệm không rõ tên"}
-                        </span>
-                        <span className="text-xs text-gray-500 md:ml-auto">
-                          {new Date(result.createdAt).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </span>
-                        <span
-                          className={[
-                            "inline-block text-xs px-2 py-1 rounded-full font-semibold ml-2",
-                            result.status === "Completed"
-                              ? "bg-green-100 text-green-700 border border-green-200"
-                              : result.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                              : "bg-gray-200 text-gray-600 border border-gray-300",
-                          ].join(" ")}
-                        >
-                          {result.status || "-"}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="pt-4">
-                        <TestResultDetail TestResult={result} />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            ) : (
-              <div className="text-center text-gray-500 py-8 text-base bg-blue-50 rounded">
-                <span className="px-2 py-1 text-blue-700 font-medium">
-                  Chưa có kết quả xét nghiệm nào
-                </span>
-              </div>
-            )}
-          </div>
         </div>
         {/* Protocol Form Card */}
         <ProtocolFormCard
@@ -656,6 +608,50 @@ export default function ConsultationPage() {
           handleSubmitForm={handleSubmitForm}
           toast={toast}
         />
+      </div>{" "}
+      <div>
+        <h3 className="text-lg font-semibold mt-2 mb-3">Kết quả xét nghiệm</h3>
+        {testResultsData && testResultsData.length > 0 ? (
+          <Accordion type="multiple" className="w-full">
+            {testResultsData.map((result) => (
+              <AccordionItem key={result.id} value={`test-${result.id}`}>
+                <AccordionTrigger className="text-left">
+                  <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+                    <span className="font-medium text-primary text-base">
+                      {result.test?.name || "Xét nghiệm không rõ tên"}
+                    </span>
+                    <span className="text-xs text-gray-500 md:ml-auto">
+                      {new Date(result.createdAt).toLocaleDateString("vi-VN")}
+                    </span>
+                    <span
+                      className={[
+                        "inline-block text-xs px-2 py-1 rounded-full font-semibold ml-2",
+                        result.status === "Completed"
+                          ? "bg-green-100 text-green-700 border border-green-200"
+                          : result.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                          : "bg-gray-200 text-gray-600 border border-gray-300",
+                      ].join(" ")}
+                    >
+                      {result.status || "-"}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="pt-4">
+                    <TestResultDetail TestResult={result} />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        ) : (
+          <div className="text-center text-gray-500 py-8 text-base bg-blue-50 rounded">
+            <span className="px-2 py-1 text-blue-700 font-medium">
+              Chưa có kết quả xét nghiệm nào
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
