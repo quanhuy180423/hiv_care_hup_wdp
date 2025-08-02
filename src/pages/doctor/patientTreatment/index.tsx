@@ -79,8 +79,10 @@ const DoctorPatientTreatments = () => {
   );
 
   const appointmentsList: Appointment[] = useMemo(() => {
-    if (Array.isArray(appointmentsData)) return appointmentsData;
-    return appointmentsData?.data ?? [];
+    if (Array.isArray(appointmentsData)) {
+      return appointmentsData.length > 0 ? appointmentsData : [];
+    }
+    return Array.isArray(appointmentsData?.data) ? appointmentsData.data : [];
   }, [appointmentsData]);
 
   const treatmentsData = useMemo(() => {

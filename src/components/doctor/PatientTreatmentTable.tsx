@@ -251,7 +251,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                                 type="button"
                               >
                                 <Stethoscope className="w-5 h-5" />
-                                <span className="ml-1">Khám ngay</span>
+                                <span className="ml-1 sr-only">Khám ngay</span>
                               </Button>
                             </span>
                           </TooltipTrigger>
@@ -299,7 +299,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                                 type="button"
                               >
                                 <CheckCircle className="w-4 h-4" />
-                                <span className="ml-1">Kết thúc</span>
+                                <span className="ml-1 sr-only">Kết thúc</span>
                               </Button>
                             </span>
                           </TooltipTrigger>
