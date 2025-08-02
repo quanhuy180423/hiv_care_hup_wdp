@@ -523,34 +523,45 @@ export default function ConsultationPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
         {/* Patient Info Card */}
         <div className="bg-white rounded-2xl shadow p-8 min-h-[350px] flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className="flex-shrink-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                <UserCircle2 className="w-16 h-16 text-gray-300" />
-              </div>
-              <div className="font-bold text-lg text-primary text-center">
-                {patient?.name || ""}
-              </div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-100 to-blue-200 flex items-center justify-center shadow">
+              <UserCircle2 className="w-16 h-16 text-blue-400" />
             </div>
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-              <div className="text-sm">
-                <div className="font-semibold mb-1">Thông tin cá nhân</div>
+            <div className="font-bold text-xl text-primary text-center mb-1">
+              {patient?.name || ""}
+            </div>
+            {patient?.email && (
+              <div className="text-xs text-gray-500 text-center break-all max-w-[180px]">
+                {patient.email}
+              </div>
+            )}
+            <div className="w-full mt-2">
+              <div className="font-semibold text-sm text-gray-700 mb-1">
+                Thông tin cá nhân
+              </div>
+              <div className="flex flex-col gap-1 text-sm">
                 <div>
-                  <span className="font-medium">SĐT:</span>{" "}
-                  <span className="text-gray-700">
+                  <span className="font-medium text-gray-600">SĐT:</span>{" "}
+                  <span className="text-gray-800">
                     {patient?.phoneNumber || "-"}
                   </span>
                 </div>
                 <div>
-                  <span className="font-medium">Email:</span>{" "}
-                  <span className="text-gray-700">{patient?.email || "-"}</span>
+                  <span className="font-medium text-gray-600">Email:</span>{" "}
+                  <span className="text-gray-800">{patient?.email || "-"}</span>
                 </div>
               </div>
-              <div className="text-sm">
-                <div className="font-semibold mb-1">Thông tin y tế</div>
+            </div>
+            <div className="w-full mt-2">
+              <div className="font-semibold text-sm text-gray-700 mb-1">
+                Thông tin y tế
+              </div>
+              <div className="flex flex-col gap-1 text-sm">
                 <div>
-                  <span className="font-medium">Phác đồ hiện tại:</span>
-                  <span className="text-gray-700">
+                  <span className="font-medium text-gray-600">
+                    Phác đồ hiện tại:
+                  </span>{" "}
+                  <span className="text-gray-800">
                     {patientData?.protocol?.name || "-"}
                   </span>
                 </div>
@@ -567,7 +578,7 @@ export default function ConsultationPage() {
                   <AccordionItem key={result.id} value={`test-${result.id}`}>
                     <AccordionTrigger className="text-left">
                       <div className="flex flex-col md:flex-row md:items-center md:gap-4">
-                        <span className="font-medium text-primary">
+                        <span className="font-medium text-primary text-base">
                           {result.test?.name || "Xét nghiệm không rõ tên"}
                         </span>
                         <span className="text-xs text-gray-500 md:ml-auto">
@@ -598,8 +609,10 @@ export default function ConsultationPage() {
                 ))}
               </Accordion>
             ) : (
-              <div className="text-center text-gray-500 py-8">
-                Chưa có kết quả xét nghiệm nào
+              <div className="text-center text-gray-500 py-8 text-base bg-blue-50 rounded">
+                <span className="px-2 py-1 text-blue-700 font-medium">
+                  Chưa có kết quả xét nghiệm nào
+                </span>
               </div>
             )}
           </div>
