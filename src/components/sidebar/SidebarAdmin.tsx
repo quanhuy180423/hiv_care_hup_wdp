@@ -36,7 +36,7 @@ const sidebarNav = [
   {
     name: "Dashboard",
     icon: LayoutDashboard,
-    path: "/admin",
+    path: "/admin/dashboard",
     color: "text-blue-600",
     bgColor: "bg-blue-50/80",
     hoverColor: "hover:bg-blue-50/60",
