@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteCategoryBlog } from "@/hooks/useCategoryBlogs";
+import { useChangeCategoryBlogStatus, useDeleteCategoryBlog } from "@/hooks/useCategoryBlogs";
 import {
   useCategoryBlogDrawerStore,
   useCategoryBlogModalStore,
@@ -27,6 +27,7 @@ const CateBlogActionsCell = ({ categoryBlog }: Props) => {
   const { openModal } = useCategoryBlogModalStore();
   const { mutate: deleteCategoryBlog } = useDeleteCategoryBlog();
   const [open, setOpen] = useState(false);
+  const { mutate: changeStatus } = useChangeCategoryBlogStatus();
 
   const handleDelete = () => {
     deleteCategoryBlog(categoryBlog.id, {
@@ -35,6 +36,19 @@ const CateBlogActionsCell = ({ categoryBlog }: Props) => {
         setOpen(false);
       },
     });
+  };
+
+  const handleChangeStatus = () => {
+    const nextStatus = categoryBlog.isPublished === true ? false : true;
+    changeStatus(
+      { id: categoryBlog.id, isPublished: nextStatus },
+      {
+        onSuccess: () => {
+          toast.success("Đổi trạng thái bài viết thành công");
+          setOpen(false);
+        },
+      }
+    );
   };
 
   return (
@@ -56,6 +70,12 @@ const CateBlogActionsCell = ({ categoryBlog }: Props) => {
           className="cursor-pointer"
         >
           Chỉnh sửa
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => handleChangeStatus()}
+          className="cursor-pointer"
+        >
+          Đổi trạng thái
         </DropdownMenuItem>
         <ConfirmDelete
           onConfirm={handleDelete}

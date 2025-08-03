@@ -23,6 +23,13 @@ import {
   MapPin,
   Info,
   ClipboardList,
+  Heart,
+  Activity,
+  AlertCircle,
+  Video,
+  Building2,
+  Calendar as CalendarLucide,
+  Shield,
 } from "lucide-react";
 import {
   Popover,
@@ -38,6 +45,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Appointment } from "@/types/appointment";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
@@ -91,20 +99,20 @@ const AppointmentHistory = () => {
     switch (status) {
       case "COMPLETED":
         return (
-          <Badge variant="outline" className="gap-1">
+          <Badge className="gap-1 bg-emerald-100 text-emerald-700 border-emerald-200">
             <CheckCircle className="h-3 w-3" /> Hoàn thành
           </Badge>
         );
       case "CANCELLED":
         return (
-          <Badge variant="outline" className="gap-1">
+          <Badge className="gap-1 bg-red-100 text-red-700 border-red-200">
             <XCircle className="h-3 w-3" /> Đã hủy
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="gap-1">
-            Đang chờ
+          <Badge className="gap-1 bg-blue-100 text-blue-700 border-blue-200">
+            <Clock className="h-3 w-3" /> Đang chờ
           </Badge>
         );
     }
@@ -116,7 +124,6 @@ const AppointmentHistory = () => {
   };
 
   const canCancelAppointment = (appointment: Appointment) => {
-    // Không thể hủy nếu đã hủy hoặc đã hoàn thành
     if (
       appointment.status === "CANCELLED" ||
       appointment.status === "COMPLETED"
@@ -124,13 +131,12 @@ const AppointmentHistory = () => {
       return false;
     }
 
-    // Kiểm tra thời gian: không thể hủy nếu còn 1 ngày hoặc ít hơn
     const appointmentDate = new Date(appointment.appointmentTime);
     const now = new Date();
     const timeDiff = appointmentDate.getTime() - now.getTime();
     const daysDiff = timeDiff / (1000 * 3600 * 24);
 
-    return daysDiff > 1; // Chỉ có thể hủy nếu còn hơn 1 ngày
+    return daysDiff > 1;
   };
 
   const handleCancelAppointment = () => {
@@ -150,424 +156,517 @@ const AppointmentHistory = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-gray-900">Lịch Hẹn Của Tôi</h1>
-          <p className="text-sm text-gray-500">
-            Quản lý và theo dõi các cuộc hẹn khám bệnh
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-indigo-100">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <CalendarLucide className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Lịch Hẹn Của Tôi
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Quản lý và theo dõi các cuộc hẹn khám bệnh
+                  </p>
+                </div>
+              </div>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToToday}
-            className="border-gray-300"
-          >
-            Hôm nay
-          </Button>
-          <Popover>
-            <PopoverTrigger asChild>
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                className="w-[200px] justify-start text-left font-normal border-gray-300"
+                size="sm"
+                onClick={goToToday}
+                className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
               >
-                <CalendarIcon className="mr-2 h-4 w-4 text-gray-600" />
-                {format(selectedDate, "dd/MM/yyyy")}
+                Hôm nay
               </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto p-0 bg-white shadow-lg rounded-md"
-              align="start"
-            >
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[200px] justify-start text-left font-normal border-indigo-200 hover:bg-indigo-50"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-indigo-600" />
+                    {format(selectedDate, "dd/MM/yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto p-0 bg-white shadow-xl rounded-xl"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Week Navigation */}
-      <div className="flex items-center justify-between bg-white p-3">
-        <Button
-          variant="outline"
-          onClick={goToPreviousWeek}
-          className="text-gray-700 hover:bg-gray-100 cursor-pointer"
-        >
-          <ChevronLeft className="mr-1 h-4 w-4" /> Tuần trước
-        </Button>
-        <h2 className="text-lg font-semibold text-gray-800 text-center">
-          {format(weekDates[0], "dd/MM/yyyy")} -{" "}
-          {format(weekDates[6], "dd/MM/yyyy")}
-        </h2>
-        <Button
-          variant="outline"
-          onClick={goToNextWeek}
-          className="text-gray-700 hover:bg-gray-100 cursor-pointer"
-        >
-          Tuần sau <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
-      </div>
+        {/* Week Navigation */}
+        <div className="bg-white rounded-xl shadow-md p-4 border border-indigo-100">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              onClick={goToPreviousWeek}
+              className="text-indigo-600 hover:bg-indigo-50"
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" /> Tuần trước
+            </Button>
+            <h2 className="text-lg font-semibold text-gray-800 text-center">
+              {format(weekDates[0], "dd/MM")} -{" "}
+              {format(weekDates[6], "dd/MM/yyyy")}
+            </h2>
+            <Button
+              variant="ghost"
+              onClick={goToNextWeek}
+              className="text-indigo-600 hover:bg-indigo-50"
+            >
+              Tuần sau <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
-      {/* Appointments */}
-      <Card className="border-none shadow-sm">
-        <CardHeader className="px-0 sm:px-6">
-          <CardTitle className="text-lg text-gray-800">
-            Chi tiết lịch hẹn tuần này
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-0 sm:px-6">
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 animate-pulse">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <div className="h-6 w-32 rounded bg-gray-200" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-24 rounded-lg bg-gray-200" />
-                    <Skeleton className="h-24 rounded-lg bg-gray-200" />
+        {/* Appointments Grid */}
+        <Card className="border-0 shadow-xl bg-white/90 backdrop-blur">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" />
+              Lịch hẹn trong tuần
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="h-10 w-full rounded-lg" />
+                    <Skeleton className="h-32 w-full rounded-lg" />
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
+                {weekDates.map((date) => {
+                  const dateStr = format(date, "yyyy-MM-dd");
+                  const dailyAppointments = appointmentsByDate?.[dateStr] || [];
+                  const isToday =
+                    format(date, "yyyy-MM-dd") ===
+                    format(new Date(), "yyyy-MM-dd");
+
+                  return (
+                    <div key={dateStr} className="space-y-3">
+                      <div
+                        className={`p-3 rounded-xl text-center transition-all ${
+                          isToday
+                            ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md"
+                            : "bg-gray-50 text-gray-700"
+                        }`}
+                      >
+                        <p className="text-xs font-medium">
+                          {format(date, "EEEE", { locale: vi })}
+                        </p>
+                        <p className="text-lg font-bold">
+                          {format(date, "dd/MM")}
+                        </p>
+                      </div>
+
+                      {dailyAppointments.length > 0 ? (
+                        <div className="space-y-2">
+                          {dailyAppointments.map((appt) => (
+                            <div
+                              key={appt.id}
+                              onClick={() => handleAppointmentClick(appt)}
+                              className="group relative overflow-hidden border border-gray-200 p-3 rounded-xl hover:shadow-lg transition-all cursor-pointer bg-white hover:scale-[1.02]"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                              <div className="relative space-y-2">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex items-center gap-2">
+                                    {appt.type === "ONLINE" ? (
+                                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <Video className="h-4 w-4 text-blue-600" />
+                                      </div>
+                                    ) : (
+                                      <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                        <Building2 className="h-4 w-4 text-emerald-600" />
+                                      </div>
+                                    )}
+                                    <span className="text-xs font-medium">
+                                      {appt.type === "ONLINE"
+                                        ? "Online"
+                                        : "Tại phòng khám"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Clock className="h-3 w-3 text-gray-400" />
+                                    <span className="font-semibold text-gray-700">
+                                      {format(
+                                        toZonedTime(
+                                          appt.appointmentTime,
+                                          "UTC"
+                                        ),
+                                        "HH:mm"
+                                      )}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                                    <Stethoscope className="h-3 w-3 text-gray-400" />
+                                    <span className="truncate">
+                                      BS. {appt.doctor.user.name}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                                    <Heart className="h-3 w-3 text-gray-400" />
+                                    <span className="truncate">
+                                      {appt.service.name}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="pt-1">
+                                  {getStatusBadge(appt.status)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center h-32 bg-gray-50/50">
+                          <CalendarIcon className="h-6 w-6 text-gray-300 mb-1" />
+                          <p className="text-gray-400 text-xs text-center">
+                            Không có lịch hẹn
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Appointment Detail Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[700px] bg-white p-0 overflow-hidden">
+            {selectedAppointment && (
+              <>
+                {/* Header */}
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+                  <DialogHeader>
+                    <DialogTitle className="text-white flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur">
+                        <ClipboardList className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-xl">Chi tiết lịch hẹn</span>
+                        <p className="text-sm text-white/80 font-normal">
+                          Mã lịch hẹn: #{selectedAppointment.id}
+                        </p>
+                      </div>
+                    </DialogTitle>
+                  </DialogHeader>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-2">
-              {weekDates.map((date) => {
-                const dateStr = format(date, "yyyy-MM-dd");
-                const dailyAppointments = appointmentsByDate?.[dateStr] || [];
-                const isToday =
-                  format(date, "yyyy-MM-dd") ===
-                  format(new Date(), "yyyy-MM-dd");
 
-                return (
-                  <div key={dateStr} className="space-y-3">
-                    <div
-                      className={`flex items-center justify-between p-2 rounded-lg ${
-                        isToday ? "bg-blue-50" : ""
-                      }`}
-                    >
-                      <h3 className="text-sm font-medium text-gray-800">
-                        {format(date, "EEE, dd/MM/yyyy", { locale: vi })}
+                <div className="p-6 max-h-[70vh] overflow-y-auto">
+                  {/* Status Alert */}
+                  {selectedAppointment.status === "CANCELLED" && (
+                    <Alert className="mb-4 border-red-200 bg-red-50">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-red-700">
+                        Lịch hẹn này đã bị hủy
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Main Info Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Doctor Info */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <Stethoscope className="h-5 w-5 text-indigo-600" />
+                        Thông tin bác sĩ
                       </h3>
-                    </div>
-
-                    {dailyAppointments.length > 0 ? (
-                      <div className="space-y-3">
-                        {dailyAppointments.map((appt) => (
-                          <div
-                            key={appt.id}
-                            onClick={() => handleAppointmentClick(appt)}
-                            className="border border-gray-200 p-2 rounded-lg hover:shadow-sm transition-shadow cursor-pointer bg-white min-h-[120px] flex flex-col justify-between"
-                          >
-                            <div className="flex justify-between items-start mb-2 space-x-1">
-                              <div className="flex items-center gap-1">
-                                {appt.type === "ONLINE" ? (
-                                  <Monitor className="h-4 w-4 text-blue-600" />
-                                ) : (
-                                  <Stethoscope className="h-4 w-4 text-green-600" />
-                                )}
-                                <span className="text-sm font-medium truncate max-w-[100px]">
-                                  {appt.type === "ONLINE"
-                                    ? "Online"
-                                    : "Offline"}
-                                </span>
-                              </div>
-                              {getStatusBadge(appt.status)}
-                            </div>
-
-                            <div className="space-y-1 text-sm text-gray-600">
-                              <div className="flex items-center gap-2 truncate">
-                                <Clock className="h-4 w-4 text-gray-400" />
-                                {format(
-                                  toZonedTime(appt.appointmentTime, "UTC"),
-                                  "HH:mm"
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 truncate">
-                                <User className="h-4 w-4 text-gray-400" />
-                                <span className="truncate max-w-[140px]">
-                                  {appt.doctor.user.name}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 truncate">
-                                <Stethoscope className="h-4 w-4 text-gray-400" />
-                                <span className="truncate max-w-[140px]">
-                                  {appt.service.name}
-                                </span>
-                              </div>
-                            </div>
+                      <div className="bg-indigo-50 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <User className="h-6 w-6 text-indigo-600" />
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex items-center justify-center h-[120px]">
-                        <p className="text-gray-500 text-sm text-center">
-                          Không có lịch hẹn
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Appointment Detail Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[650px] bg-white">
-          {selectedAppointment && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-blue-600" />
-                  <span>Chi tiết lịch hẹn #{selectedAppointment.id}</span>
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto">
-                {/* Thông tin cơ bản */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 p-2 bg-blue-50 rounded-full">
-                        <User className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          Bệnh nhân
-                        </h4>
-                        <p className="font-medium">
-                          {selectedAppointment.user.name}
-                        </p>
+                          <div>
+                            <p className="font-semibold text-gray-800">
+                              BS. {selectedAppointment.doctor.user.name}
+                            </p>
+                            <p className="text-sm text-gray-600">Chuyên khoa</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 p-2 bg-green-50 rounded-full">
-                        <Stethoscope className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          Bác sĩ
-                        </h4>
-                        <p className="font-medium">
-                          {selectedAppointment.doctor.user.name}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 p-2 bg-purple-50 rounded-full">
+                    {/* Time & Type Info */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
                         <Clock className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          Thời gian đặt lịch
-                        </h4>
-                        <p className="font-medium">
-                          {formatUtcDateManually(
-                            selectedAppointment.appointmentTime,
-                            "dd/MM/yyyy HH:mm"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 p-2 bg-orange-50 rounded-full">
-                        {selectedAppointment.type === "ONLINE" ? (
-                          <Monitor className="h-5 w-5 text-orange-600" />
-                        ) : (
-                          <MapPin className="h-5 w-5 text-orange-600" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">
-                          Hình thức
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
+                        Thời gian & Hình thức
+                      </h3>
+                      <div className="bg-purple-50 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm text-gray-600">
+                              Ngày khám:
+                            </span>
+                          </div>
+                          <span className="font-semibold">
+                            {formatUtcDateManually(
+                              selectedAppointment.appointmentTime,
+                              "dd/MM/yyyy"
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm text-gray-600">
+                              Giờ khám:
+                            </span>
+                          </div>
+                          <span className="font-semibold">
+                            {formatUtcDateManually(
+                              selectedAppointment.appointmentTime,
+                              "HH:mm"
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {selectedAppointment.type === "ONLINE" ? (
+                              <Video className="h-4 w-4 text-purple-600" />
+                            ) : (
+                              <Building2 className="h-4 w-4 text-purple-600" />
+                            )}
+                            <span className="text-sm text-gray-600">
+                              Hình thức:
+                            </span>
+                          </div>
+                          <Badge className="bg-purple-100 text-purple-700 border-purple-200">
                             {selectedAppointment.type === "ONLINE"
                               ? "Khám Online"
                               : "Khám Trực tiếp"}
-                          </p>
-                          {getStatusBadge(selectedAppointment.status)}
+                          </Badge>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Thông tin dịch vụ */}
-                <div className="border-t pt-4">
-                  <h3 className="font-medium mb-3 flex items-center gap-2">
-                    <Stethoscope className="h-5 w-5 text-blue-600" />
-                    Thông tin dịch vụ
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">
-                        Tên dịch vụ
-                      </h4>
-                      <p className="font-medium">
-                        {selectedAppointment.service.name}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">
-                        Loại dịch vụ
-                      </h4>
-                      <p className="font-medium">
-                        {selectedAppointment.service.type === "CONSULT"
-                          ? "Tư vấn"
-                          : "Điều trị"}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">
-                        Giá dịch vụ
-                      </h4>
-                      <p className="font-medium">
-                        {formatCurrency(selectedAppointment.service.price)}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">
-                        Thời gian hoạt động
-                      </h4>
-                      <p className="font-medium">
-                        {selectedAppointment.service.startTime} -{" "}
-                        {selectedAppointment.service.endTime}
-                      </p>
-                    </div>
-                  </div>
-                  {selectedAppointment.service.description && (
-                    <div className="mt-3">
-                      <h4 className="text-sm font-medium text-gray-500">
-                        Mô tả dịch vụ
-                      </h4>
-                      <p className="text-gray-700">
-                        {selectedAppointment.service.description}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Thông tin bổ sung */}
-                {selectedAppointment.type === "ONLINE" ? (
-                  <div className="border-t pt-4">
-                    <h3 className="font-medium mb-3 flex items-center gap-2">
-                      <Monitor className="h-5 w-5 text-blue-600" />
-                      Thông tin phòng khám online
+                  {/* Service Info */}
+                  <div className="space-y-4 mb-6">
+                    <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                      <Heart className="h-5 w-5 text-rose-600" />
+                      Dịch vụ khám
                     </h3>
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <p className="mb-2">
-                        Bạn có thể tham gia phòng khám online bằng đường link
-                        bên dưới:
-                      </p>
-                      <Button
-                        variant="outline"
-                        className="w-full cursor-pointer"
-                        onClick={() =>
-                          window.open(
-                            selectedAppointment.patientMeetingUrl || "",
-                            "_blank"
-                          )
-                        }
-                      >
-                        Tham gia phòng khám ngay
-                      </Button>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Lưu ý: Link chỉ hoạt động khi đến giờ hẹn
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-t pt-4">
-                    <h3 className="font-medium mb-3 flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                      Thông tin địa điểm khám
-                    </h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="font-medium">Phòng khám đa khoa</p>
-                      <p className="text-gray-700">
-                        123 Đường ABC, Quận 1, TP.HCM
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Vui lòng đến trước 15 phút để làm thủ tục
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Ghi chú */}
-                {(selectedAppointment.notes ||
-                  selectedAppointment.isAnonymous) && (
-                  <div className="border-t pt-4">
-                    <h3 className="font-medium mb-3 flex items-center gap-2">
-                      <Info className="h-5 w-5 text-blue-600" />
-                      Thông tin bổ sung
-                    </h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      {selectedAppointment.isAnonymous && (
-                        <p className="text-gray-700 mb-2">
-                          <span className="font-medium">Khám ẩn danh:</span> Bác
-                          sĩ sẽ không biết thông tin cá nhân của bạn
-                        </p>
-                      )}
-                      {selectedAppointment.notes && (
-                        <>
-                          <h4 className="text-sm font-medium text-gray-500">
-                            Ghi chú của bạn
-                          </h4>
-                          <p className="text-gray-700">
-                            {selectedAppointment.notes}
+                    <div className="bg-rose-50 rounded-xl p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Tên dịch vụ
                           </p>
-                        </>
+                          <p className="font-semibold text-gray-800">
+                            {selectedAppointment.service.name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Loại dịch vụ
+                          </p>
+                          <p className="font-semibold text-gray-800">
+                            {selectedAppointment.service.type === "CONSULT"
+                              ? "Tư vấn"
+                              : "Điều trị"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">Chi phí</p>
+                          <p className="font-semibold text-rose-600 text-lg">
+                            {formatCurrency(selectedAppointment.service.price)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Thời gian hoạt động
+                          </p>
+                          <p className="font-semibold text-gray-800">
+                            {selectedAppointment.service.startTime} -{" "}
+                            {selectedAppointment.service.endTime}
+                          </p>
+                        </div>
+                      </div>
+                      {selectedAppointment.service.description && (
+                        <div className="mt-4 pt-4 border-t border-rose-200">
+                          <p className="text-sm text-gray-600 mb-1">
+                            Mô tả dịch vụ
+                          </p>
+                          <p className="text-gray-700">
+                            {selectedAppointment.service.description}
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
-                )}
-              </div>
-              <DialogFooter>
-                {canCancelAppointment(selectedAppointment) && (
-                  <ConfirmDelete
-                    onConfirm={handleCancelAppointment}
-                    title="Xác nhận hủy lịch hẹn"
-                    description="Bạn có chắc chắn muốn hủy lịch hẹn này không? Hành động này không thể hoàn tác."
-                    cancelText="Không"
-                    confirmText="Xác nhận hủy"
-                    trigger={
-                      <Button variant="outline" className="cursor-pointer bg-red-600 text-white">
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Hủy lịch hẹn
-                      </Button>
-                    }
-                    asChild
-                  />
-                )}
-                {!canCancelAppointment(selectedAppointment) &&
-                  selectedAppointment.status !== "CANCELLED" &&
-                  selectedAppointment.status !== "COMPLETED" && (
-                    <p className="text-sm text-red-500">
-                      Không thể hủy lịch hẹn trong vòng 24 giờ trước giờ khám
-                    </p>
+
+                  {/* Location/Meeting Info */}
+                  {selectedAppointment.type === "ONLINE" ? (
+                    <div className="space-y-4 mb-6">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <Video className="h-5 w-5 text-blue-600" />
+                        Thông tin phòng khám online
+                      </h3>
+                      <div className="bg-blue-50 rounded-xl p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Monitor className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <p className="text-gray-700">
+                            Khám bệnh trực tuyến qua video call
+                          </p>
+                        </div>
+                        <Button
+                          variant="default"
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() =>
+                            window.open(
+                              selectedAppointment.patientMeetingUrl || "",
+                              "_blank"
+                            )
+                          }
+                        >
+                          <Video className="h-4 w-4 mr-2" />
+                          Tham gia phòng khám online
+                        </Button>
+                        <p className="text-xs text-gray-500 mt-3 text-center">
+                          <Info className="h-3 w-3 inline mr-1" />
+                          Link chỉ hoạt động khi đến giờ hẹn
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 mb-6">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-emerald-600" />
+                        Địa điểm khám
+                      </h3>
+                      <div className="bg-emerald-50 rounded-xl p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Building2 className="h-5 w-5 text-emerald-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">
+                              Phòng khám đa khoa HIV Care
+                            </p>
+                            <p className="text-gray-700 mt-1">
+                              123 Đường ABC, Quận 1, TP.HCM
+                            </p>
+                            <p className="text-sm text-gray-500 mt-2">
+                              <AlertCircle className="h-3 w-3 inline mr-1" />
+                              Vui lòng đến trước 15 phút để làm thủ tục
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )}
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+
+                  {/* Additional Info */}
+                  {(selectedAppointment.notes ||
+                    selectedAppointment.isAnonymous) && (
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <Info className="h-5 w-5 text-amber-600" />
+                        Thông tin bổ sung
+                      </h3>
+                      <div className="bg-amber-50 rounded-xl p-4">
+                        {selectedAppointment.isAnonymous && (
+                          <div className="flex items-center gap-2 mb-3">
+                            <Shield className="h-4 w-4 text-amber-600" />
+                            <p className="text-gray-700">
+                              <span className="font-semibold">
+                                Khám ẩn danh:
+                              </span>{" "}
+                              Thông tin cá nhân của bạn sẽ được bảo mật
+                            </p>
+                          </div>
+                        )}
+                        {selectedAppointment.notes && (
+                          <div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              Ghi chú của bạn:
+                            </p>
+                            <p className="text-gray-700 bg-white rounded-lg p-3">
+                              {selectedAppointment.notes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <DialogFooter className="px-6 py-4 bg-gray-50 border-t">
+                  <div className="w-full space-y-3 flex justify-end">
+                    {canCancelAppointment(selectedAppointment) && (
+                      <ConfirmDelete
+                        onConfirm={handleCancelAppointment}
+                        title="Xác nhận hủy lịch hẹn"
+                        description="Bạn có chắc chắn muốn hủy lịch hẹn này không? Hành động này không thể hoàn tác."
+                        cancelText="Không"
+                        confirmText="Xác nhận hủy"
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="cursor-pointer bg-red-600 hover:bg-red-700 text-white"
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Hủy lịch hẹn
+                          </Button>
+                        }
+                        asChild
+                      />
+                    )}
+                    {!canCancelAppointment(selectedAppointment) &&
+                      selectedAppointment.status !== "CANCELLED" &&
+                      selectedAppointment.status !== "COMPLETED" && (
+                        <Alert className="border-amber-200 bg-amber-50">
+                          <AlertCircle className="h-4 w-4 text-amber-600" />
+                          <AlertDescription className="text-amber-700">
+                            Không thể hủy lịch hẹn trong vòng 24 giờ trước giờ
+                            khám
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                  </div>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

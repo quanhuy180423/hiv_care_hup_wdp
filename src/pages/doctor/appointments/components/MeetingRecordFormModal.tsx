@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -52,19 +52,127 @@ import {
 } from "@/hooks/useMeetingRecord";
 import toast from "react-hot-toast";
 import { formatDate } from "@/lib/utils/dates/formatDate";
+import { uploadAvatarToSupabase } from "@/lib/utils/uploadImage/uploadImage";
+import type { Appointment } from "@/types/appointment";
+import "../../../../styles/editor.css";
+import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  appointment: Appointment;
   appointmentId: number;
   recordedById: number;
   initialData?: MeetingRecord | null;
   onSuccess?: () => void;
 }
 
+function getNowDatetimeLocal(): string {
+  const now = new Date();
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return (
+    now.getFullYear() +
+    "-" +
+    pad(now.getMonth() + 1) +
+    "-" +
+    pad(now.getDate()) +
+    "T" +
+    pad(now.getHours()) +
+    ":" +
+    pad(now.getMinutes())
+  );
+}
+
+function generateMeetingContent(appointment?: Appointment) {
+  const user = appointment?.user;
+  const doctor = appointment?.doctor;
+  return `
+<h2 style="text-align:center"><strong>BIÊN BẢN TƯ VẤN TRỰC TUYẾN VỀ HIV/AIDS</strong></h2>
+<ol>
+  <li>
+    <strong>Thông tin người được tư vấn:</strong>
+    <ul>
+      <li>Họ và tên: <u>${
+        user?.name || ".................................................."
+      }</u></li>
+      <li>Ngày sinh: <u>....................</u></li>
+      <li>Giới tính: <u>....................</u></li>
+      <li>Số điện thoại: <u>${
+        user?.phoneNumber ||
+        ".................................................."
+      }</u></li>
+      <li>Email (nếu có): <u>${
+        user?.email || ".................................................."
+      }</u></li>
+      <li>Lý do tư vấn:
+        <ul style="list-style-type:none;">
+          <li><input type="checkbox" disabled /> Nghi ngờ bị phơi nhiễm HIV</li>
+          <li><input type="checkbox" disabled /> Mong muốn xét nghiệm HIV</li>
+          <li><input type="checkbox" disabled /> Quan hệ không an toàn</li>
+          <li><input type="checkbox" disabled /> Khác: <u>...................................................</u></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <strong>Thời gian tư vấn:</strong>
+    <ul>
+      <li>Ngày: <u>${formatDate(getNowDatetimeLocal(), "dd/MM/yyyy")}</u></li>
+      <li>Giờ bắt đầu: <u>${formatDate(getNowDatetimeLocal(), "HH:mm")}</u></li>
+      <li>Giờ kết thúc: <u>..........</u></li>
+    </ul>
+  </li>
+  <li>
+    <strong>Nội dung tư vấn:</strong>
+    <div style="min-height:60px; border-bottom:1px dotted #ccc;"></div>
+  </li>
+  <li>
+    <strong>Thông tin bác sĩ tư vấn:</strong>
+    <ul>
+      <li>Họ và tên: <u>${
+        doctor?.user.name || "............................"
+      }</u></li>
+      <li>Đơn vị công tác: <u>..................................................</u></li>
+      <li>Chức danh: <u>${
+        doctor?.specialization ||
+        "................................................."
+      }</u></li>
+      <li>Số điện thoại liên hệ: <u>${
+        doctor?.user.phoneNumber ||
+        ".................................................."
+      }</u></li>
+    </ul>
+  </li>
+  <li>
+    <strong>Hướng dẫn sau tư vấn:</strong>
+    <ul style="list-style-type:none;">
+      <li><input type="checkbox" disabled /> Khuyến khích xét nghiệm HIV sau 28 ngày từ thời điểm có nguy cơ.</li>
+      <li><input type="checkbox" disabled /> Cần sử dụng thuốc PEP (phơi nhiễm) nếu còn trong 72 giờ.</li>
+      <li><input type="checkbox" disabled /> Tư vấn an toàn tình dục và sử dụng bao cao su đúng cách.</li>
+      <li><input type="checkbox" disabled /> Tư vấn điều trị ARV nếu đã xét nghiệm dương tính.</li>
+      <li><input type="checkbox" disabled /> Khác: <u>...................................................</u></li>
+    </ul>
+  </li>
+  <li>
+    <strong>Ghi chú thêm (nếu có):</strong>
+    <div style="min-height:40px; border-bottom:1px dotted #ccc;"></div>
+  </li>
+</ol>
+<hr />
+<p><strong>Xác nhận của người được tư vấn</strong><br />
+Tôi xác nhận đã được tư vấn đầy đủ, rõ ràng, dễ hiểu về HIV/AIDS và các phương án phù hợp.</p>
+<p>Chữ ký (nếu có): <u>.................................</u></p>
+<p><strong>Ngày lập biên bản</strong>: <u>${formatDate(
+    getNowDatetimeLocal(),
+    "dd/MM/yyyy"
+  )}</u></p>
+`;
+}
+
 export default function MeetingRecordFormModal({
   open,
   onClose,
+  appointment,
   appointmentId,
   recordedById,
   initialData,
@@ -81,6 +189,7 @@ export default function MeetingRecordFormModal({
       endTime: "",
     },
   });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { setValue, handleSubmit, reset, control } = form;
 
@@ -134,9 +243,21 @@ export default function MeetingRecordFormModal({
   };
 
   const addImage = () => {
-    const url = window.prompt("Nhập URL ảnh");
-    if (url) {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const { url } = await uploadAvatarToSupabase(file, String(recordedById));
       editor?.chain().focus().setImage({ src: url }).run();
+      toast.success("Tải ảnh lên thành công!");
+    } catch (err) {
+      console.log(err);
+      toast.error("Tải ảnh thất bại!");
+    } finally {
+      e.target.value = "";
     }
   };
 
@@ -144,6 +265,7 @@ export default function MeetingRecordFormModal({
     useCreateMeetingRecord();
   const { mutate: updateMeetingRecord, isPending: isUpdating } =
     useUpdateMeetingRecord();
+  const { mutate: changeStatus } = useChangeAppointmentStatus();
 
   const isEditMode = !!initialData;
 
@@ -157,31 +279,43 @@ export default function MeetingRecordFormModal({
         startTime: formatDate(initialData.startTime, "yyyy-MM-dd'T'HH:mm"),
         endTime: formatDate(initialData.endTime, "yyyy-MM-dd'T'HH:mm"),
       });
-
-      if (editor) {
-        editor.commands.setContent(initialData.content || "");
-      }
     } else {
       reset({
         appointmentId,
         recordedById,
         title: "",
-        content: "",
-        startTime: "",
+        content: generateMeetingContent(appointment),
+        startTime: getNowDatetimeLocal(),
         endTime: "",
       });
+    }
+  }, [initialData, appointmentId, recordedById, reset, appointment]);
 
-      if (editor) {
-        editor.commands.setContent("");
+  useEffect(() => {
+    if (!editor) return;
+
+    if (open) {
+      if (initialData?.content) {
+        editor.commands.setContent(initialData.content);
+      } else {
+        editor.commands.setContent(generateMeetingContent(appointment));
       }
     }
-  }, [initialData, appointmentId, recordedById, reset, editor]);
+  }, [editor, open, initialData, appointment]);
+
+  const handleCOMPLETEDAppointment = () => {
+    changeStatus({
+      id: appointmentId,
+      status: "COMPLETED",
+    });
+  };
 
   const onSubmit = (values: MeetingRecordFormValues) => {
     const finalData = {
       ...values,
       appointmentId,
       recordedById,
+      endTime: values.endTime || getNowDatetimeLocal(),
     };
     if (isEditMode && initialData) {
       updateMeetingRecord(
@@ -189,19 +323,20 @@ export default function MeetingRecordFormModal({
         {
           onSuccess: () => {
             toast.success("Cập nhật biên bản thành công");
-             onSuccess?.();
-            onClose();
           },
         }
       );
+      onSuccess?.();
+      onClose();
     } else {
       createMeetingRecord(finalData, {
         onSuccess: () => {
           toast.success("Tạo biên bản thành công");
-           onSuccess?.();
-          onClose();
         },
       });
+      handleCOMPLETEDAppointment();
+      onSuccess?.();
+      onClose();
     }
   };
 
@@ -258,7 +393,7 @@ export default function MeetingRecordFormModal({
                     <FormControl>
                       <Input type="datetime-local" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs text-red-500" />
                   </FormItem>
                 )}
               />
@@ -333,6 +468,13 @@ export default function MeetingRecordFormModal({
                           >
                             <ImageIcon className="h-4 w-4" />
                           </Button>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            style={{ display: "none" }}
+                            onChange={handleFileChange}
+                          />
                           <Button
                             type="button"
                             size="sm"
@@ -357,7 +499,11 @@ export default function MeetingRecordFormModal({
                                 : "outline"
                             }
                             onClick={() =>
-                              editor.chain().focus().setTextAlign("center").run()
+                              editor
+                                .chain()
+                                .focus()
+                                .setTextAlign("center")
+                                .run()
                             }
                             className="h-8 w-8 p-0"
                           >
@@ -438,7 +584,9 @@ export default function MeetingRecordFormModal({
                                 type="button"
                                 size="sm"
                                 variant={
-                                  editor.isActive("bold") ? "default" : "outline"
+                                  editor.isActive("bold")
+                                    ? "default"
+                                    : "outline"
                                 }
                                 onClick={() =>
                                   editor.chain().focus().toggleBold().run()
@@ -451,7 +599,9 @@ export default function MeetingRecordFormModal({
                                 type="button"
                                 size="sm"
                                 variant={
-                                  editor.isActive("italic") ? "default" : "outline"
+                                  editor.isActive("italic")
+                                    ? "default"
+                                    : "outline"
                                 }
                                 onClick={() =>
                                   editor.chain().focus().toggleItalic().run()
@@ -464,7 +614,9 @@ export default function MeetingRecordFormModal({
                                 type="button"
                                 size="sm"
                                 variant={
-                                  editor.isActive("link") ? "default" : "outline"
+                                  editor.isActive("link")
+                                    ? "default"
+                                    : "outline"
                                 }
                                 onClick={setLink}
                                 className="h-8 w-8 p-0"

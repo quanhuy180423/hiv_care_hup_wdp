@@ -36,6 +36,19 @@ export const useMeetingRecordByAppointment = (appointmentId?: number) => {
   });
 };
 
+// Get meeting record by patientId
+export const useMeetingRecordByPatient = (
+  id: number,
+  params: MeetingRecordQueryParams
+) => {
+  return useQuery({
+    queryKey: ["meeting-records", "patient", id, params],
+    queryFn: () => meetingRecordService.getMeetingRecordByPatientId(id, params),
+    enabled: !!id,
+    select: (res) => res.data,
+  });
+};
+
 // Create a new meeting record
 export const useCreateMeetingRecord = () => {
   const queryClient = useQueryClient();

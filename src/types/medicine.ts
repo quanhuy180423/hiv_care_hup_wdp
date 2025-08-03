@@ -99,3 +99,42 @@ export type MedicineResponse = {
     hasPreviousPage: boolean;
   };
 };
+
+export enum MedicationSchedule {
+  MORNING = "MORNING",
+  AFTERNOON = "AFTERNOON",
+  NIGHT = "NIGHT",
+}
+
+export enum DurationUnit {
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+  YEAR = "YEAR",
+}
+
+export type CustomMedication = {
+  medicineId?: number;
+  medicineName: string;
+  dosage: string;
+  unit?: string;
+  price?: number;
+  schedule?: string;
+  frequency?: string;
+  time?: string;
+  durationValue?: number;
+  durationUnit?: string;
+  notes?: string;
+  source?: "protocol" | "custom" | "edited";
+  protocolMedicineId?: number;
+  deleted?: boolean;
+};
+
+export enum MedicineUnit {
+  TABLET = "tablet",
+  AMPOULE = "ampoule",
+  ML = "ml",
+  SACHET = "sachet",
+  BOTTLE = "bottle",
+  OTHER = "other",
+}

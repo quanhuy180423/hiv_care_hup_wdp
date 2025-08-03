@@ -1,76 +1,146 @@
 import { PatientTreatmentDetailDialog } from "@/components/doctor/PatientTreatmentDetailDialog";
 import { PatientTreatmentTable } from "@/components/doctor/PatientTreatmentTable";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useAppointmentsByDoctor } from "@/hooks/useAppointments";
 import {
   useCreatePatientTreatment,
   useDeletePatientTreatment,
-  usePatientTreatments,
+  usePatientTreatmentsByDoctor,
   useUpdatePatientTreatment,
 } from "@/hooks/usePatientTreatments";
-import type { PatientTreatmentType } from "@/types/patientTreatment";
-import { FileX2, Loader2, Plus, Search } from "lucide-react";
+import {
+  findMatchedAppointment,
+  getLatestPendingAppointment,
+} from "@/lib/utils/patientTreatmentUtils";
+import useAuthStore from "@/store/authStore";
+import type { CustomApiError } from "@/types/api";
+import type { Appointment } from "@/types/appointment";
+import type { PatientTreatmentType as BasePatientTreatmentType } from "@/types/patientTreatment";
+import { AlertTriangle, FileX2, Loader2, Plus } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const DoctorPatientTreatments = () => {
-  const [search, setSearch] = useState("");
-  const [selectedTreatment, setSelectedTreatment] =
-    useState<PatientTreatmentType | null>(null);
-  const navigate = useNavigate();
+export interface PatientTreatmentWithAppointment
+  extends BasePatientTreatmentType {
+  appointmentStatus?: Appointment["status"];
+  appointmentId?: Appointment["id"];
+  isAnonymous?: boolean;
+}
 
+// Paginated data type for treatments
+interface PaginatedTreatmentData {
+  data: BasePatientTreatmentType[];
+  meta?: { total: number };
+}
+
+function isPaginatedTreatmentData(obj: unknown): obj is PaginatedTreatmentData {
+  return (
+    !!obj &&
+    typeof obj === "object" &&
+    Array.isArray((obj as PaginatedTreatmentData).data)
+  );
+}
+
+const DoctorPatientTreatments = () => {
+  // Lấy doctorId từ store
+  const doctorIdFromUser = useAuthStore((s) => {
+    const docId = s.userProfile?.doctorId ?? s.userProfile?.doctorId;
+    if (typeof docId === "string") return Number(docId);
+    if (typeof docId === "number") return docId;
+    return undefined;
+  });
+  const [selectedTreatment, setSelectedTreatment] =
+    useState<PatientTreatmentWithAppointment | null>(null);
   const [page, setPage] = useState(1);
+  const [showPendingAlert, setShowPendingAlert] = useState(false);
   const pageSize = 10;
+  const navigate = useNavigate();
 
   const {
     data: treatmentsDataRaw,
     isLoading: isLoadingPatientTreatments,
     refetch: refetchTreatments,
-  } = usePatientTreatments({
-    page,
-    limit: pageSize,
-    search,
-    sortBy: "startDate",
-    sortOrder: "desc",
-  });
+  } = usePatientTreatmentsByDoctor(
+    doctorIdFromUser !== undefined ? doctorIdFromUser : "",
+    {
+      page,
+      limit: pageSize,
+      sortBy: "startDate",
+      sortOrder: "desc",
+    }
+  );
 
-  // Transform the raw data into a format suitable for the table
+  // Lấy danh sách lịch hẹn của bác sĩ
+  const { data: appointmentsData } = useAppointmentsByDoctor(
+    doctorIdFromUser ?? 0,
+    { page: 1, limit: 1000 }
+  );
+
+  const appointmentsList: Appointment[] = useMemo(() => {
+    if (Array.isArray(appointmentsData)) {
+      return appointmentsData.length > 0 ? appointmentsData : [];
+    }
+    return Array.isArray(appointmentsData?.data) ? appointmentsData.data : [];
+  }, [appointmentsData]);
+
   const treatmentsData = useMemo(() => {
-    if (
-      treatmentsDataRaw &&
-      typeof treatmentsDataRaw === "object" &&
-      Array.isArray((treatmentsDataRaw as { data?: unknown }).data)
-    ) {
-      const { data, meta } = treatmentsDataRaw as {
-        data: PatientTreatmentType[];
-        meta?: { total: number };
-      };
-      return {
-        data,
-        meta: meta ?? { total: 0 },
-      };
+    if (!isPaginatedTreatmentData(treatmentsDataRaw)) {
+      return { data: [], meta: { total: 0 } };
     }
-    return { data: [], meta: { total: 0 } };
-  }, [treatmentsDataRaw]);
-
-  useEffect(() => {
-    if (
-      !isLoadingPatientTreatments &&
-      (!treatmentsDataRaw ||
-        typeof treatmentsDataRaw !== "object" ||
-        !("data" in treatmentsDataRaw))
+    // Helper: get the best-matched appointment for a treatment
+    function getBestMatchedAppointment(
+      patientId: number,
+      treatmentStart: string
     ) {
-      toast.error(
-        "Không thể tải danh sách hồ sơ bệnh nhân. Vui lòng kiểm tra lại kết nối hoặc liên hệ quản trị viên."
+      // 1. Try to find by patientId and startDate (ignoring time)
+      const matched = findMatchedAppointment(
+        appointmentsList,
+        patientId,
+        treatmentStart
       );
+      if (matched) return matched;
+      // 2. Fallback: get latest appointment for this patient
+      const patientAppointments = appointmentsList.filter(
+        (a) => a.userId === patientId
+      );
+      if (patientAppointments.length > 0) {
+        return patientAppointments.reduce((latest, curr) =>
+          new Date(curr.appointmentTime) > new Date(latest.appointmentTime)
+            ? curr
+            : latest
+        );
+      }
+      return undefined;
     }
-  }, [isLoadingPatientTreatments, treatmentsDataRaw]);
+
+    const merged: PatientTreatmentWithAppointment[] =
+      treatmentsDataRaw.data.map((t) => {
+        const matchedAppointment = getBestMatchedAppointment(
+          t.patientId,
+          t.startDate
+        );
+        return {
+          ...t,
+          appointmentStatus: matchedAppointment?.status as
+            | Appointment["status"]
+            | undefined,
+          appointmentId: matchedAppointment?.id,
+          isAnonymous: t.isAnonymous,
+        };
+      });
+    return {
+      data: merged,
+      meta: treatmentsDataRaw.meta ?? { total: merged.length },
+    };
+  }, [treatmentsDataRaw, appointmentsList]);
 
   const createMutation = useCreatePatientTreatment();
   const updateMutation = useUpdatePatientTreatment();
   const deleteMutation = useDeletePatientTreatment();
 
+  // Refetch khi mutation thành công, toast error khi mutation lỗi
   useEffect(() => {
     if (
       createMutation.isSuccess ||
@@ -79,14 +149,35 @@ const DoctorPatientTreatments = () => {
     ) {
       refetchTreatments();
     }
+    if (createMutation.isError && createMutation.error) {
+      const error = createMutation.error as CustomApiError;
+      toast.error(
+        error.message ||
+          "Không thể tạo hồ sơ điều trị. Vui lòng kiểm tra lại điều kiện nghiệp vụ hoặc liên hệ quản trị viên."
+      );
+    }
+    if (deleteMutation.isError && deleteMutation.error) {
+      toast.error("Xóa hồ sơ thất bại.");
+    }
   }, [
     createMutation.isSuccess,
     updateMutation.isSuccess,
     deleteMutation.isSuccess,
+    createMutation.isError,
+    createMutation.error,
+    deleteMutation.isError,
+    deleteMutation.error,
     refetchTreatments,
   ]);
 
+  const latestPendingAppointment =
+    getLatestPendingAppointment(appointmentsList);
+
   const handleAdd = () => {
+    if (latestPendingAppointment) {
+      setShowPendingAlert(true);
+      return;
+    }
     navigate("/doctor/patient-treatments/create");
   };
 
@@ -99,11 +190,11 @@ const DoctorPatientTreatments = () => {
     }
   };
 
-  const handleShowDetail = (treatment: PatientTreatmentType) => {
+  const handleShowDetail = (treatment: PatientTreatmentWithAppointment) => {
     setSelectedTreatment(treatment);
   };
 
-  const handleEdit = (treatment: PatientTreatmentType) => {
+  const handleEdit = (treatment: PatientTreatmentWithAppointment) => {
     navigate(`/doctor/patient-treatments/${treatment.id}/edit`);
   };
 
@@ -113,7 +204,7 @@ const DoctorPatientTreatments = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
           Quản lý hồ sơ bệnh nhân
@@ -121,13 +212,30 @@ const DoctorPatientTreatments = () => {
         <Button
           className="inline-flex items-center gap-2 bg-primary text-black px-5 py-2 rounded-lg shadow transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50"
           onClick={handleAdd}
+          disabled={!!latestPendingAppointment}
         >
           <Plus className="w-5 h-5" />
           Thêm hồ sơ
         </Button>
+        {showPendingAlert && (
+          <div className="flex items-center gap-2 mt-2 text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-3 py-2">
+            <AlertTriangle className="w-5 h-5" />
+            <span>
+              Không thể tạo hồ sơ điều trị khi lịch hẹn gần nhất của bệnh nhân
+              đang ở trạng thái <b>Chờ xác nhận</b> (PENDING). Vui lòng xác nhận
+              hoặc huỷ lịch hẹn trước khi tạo hồ sơ mới.
+            </span>
+            <button
+              className="ml-auto text-sm underline"
+              onClick={() => setShowPendingAlert(false)}
+            >
+              Đóng
+            </button>
+          </div>
+        )}
       </div>
-      <div className="mb-6 flex items-center justify-between w-full">
-        <div className="relative w-full max-w-xs">
+      <div className="mb-6 flex items-center justify-end w-full">
+        {/* <div className="relative w-full max-w-xs">
           <Input
             placeholder="Tìm kiếm theo tên bệnh nhân..."
             value={search}
@@ -138,31 +246,15 @@ const DoctorPatientTreatments = () => {
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
             <Search className="w-4 h-4" />
           </span>
-        </div>
+        </div> */}
         <Button
           variant="outline"
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2"
           onClick={handleRefresh}
           aria-label="Làm mới danh sách"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 4v6h6M20 20v-6h-6"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M20 4a8.1 8.1 0 0 0-15.9 2M4 20a8.1 8.1 0 0 0 15.9-2"
-            />
-          </svg>
+          {/* Lucide RefreshCcw icon */}
+          <RefreshCcw className="w-4 h-4" />
           Làm mới
         </Button>
       </div>
@@ -230,8 +322,6 @@ const DoctorPatientTreatments = () => {
         onShowForm={() => {}}
         onJoinMeet={() => {}}
       />
-
-      {/* Form tạo/sửa hồ sơ bệnh án chỉ dùng trang riêng để tạo mới */}
     </div>
   );
 };

@@ -1,25 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TreatmentProtocolFormModal } from "./components/TreatmentProtocolFormModal";
-import { TreatmentProtocolDetailsDrawer } from "./components/TreatmentProtocolDetailsDrawer";
-import { SearchAndFilter } from "./components/SearchAndFilter";
-import { createColumns } from "./columns";
-import {
-  useTreatmentProtocols,
-  useCreateTreatmentProtocol,
-  useUpdateTreatmentProtocol,
-  useDeleteTreatmentProtocol,
-  useCloneTreatmentProtocol,
-} from "@/hooks/useTreatmentProtocols";
-import { toast } from "react-hot-toast";
-import type { TreatmentProtocol } from "@/types/treatmentProtocol";
-import type { TreatmentProtocolFormValues } from "@/schemas/treatmentProtocol";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
+import { Input } from "@/components/ui/input";
+import {
+  useCloneTreatmentProtocol,
+  useCreateTreatmentProtocol,
+  useDeleteTreatmentProtocol,
+  useTreatmentProtocols,
+  useUpdateTreatmentProtocol,
+} from "@/hooks/useTreatmentProtocols";
+import { handleApiError } from "@/lib/utils/errorHandler";
+import type { TreatmentProtocolFormValues } from "@/schemas/treatmentProtocol";
+import type { TreatmentProtocol } from "@/types/treatmentProtocol";
+import { Loader2, Plus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
+import { createColumns } from "./columns";
+import { SearchAndFilter } from "./components/SearchAndFilter";
+import { TreatmentProtocolDetailsDrawer } from "./components/TreatmentProtocolDetailsDrawer";
+import { TreatmentProtocolFormModal } from "./components/TreatmentProtocolFormModal";
 
 export default function TreatmentProtocolsManagement() {
   const [searchText, setSearchText] = useState("");
@@ -53,7 +54,7 @@ export default function TreatmentProtocolsManagement() {
     search: searchText,
     targetDisease: searchParams.targetDisease,
   });
-  const protocols = protocolsData?.data || [];
+  const protocols = protocolsData?.data.data || [];
   const meta = protocolsData?.data.meta;
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 0;
 
@@ -107,9 +108,9 @@ export default function TreatmentProtocolsManagement() {
       toast.success("Tạo protocol thành công!");
       closeModal();
       refetch();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Create protocol error:", error);
+      toast.error(handleApiError(error));
     }
   };
 
@@ -124,9 +125,9 @@ export default function TreatmentProtocolsManagement() {
       toast.success("Cập nhật protocol thành công!");
       closeModal();
       refetch();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Update protocol error:", error);
+      toast.error(handleApiError(error));
     }
   };
 
@@ -137,9 +138,9 @@ export default function TreatmentProtocolsManagement() {
       await deleteProtocolMutation.mutateAsync(protocol.id);
       toast.success("Xóa protocol thành công!");
       refetch();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Delete protocol error:", error);
+      toast.error(handleApiError(error));
     }
   };
 
@@ -157,9 +158,9 @@ export default function TreatmentProtocolsManagement() {
       });
       toast.success("Sao chép protocol thành công!");
       refetch();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Clone protocol error:", error);
+      toast.error(handleApiError(error));
     }
   };
 
@@ -253,7 +254,7 @@ export default function TreatmentProtocolsManagement() {
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
               <span className="ml-2 text-gray-600">Đang tải dữ liệu...</span>
             </div>
-          ) : Array.isArray(protocols) && protocols.length > 0 ? (
+          ) : protocols && protocols.length > 0 ? (
             <div>
               {/* Search */}
               <div className="flex items-center py-4">

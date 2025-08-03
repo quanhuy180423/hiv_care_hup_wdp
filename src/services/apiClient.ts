@@ -93,6 +93,7 @@ class ApiClient {
           try {
             // Thử refresh token từ localStorage
             const refreshToken = localStorage.getItem("refresh_token");
+            console.log(refreshToken);
             if (refreshToken) {
               const response = await this.refreshToken(refreshToken);
               const { accessToken, refreshToken: newRefreshToken } =

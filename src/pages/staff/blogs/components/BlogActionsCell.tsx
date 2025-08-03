@@ -10,7 +10,7 @@ import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBlogDrawerStore, useBlogModalStore } from "@/store/blogStore";
 import type { Blog } from "@/types/blog";
-import { useDeleteBlog } from "@/hooks/useBlogs";
+import { useChangeBlogStatus, useDeleteBlog } from "@/hooks/useBlogs";
 import toast from "react-hot-toast";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { useState } from "react";
@@ -24,6 +24,7 @@ const BlogActionsCell = ({ blog }: Props) => {
   const { openModal } = useBlogModalStore();
   const { mutate: deleteBlog } = useDeleteBlog();
   const [open, setOpen] = useState(false);
+  const { mutate: changeStatus } = useChangeBlogStatus();
 
   const handleDelete = () => {
     deleteBlog(blog.id, {
@@ -32,6 +33,19 @@ const BlogActionsCell = ({ blog }: Props) => {
         setOpen(false);
       },
     });
+  };
+
+  const handleChangeStatus = () => {
+    const nextStatus = blog.isPublished === true ? false : true;
+    changeStatus(
+      { id: blog.id, isPublished: nextStatus },
+      {
+        onSuccess: () => {
+          toast.success("Đổi trạng thái bài viết thành công");
+          setOpen(false);
+        },
+      }
+    );
   };
 
   return (
@@ -53,6 +67,12 @@ const BlogActionsCell = ({ blog }: Props) => {
           className="cursor-pointer"
         >
           Chỉnh sửa
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleChangeStatus}
+          className="cursor-pointer"
+        >
+          Đổi trạng thái
         </DropdownMenuItem>
 
         <ConfirmDelete

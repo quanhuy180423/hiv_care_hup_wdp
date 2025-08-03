@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardTitle, CardHeader, Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatientTreatments } from "@/hooks/usePatientTreatments";
@@ -8,22 +8,27 @@ import { useTests } from "@/hooks/useTest";
 import { useCreateTestResult } from "@/hooks/useTestResult";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type { Test } from "@/services/testService";
-import type { PatientTreatmentType } from "@/types/patientTreatment";
+import type {
+  PatientInfo,
+  PatientTreatmentType,
+} from "@/types/patientTreatment";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-interface TestResultCreateProps {
-  onClose?: () => void; // Optional close function
+export interface TestResultCreateProps {
+  onClose?: () => void;
+  patientId?: number;
+  patient?: PatientInfo;
 }
 
 const TestResultCreate = (props: TestResultCreateProps) => {
+  const { patientId, patient } = props;
   // State for Patient Treatment Search
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTreatment, setSelectedTreatment] =
     useState<PatientTreatmentType | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // State for Test Search
   const [testSearchQuery, setTestSearchQuery] = useState("");
@@ -62,6 +67,26 @@ const TestResultCreate = (props: TestResultCreateProps) => {
     }
     return { data: [], meta: { total: 0 } };
   }, [treatmentsDataRaw]);
+
+  // Tự động chọn treatment nếu truyền vào patientId hoặc patient
+  // Đặt sau khi khai báo treatmentsData
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if ((patientId || patient) && treatmentsData.data.length > 0) {
+      // Ưu tiên tìm treatment theo patientId
+      const found = treatmentsData.data.find(
+        (t) =>
+          (patientId && t.patient?.id === patientId) ||
+          (patient && t.patient?.id === patient.id)
+      );
+      if (found) {
+        setSelectedTreatment(found);
+        setSearchQuery(found.patient?.name || "");
+        setShowDropdown(false);
+      }
+    }
+  }, [patientId, patient, treatmentsData.data]);
 
   // Fetch Tests
   const { data: testsData, isLoading: isLoadingTests } = useTests({
@@ -146,7 +171,7 @@ const TestResultCreate = (props: TestResultCreateProps) => {
         setShowDropdown(false);
         setShowTestDropdown(false);
         if (props.onClose) {
-          props.onClose(); // Call the optional close function if provided
+          props.onClose();
         }
       }
     } catch (error) {
@@ -183,9 +208,15 @@ const TestResultCreate = (props: TestResultCreateProps) => {
               }
             }}
             className="w-full border-none focus:outline-none"
+            disabled={!!patientId || !!patient}
           />
-
-          {showDropdown && (
+          {(!!patientId || !!patient) && selectedTreatment && (
+            <div className="text-xs text-green-600 mt-1">
+              Đã tự động chọn bệnh nhân:{" "}
+              <b>{selectedTreatment.patient?.name}</b>
+            </div>
+          )}
+          {!patientId && !patient && showDropdown && (
             <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
               {isLoadingPatientTreatments ? (
                 <div className="p-4 text-center">
@@ -318,6 +349,18 @@ const TestResultCreate = (props: TestResultCreateProps) => {
                     "Chưa có thông tin"}
                 </span>
               </div>
+              {selectedTreatment.doctor &&
+                (() => {
+                  const name = selectedTreatment.doctor.user?.name;
+                  const id = selectedTreatment.doctor.id;
+                  if (!name && !id) return null;
+                  return (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Chủ nhiệm điều trị</Badge>
+                      <span>{name || id}</span>
+                    </div>
+                  );
+                })()}
             </div>
           </CardContent>
         </Card>
@@ -397,10 +440,18 @@ const TestResultCreate = (props: TestResultCreateProps) => {
       )}
 
       <div className="flex justify-end m-4 gap-4">
-        <Button variant="outline" onClick={props.onClose} className="cursor-pointer">
+        <Button
+          variant="outline"
+          onClick={props.onClose}
+          className="cursor-pointer"
+        >
           Đóng
         </Button>
-        <Button variant="outline" onClick={() => handleSubmit()} className="cursor-pointer">
+        <Button
+          variant="outline"
+          onClick={() => handleSubmit()}
+          className="cursor-pointer"
+        >
           Tạo yêu cầu
         </Button>
       </div>

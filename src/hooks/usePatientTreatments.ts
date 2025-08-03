@@ -1,4 +1,3 @@
-import { patientTreatmentSchema } from "@/schemas/patientTreatment";
 import {
   createPatientTreatment,
   deletePatientTreatment,
@@ -41,7 +40,7 @@ export const usePatientTreatments = (
         };
       }
       // Fallback for array response
-      if (Array.isArray(res.data) ) {
+      if (Array.isArray(res.data)) {
         return {
           data: res.data,
           meta: {
@@ -66,7 +65,8 @@ export const usePatientTreatment = (id: number, options?: UseQueryOptions) =>
     queryKey: ["patientTreatment", id],
     queryFn: async () => {
       const res = await getPatientTreatmentById(id);
-      return patientTreatmentSchema.parse(res);
+      console.log(`Fetched treatment data for ID ${id}:`, res.data);
+      return res.data;
     },
     enabled: !!id,
     ...(options ?? {}),
@@ -188,3 +188,38 @@ export const useActivePatientTreatmentsByPatient = (patientId?: number) => {
     refetchOnWindowFocus: false,
   });
 };
+
+export const usePatientTreatmentsByDoctor = (
+  doctorId: number | string,
+  query: PatientTreatmentQueryParams = {},
+  options?: UseQueryOptions
+) =>
+  useQuery({
+    queryKey: ["patientTreatmentsByDoctor", doctorId, query],
+    queryFn: async () => {
+      const res = await patientTreatmentService.getByDoctor(doctorId, query);
+      // Xử lý trả về giống các hook khác
+      if (res && res.data && res.data.data && res.data.meta) {
+        return {
+          data: res.data.data,
+          meta: res.data.meta,
+        };
+      }
+      if (Array.isArray(res.data)) {
+        return {
+          data: res.data,
+          meta: {
+            page: res.data.meta.page,
+            limit: res.data.meta.limit,
+            total: res.data.meta.total,
+            totalPages: res.data.meta.totalPages,
+          },
+        };
+      }
+      return {
+        data: [],
+        meta: { page: 1, limit: 0, total: 0, totalPages: 1 },
+      };
+    },
+    ...(options ?? {}),
+  });

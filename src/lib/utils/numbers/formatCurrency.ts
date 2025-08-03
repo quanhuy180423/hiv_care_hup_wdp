@@ -42,3 +42,19 @@ export function formatCurrency(
     return `${numericAmount.toLocaleString()} ${currencyCode}`;
   }
 }
+
+// Format appointment time for Vietnamese display
+export const formatAppointmentTime = (timeString: string) => {
+  const date = new Date(timeString);
+    const dateStr = date.toLocaleDateString("vi-VN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const timeStr = date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return { dateStr, timeStr };
+  };
