@@ -3,6 +3,7 @@ import {
   BookOpen,
   Calculator,
   Calendar,
+  CreditCard,
   DollarSign, // Added from second block
   FileHeart, // Added from second block
   FileText,
@@ -75,6 +76,7 @@ import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
+import Transaction from "./pages/user/transaction/page";
 
 // Route definition interface
 export interface RouteConfig {
@@ -256,6 +258,17 @@ export const userRoutes: RouteConfig[] = [
     icon: Calendar,
     showInNav: false,
     allowedRoles: ["PATIENT", "DOCTOR"],
+  },
+  {
+    path: "/user/transaction",
+    component: Transaction,
+    title: "Lịch sử giao dịch",
+    description: "Xem lịch sử thanh toán và giao dịch",
+    protected: true,
+    layout: "USER_PROFILE",
+    icon: CreditCard,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
   },
 ];
 

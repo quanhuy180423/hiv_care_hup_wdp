@@ -1,29 +1,40 @@
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { appointmentService } from "@/services/appointmentService";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
-import type { Appointment } from "@/types/appointment";
-import type { ActivePatientTreatment } from "@/types/patientTreatment";
-import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
 import {
   PaymentService,
   type PaymentMethod,
-  type RequestCreatePayment,
   type PaymentResponse,
+  type RequestCreatePayment,
 } from "@/services/paymentService";
+import type { Appointment } from "@/types/appointment";
+import type { ActivePatientTreatment } from "@/types/patientTreatment";
+import {
+  Calendar,
+  ClipboardList,
+  FileText,
+  Heart,
+  Pill,
+  Stethoscope,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import PaymentMethodDialog from "./components/PaymentMethodDialog";
+import { useParams } from "react-router-dom";
 import AppointmentCard from "./components/AppointmentCard";
 import PatientTreatmentCard from "./components/PatientTreatmentCard";
+import PaymentMethodDialog from "./components/PaymentMethodDialog";
 import PaymentMethodPatientmentModal from "./components/PaymentMethodPatientmentModal";
 import QRCodeModal from "./components/QRCodeModal";
+import { useAppointmentOrderStore } from "@/store/appointmentStore";
 
 const UserPayment: React.FC = () => {
   const { userId, appointmentTime } = useParams<{
     userId: string;
     appointmentTime: string;
   }>();
+  const { isPayment } = useAppointmentOrderStore();
 
   // --- Appointments State & Logic ---
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -39,7 +50,6 @@ const UserPayment: React.FC = () => {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   // QR Code Modal state
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
@@ -48,11 +58,68 @@ const UserPayment: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleShowQRModalAppointment = async (appointment: Appointment) => {
+    // Tìm order của appointment này
+    const existingOrder = payment.find(
+      (p) => p.appointmentId === appointment.id && p.orderStatus === "PENDING"
+    );
+
+    if (existingOrder) {
+      // Nếu order chưa có paymentUrl, fetch lại từ API
+      if (!existingOrder.paymentUrl && existingOrder.id) {
+        try {
+          const orderDetails = await PaymentService.getPaymentById(
+            existingOrder.id
+          );
+          // Update order with fresh data including paymentUrl
+          setOrder(orderDetails.data);
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          setOrder(existingOrder); // fallback to existing order
+        }
+      } else {
+        setOrder(existingOrder);
+      }
+
+      setSelectedAppointment(appointment);
+      setIsQRModalOpen(true);
+    }
+  };
+
   const handleOpenPatientTreatmentModal = (
     treatment: ActivePatientTreatment
   ) => {
     setSelectedPatientTreatment(treatment);
     setIsModalOpen(true);
+  };
+
+  const handleShowQRModal = async (treatment: ActivePatientTreatment) => {
+    // Tìm order của treatment này
+    const existingOrder = payment.find(
+      (p) =>
+        p.patientTreatmentId === treatment.id && p.orderStatus === "PENDING"
+    );
+
+    if (existingOrder) {
+      // Nếu order chưa có paymentUrl, fetch lại từ API
+      if (!existingOrder.paymentUrl && existingOrder.id) {
+        try {
+          const orderDetails = await PaymentService.getPaymentById(
+            existingOrder.id
+          );
+          // Update order with fresh data including paymentUrl
+          setOrder(orderDetails.data);
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          setOrder(existingOrder); // fallback to existing order
+        }
+      } else {
+        setOrder(existingOrder);
+      }
+
+      setSelectedPatientTreatment(treatment);
+      setIsQRModalOpen(true);
+    }
   };
 
   // --- Patient Treatments State & Logic ---
@@ -67,18 +134,19 @@ const UserPayment: React.FC = () => {
       Number(userId)
     );
     setPatientTreatment(res.data);
-  }, [userId]);
+  }, [userId, selectedPatientTreatment?.id, isPayment]);
 
   const fetchOrders = useCallback(async () => {
     if (!userId) return;
     try {
       const res = await PaymentService.getPaymentByUserId(userId);
+      console.log("Fetched payments for user:", userId, res.data);
       setPayment(res.data);
     } catch (error) {
       console.error("Error fetching orders:", error);
       setPayment([]);
     }
-  }, [userId]);
+  }, [userId, selectedPatientTreatment?.id]);
 
   useEffect(() => {
     if (!userId) return;
@@ -103,12 +171,12 @@ const UserPayment: React.FC = () => {
 
   useEffect(() => {
     fetchActiveTreatmentsUser();
-  }, [fetchActiveTreatmentsUser]);
+    fetchOrders(); // Fetch orders when component mounts
+  }, [fetchActiveTreatmentsUser, fetchOrders]);
 
   const handlePayment = async () => {
     if (!selectedAppointment && !selectedPatientTreatment) return;
     setPayLoading(true);
-    setIsPaymentProcessing(true);
     try {
       let data: RequestCreatePayment | null = null;
 
@@ -132,14 +200,6 @@ const UserPayment: React.FC = () => {
           ],
         };
       } else if (selectedPatientTreatment) {
-        // Ensure selectedPatientTreatment has items
-        if (!selectedPatientTreatment.protocol) {
-          console.error("Patient treatment items are missing.");
-          setPayLoading(false);
-          setIsPaymentProcessing(false);
-          return;
-        }
-
         // Submit for Patient Treatment
         data = {
           userId: Number(userId),
@@ -164,7 +224,7 @@ const UserPayment: React.FC = () => {
               referenceId: med.medicineId ?? 0, // Provide a fallback value for referenceId
               name: med.medicineName || "Unknown Custom Medication",
               quantity: 1, // Default quantity to 1 as `quantity` is not defined
-              unitPrice: med.price || 0, // Ensure unitPrice is a number
+              unitPrice: (med.price ?? 0) * (med.durationValue ?? 1) || 0, // Ensure unitPrice is a number
             })) ?? []),
           ],
         };
@@ -173,15 +233,10 @@ const UserPayment: React.FC = () => {
       if (!data) {
         console.error("No valid data to submit.");
         setPayLoading(false);
-        setIsPaymentProcessing(false);
         return;
       }
-      // console.log("data to submit:", data);
       const res = await PaymentService.createPayment(data);
       if (res.data) {
-        console.log("Payment response:", res.data);
-        console.log("PaymentUrl:", res.data.paymentUrl);
-        console.log("Setting isPaymentProcessing to true");
         setOrder(res.data);
         // Close the payment method modal
         setIsModalOpen(false);
@@ -189,148 +244,209 @@ const UserPayment: React.FC = () => {
         if (paymentMethod?.method === "CASH") {
           toast.success("Thanh toán thành công, không cần quét mã QR");
           setIsQRModalOpen(false);
-          setIsPaymentProcessing(false);
         } else {
           setIsQRModalOpen(true);
         }
       }
     } catch (error) {
       console.error("Error processing payment:", error);
-      setIsPaymentProcessing(false);
     } finally {
       setPayLoading(false);
     }
   };
 
-  useEffect(() => {
-    const compareAndUpdateStatus = async () => {
-      if (!userId) return;
+  // Remove the problematic useEffect that was causing infinite re-renders
+  // The QRCodeModal now handles payment status polling internally
 
-      // Compare appointments
-      appointments.forEach((appointment) => {
-        const paymentMatch = payment.find(
-          (p) => p.appointmentId === appointment.id && p.orderStatus === "PAID"
-        );
-        if (paymentMatch) {
-          // Check if this is the selected appointment being paid
-          if (
-            selectedAppointment?.id === appointment.id &&
-            isPaymentProcessing
-          ) {
-            toast.success(
-              `Thanh toán thành công cho lịch hẹn #${appointment.id}`
-            );
-            setIsQRModalOpen(false);
-            setSelectedAppointment(null);
-            setIsPaymentProcessing(false);
-            setOrder(null);
-          }
-        }
-      });
+  // Memoized callback to prevent unnecessary re-renders in QRCodeModal
+  const handlePaymentSuccess = useCallback(() => {
+    // Handle successful payment
+    if (selectedAppointment) {
+      toast.success(
+        `Thanh toán thành công cho lịch hẹn #${selectedAppointment.id}`
+      );
+    } else if (selectedPatientTreatment) {
+      toast.success(
+        `Thanh toán thành công cho điều trị #${selectedPatientTreatment.id}`
+      );
+      // Refresh treatments list for patient treatments
+      fetchActiveTreatmentsUser();
+    }
 
-      // Compare patient treatments
-      patientTreatment.forEach((treatment) => {
-        const paymentMatch = payment.find(
-          (p) =>
-            p.patientTreatmentId === treatment.id && p.orderStatus === "PAID"
-        );
-        if (paymentMatch) {
-          console.log(`Treatment #${treatment.id} is already paid.`);
-          // Check if this is the selected treatment being paid
-          if (
-            selectedPatientTreatment?.id === treatment.id &&
-            isPaymentProcessing
-          ) {
-            toast.success(
-              `Thanh toán thành công cho điều trị #${treatment.id}`
-            );
-            setIsQRModalOpen(false);
-            setSelectedPatientTreatment(null);
-            setIsPaymentProcessing(false);
-            setOrder(null);
-            fetchActiveTreatmentsUser();
-          }
-        }
-      });
+    // Refetch orders to update the UI
+    fetchOrders();
 
-      // Only fetch orders if payment is processing (to avoid unnecessary calls)
-      if (isPaymentProcessing || payment.length === 0) {
-        setTimeout(() => {
-          fetchOrders();
-        }, 3000);
-      }
-    };
-
-    compareAndUpdateStatus();
+    // Close modal and reset state
+    setIsQRModalOpen(false);
+    setSelectedAppointment(null);
+    setSelectedPatientTreatment(null);
+    setOrder(null);
   }, [
-    userId,
-    appointments,
-    patientTreatment,
-    payment,
     selectedAppointment,
     selectedPatientTreatment,
-    isPaymentProcessing,
     fetchActiveTreatmentsUser,
     fetchOrders,
   ]);
+
+  // Memoized close callback for QRCodeModal
+  const handleQRModalClose = useCallback(() => {
+    setIsQRModalOpen(false);
+    setOrder(null);
+    setSelectedAppointment(null);
+    setSelectedPatientTreatment(null);
+  }, []);
+
   return (
     <>
       <Tabs defaultValue="appointments" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="appointments">Lịch hẹn</TabsTrigger>
-          <TabsTrigger value="patient-treatments">Điều trị</TabsTrigger>
+        <TabsList className="w-full bg-gradient-to-r from-blue-100 to-indigo-100 p-1 rounded-lg">
+          <TabsTrigger
+            value="appointments"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span className="font-medium">Lịch hẹn khám</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="patient-treatments"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Pill className="w-4 h-4" />
+              <span className="font-medium">Phác đồ điều trị</span>
+            </div>
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="patient-treatments">
-          <Card className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <div className="font-semibold text-lg text-primary">
-                Danh sách điều trị cần thanh toán
-              </div>
-            </div>
-            {patientTreatment.length > 0 ? (
-              <div className="space-y-3">
-                {patientTreatment.map((treatment) =>
-                  treatment?.customMedications ||
-                  treatment?.testResults?.length > 0 ? (
-                    <PatientTreatmentCard
-                      key={treatment.id}
-                      onOpenModal={() =>
-                        handleOpenPatientTreatmentModal(treatment)
-                      }
-                      orderLoading={orderLoading}
-                      treatment={treatment}
-                    />
-                  ) : null
-                )}
-              </div>
-            ) : (
-              <div className="text-gray-600">
-                Không có điều trị nào cần thanh toán.
-              </div>
-            )}
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="appointments">
-          <Card className="p-4">
-            <div className="font-semibold text-lg text-primary mb-2">
-              Lịch hẹn
+        {/* Appointments Tab */}
+        <TabsContent value="appointments" className="mt-6">
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 rounded-lg p-2">
+                  <Stethoscope className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Danh sách lịch hẹn cần thanh toán
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Quản lý thanh toán cho các lịch hẹn khám bệnh
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-sm">
+                <Calendar className="w-3 h-3 mr-1" />
+                {appointments.length} lịch hẹn
+              </Badge>
             </div>
+
+            {/* Appointments List */}
             {appointments.length === 0 ? (
-              <div className="text-gray-600">Không có lịch hẹn nào.</div>
+              <Card className="p-8 text-center bg-gray-50 border-dashed">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-gray-100 rounded-full p-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700">
+                      Không có lịch hẹn
+                    </h4>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Chưa có lịch hẹn nào cần xử lý thanh toán
+                    </p>
+                  </div>
+                </div>
+              </Card>
             ) : (
-              <div className="space-y-3 min">
-                {appointments.map((a) => (
-                  <AppointmentCard
-                    key={a.id}
-                    appointment={a}
-                    orderLoading={orderLoading}
-                    onOpenModal={handleOpenModal}
-                  />
+              <div className="grid gap-4">
+                {appointments.map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="transform transition-all duration-200 hover:scale-[1.01]"
+                  >
+                    <AppointmentCard
+                      appointment={appointment}
+                      orderLoading={orderLoading}
+                      onOpenModal={handleOpenModal}
+                      onShowQRModal={handleShowQRModalAppointment}
+                      payments={payment}
+                    />
+                  </div>
                 ))}
               </div>
             )}
-          </Card>
+          </div>
+        </TabsContent>
+
+        {/* Patient Treatments Tab */}
+        <TabsContent value="patient-treatments" className="mt-6">
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-purple-100 rounded-lg p-2">
+                  <Heart className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Phác đồ điều trị cần thanh toán
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Quản lý thanh toán cho thuốc và xét nghiệm
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-sm">
+                <ClipboardList className="w-3 h-3 mr-1" />
+                {patientTreatment.length} phác đồ
+              </Badge>
+            </div>
+
+            {/* Treatments List */}
+            {patientTreatment.length === 0 ? (
+              <Card className="p-8 text-center bg-gray-50 border-dashed">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-gray-100 rounded-full p-4">
+                    <FileText className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700">
+                      Không có phác đồ điều trị
+                    </h4>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Chưa có phác đồ điều trị nào cần xử lý thanh toán
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {patientTreatment.map((treatment) =>
+                  treatment?.customMedications ||
+                  treatment?.testResults?.length > 0 ? (
+                    <div
+                      key={treatment.id}
+                      className="transform transition-all duration-200 hover:scale-[1.01]"
+                    >
+                      <PatientTreatmentCard
+                        treatment={treatment}
+                        onOpenModal={() =>
+                          handleOpenPatientTreatmentModal(treatment)
+                        }
+                        onShowQRModal={handleShowQRModal}
+                        orderLoading={orderLoading}
+                        payments={payment}
+                      />
+                    </div>
+                  ) : null
+                )}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -340,7 +456,6 @@ const UserPayment: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           setOrder(null);
-          setIsPaymentProcessing(false);
         }}
         selectedAppointment={selectedAppointment}
         paymentMethod={paymentMethod}
@@ -355,7 +470,6 @@ const UserPayment: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           setOrder(null);
-          setIsPaymentProcessing(false);
         }}
         selectedTreatment={selectedPatientTreatment}
         paymentMethod={paymentMethod}
@@ -367,16 +481,18 @@ const UserPayment: React.FC = () => {
       {/* QR Code Modal */}
       <QRCodeModal
         isOpen={isQRModalOpen}
-        onClose={() => {
-          setIsQRModalOpen(false);
-          setOrder(null);
-          setIsPaymentProcessing(false);
-        }}
+        onClose={handleQRModalClose}
         qrCodeUrl={order?.paymentUrl || ""}
         orderCode={order?.orderCode || ""}
         amount={order?.totalAmount || 0}
         bankInfo={order?.bankInfo}
-        title="Thanh toán phí khám bệnh HIV"
+        title={
+          selectedPatientTreatment
+            ? "Thanh toán phí điều trị HIV"
+            : "Thanh toán phí khám bệnh HIV"
+        }
+        orderId={order?.id}
+        onPaymentSuccess={handlePaymentSuccess}
       />
     </>
   );

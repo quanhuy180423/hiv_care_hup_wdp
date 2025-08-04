@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type { ActivePatientTreatment } from "@/types/patientTreatment";
+import type { PaymentResponse } from "@/services/paymentService";
 import { Separator } from "@/components/ui/separator";
 import {
   User,
@@ -16,73 +17,24 @@ import {
   CheckCircle,
   AlertCircle,
   CalendarDays,
-  DollarSign,
 } from "lucide-react";
-import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
+import { formatDate } from "@/lib/utils/dates/formatDate";
 
 interface PatientTreatmentCardProps {
   treatment: ActivePatientTreatment;
   orderLoading: number | null;
   onOpenModal: (treatment: ActivePatientTreatment) => void;
+  onShowQRModal?: (treatment: ActivePatientTreatment) => void;
+  payments?: PaymentResponse[];
 }
 
 const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
   treatment,
   orderLoading,
   onOpenModal,
+  onShowQRModal,
+  payments = [],
 }) => {
-  const getTreatmentStatusVariant = (status: string | boolean) => {
-    if (typeof status === "boolean") {
-      return status ? "success" : "warning";
-    }
-    switch (status) {
-      case "ONGOING":
-        return "default";
-      case "COMPLETED":
-        return "success";
-      case "DISCONTINUED":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const getTreatmentStatusLabel = (status: string | boolean) => {
-    if (typeof status === "boolean") {
-      return status ? "Đã thanh toán" : "Chờ thanh toán";
-    }
-    switch (status) {
-      case "ONGOING":
-        return "Đang điều trị";
-      case "COMPLETED":
-        return "Đã hoàn thành";
-      case "DISCONTINUED":
-        return "Đã dừng";
-      default:
-        return status;
-    }
-  };
-
-  const getTreatmentStatusIcon = (status: string | boolean) => {
-    if (typeof status === "boolean") {
-      return status ? (
-        <CheckCircle className="w-4 h-4" />
-      ) : (
-        <AlertCircle className="w-4 h-4" />
-      );
-    }
-    switch (status) {
-      case "ONGOING":
-        return <Clock className="w-4 h-4" />;
-      case "COMPLETED":
-        return <CheckCircle className="w-4 h-4" />;
-      case "DISCONTINUED":
-        return <AlertCircle className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
-
   const totalPrice =
     (treatment?.customMedications?.reduce(
       (acc, medication) =>
@@ -93,6 +45,26 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
       (acc, result) => acc + Number(result?.test?.price || 0),
       0
     ) || 0);
+
+  // Kiểm tra status của order cho treatment này
+  const existingOrder = payments.find(
+    (payment) => payment.patientTreatmentId === treatment.id
+  );
+
+  const orderStatus = existingOrder?.orderStatus;
+  const isPaid = orderStatus === "PAID";
+  const isPending = orderStatus === "PENDING";
+
+  // Function để xử lý click button
+  const handleButtonClick = () => {
+    if (isPending && onShowQRModal) {
+      // Nếu order đang PENDING, hiển thị QR modal
+      onShowQRModal(treatment);
+    } else if (!isPaid) {
+      // Nếu chưa có order hoặc order không PAID, mở modal tạo payment
+      onOpenModal(treatment);
+    }
+  };
 
   return (
     <Card className="p-6 bg-white shadow-lg border-l-4 border-l-green-500 hover:shadow-xl transition-shadow duration-200">
@@ -106,47 +78,57 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                 Điều trị #{treatment.id}
               </h3>
             </div>
-            {treatment.isCurrent && (
+          </div>
+
+          <div className="flex flex-col items-end gap-3">
+            {/* Payment Status Badge */}
+            {isPaid && (
               <Badge
                 variant="default"
                 className="bg-green-100 text-green-800 border-green-300"
               >
-                <Clock className="w-3 h-3 mr-1" />
-                Hiện tại
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Đã thanh toán
               </Badge>
             )}
-          </div>
-
-          <div className="flex flex-col items-end gap-3">
-            {/* Treatment Status */}
-            {treatment.treatmentStatus && (
+            {isPending && (
               <Badge
-                variant={getTreatmentStatusVariant(treatment.treatmentStatus)}
-                className="text-sm font-semibold flex items-center gap-2 px-3 py-1"
+                variant="secondary"
+                className="bg-orange-100 text-orange-800 border-orange-300"
               >
-                {getTreatmentStatusIcon(treatment.treatmentStatus)}
-                {getTreatmentStatusLabel(treatment.treatmentStatus)}
+                <Clock className="w-4 h-4 mr-1" />
+                Chờ thanh toán
               </Badge>
             )}
 
-            {/* Payment Status & Total Cost */}
+            {/* Total Cost */}
             <div className="text-right space-y-2">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-600" />
+              {/* <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-green-700">
                   {formatCurrency(totalPrice)}
                 </span>
-              </div>
-              {treatment.status !== true && (
+              </div> */}
+
+              {/* Payment Button - Only show if not paid */}
+              {!isPaid && (
                 <Button
-                  onClick={() => onOpenModal(treatment)}
+                  onClick={handleButtonClick}
                   disabled={orderLoading === treatment.id}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md"
+                  className={`${
+                    isPending
+                      ? "bg-orange-600 hover:bg-orange-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  } text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md`}
                 >
                   {orderLoading === treatment.id ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                       Đang xử lý...
+                    </div>
+                  ) : isPending ? (
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      Xem QR thanh toán
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -156,6 +138,15 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                   )}
                 </Button>
               )}
+
+              {/* Paid status message */}
+              {/* {isPaid && (
+                <div className="text-center">
+                  <p className="text-sm text-green-600 font-medium">
+                    Thanh toán đã hoàn tất
+                  </p>
+                </div>
+              )} */}
             </div>
           </div>
         </div>
@@ -235,12 +226,12 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+            <div className="flex space-x-4 items-center">
               <p className="text-sm font-medium text-orange-700">
-                Ngày bắt đầu
+                Ngày bắt đầu:
               </p>
               <p className="font-semibold text-orange-900">
-                {formatUtcDateManually(treatment.startDate)}
+                {formatDate(treatment.startDate)}
               </p>
             </div>
             {treatment.endDate && (
@@ -249,7 +240,7 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                   Ngày kết thúc
                 </p>
                 <p className="font-semibold text-orange-900">
-                  {formatUtcDateManually(treatment.endDate)}
+                  {formatDate(treatment.endDate)}
                 </p>
               </div>
             )}
@@ -414,7 +405,7 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                        <div>
+                        <div className=" flex space-x-4">
                           <span className="font-medium text-purple-700">
                             Kết quả:
                           </span>
@@ -422,7 +413,7 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                             {testResult.rawResultValue} {testResult.unit}
                           </p>
                         </div>
-                        <div>
+                        <div className=" flex space-x-4">
                           <span className="font-medium text-purple-700">
                             Diễn giải:
                           </span>
@@ -430,31 +421,31 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
                             {testResult.interpretation}
                           </p>
                         </div>
-                        <div>
+                        <div className="flex space-x-4">
                           <span className="font-medium text-purple-700">
                             Ngày thực hiện:
                           </span>
                           <p className="text-purple-800">
-                            {formatUtcDateManually(testResult.resultDate)}
+                            {formatDate(testResult.resultDate, "dd/MM/yyyy")}
                           </p>
                         </div>
-                        <div>
+                        <div className="flex space-x-4">
                           <span className="font-medium text-purple-700">
                             Trạng thái:
                           </span>
                           <Badge
                             variant={
-                              testResult.status === "FINAL"
+                              testResult.status === "Completed"
                                 ? "default"
                                 : "secondary"
                             }
                             className={`text-xs ${
-                              testResult.status === "FINAL"
+                              testResult.status === "Completed"
                                 ? "bg-green-100 text-green-800 border-green-300"
                                 : "bg-yellow-100 text-yellow-800 border-yellow-300"
                             }`}
                           >
-                            {testResult.status === "FINAL" ? (
+                            {testResult.status === "Completed" ? (
                               <div className="flex items-center gap-1">
                                 <CheckCircle className="w-3 h-3" />
                                 Hoàn thành
@@ -483,7 +474,7 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
 
                     {testResult.test?.price && (
                       <div className="text-right">
-                        <div className="bg-green-100 rounded-lg p-3 border border-green-300">
+                        <div className="bg-green-100 flex gap-2 items-center rounded-lg p-3 border border-green-300">
                           <p className="text-sm font-medium text-green-700">
                             Chi phí
                           </p>
@@ -504,7 +495,6 @@ const PatientTreatmentCard: React.FC<PatientTreatmentCardProps> = ({
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border-2 border-green-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <DollarSign className="w-6 h-6 text-green-600" />
               <h4 className="font-bold text-xl text-green-800">
                 Tổng chi phí điều trị
               </h4>

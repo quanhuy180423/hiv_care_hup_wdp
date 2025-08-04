@@ -33,43 +33,43 @@ interface StaffLayoutProps {
 }
 
 const sidebarNav = [
-  { 
-    name: "Thông tin cá nhân", 
-    icon: User, 
+  {
+    name: "Thông tin cá nhân",
+    icon: User,
     path: "/staff/profile",
     color: "text-blue-600",
     bgColor: "bg-blue-50/80",
     hoverColor: "hover:bg-blue-50/60",
-    description: "Quản lý hồ sơ cá nhân"
+    description: "Quản lý hồ sơ cá nhân",
   },
-  { 
-    name: "Lịch hẹn", 
-    icon: Calendar, 
+  {
+    name: "Lịch hẹn",
+    icon: Calendar,
     path: "/staff/appointments",
     color: "text-emerald-600",
     bgColor: "bg-emerald-50/80",
     hoverColor: "hover:bg-emerald-50/60",
     badge: "5",
-    description: "Lịch hẹn và cuộc gặp"
+    description: "Lịch hẹn và cuộc gặp",
   },
-  { 
-    name: "Tin tức", 
-    icon: FileHeart, 
+  {
+    name: "Tin tức",
+    icon: FileHeart,
     path: "/staff/blog",
     color: "text-rose-600",
     bgColor: "bg-rose-50/80",
     hoverColor: "hover:bg-rose-50/60",
     badge: "2",
-    description: "Quản lý bài viết tin tức"
+    description: "Quản lý bài viết tin tức",
   },
-  { 
-    name: "Danh mục tin tức", 
-    icon: FileText, 
+  {
+    name: "Danh mục tin tức",
+    icon: FileText,
     path: "/staff/blog-categories",
     color: "text-violet-600",
     bgColor: "bg-violet-50/80",
     hoverColor: "hover:bg-violet-50/60",
-    description: "Phân loại danh mục"
+    description: "Phân loại danh mục",
   },
 ];
 
@@ -77,7 +77,7 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  
+
   const handleLogout = () => {
     logout()
       .then(() => {
@@ -101,33 +101,35 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
               {/* Background Pattern */}
               <div className="absolute inset-0 bg-gradient-to-br from-slate-500/8 via-blue-500/8 to-indigo-500/8" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.15),transparent_50%)]" />
-              
+
               <div className="relative px-6 py-6">
                 {/* Logo & Status */}
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur-md opacity-30" />
-                    <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl">
-                      <img
-                        src={Assets.logoHIV}
-                        alt="HIV Care Hub"
-                        className="w-8 h-8 rounded-lg object-cover"
-                      />
+                <Link to="/">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur-md opacity-30" />
+                      <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl">
+                        <img
+                          src={Assets.logoHIV}
+                          alt="HIV Care Hub"
+                          className="w-8 h-8 rounded-lg object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-slate-600 bg-clip-text text-transparent">
+                        HIV Care Hub
+                      </h1>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Shield className="w-3 h-3 text-blue-500" />
+                        <span className="text-xs font-semibold text-blue-600">
+                          Nhân viên hỗ trợ
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-slate-600 bg-clip-text text-transparent">
-                      HIV Care Hub
-                    </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Shield className="w-3 h-3 text-blue-500" />
-                      <span className="text-xs font-semibold text-blue-600">
-                        Nhân viên hỗ trợ
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                </Link>
               </div>
             </div>
 
@@ -140,7 +142,7 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                     <span>Khu vực nhân viên</span>
                   </div>
                 </SidebarGroupLabel>
-                
+
                 <SidebarGroupContent className="space-y-2">
                   <SidebarMenu>
                     {sidebarNav.map((item) => {
@@ -162,22 +164,26 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                               {isActive && (
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-gradient-to-b from-blue-500 via-indigo-500 to-slate-500 rounded-r-full shadow-lg" />
                               )}
-                              
+
                               {/* Icon Container */}
-                              <div className={cn(
-                                "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
-                                isActive 
-                                  ? "bg-white/80 shadow-md scale-110" 
-                                  : "bg-slate-100/60 group-hover:bg-white/80 group-hover:scale-105"
-                              )}>
-                                <item.icon className={cn(
-                                  "w-5 h-5 transition-all duration-300",
-                                  isActive 
-                                    ? item.color 
-                                    : "text-slate-500 group-hover:text-slate-700"
-                                )} />
+                              <div
+                                className={cn(
+                                  "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+                                  isActive
+                                    ? "bg-white/80 shadow-md scale-110"
+                                    : "bg-slate-100/60 group-hover:bg-white/80 group-hover:scale-105"
+                                )}
+                              >
+                                <item.icon
+                                  className={cn(
+                                    "w-5 h-5 transition-all duration-300",
+                                    isActive
+                                      ? item.color
+                                      : "text-slate-500 group-hover:text-slate-700"
+                                  )}
+                                />
                               </div>
-                              
+
                               {/* Content */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
@@ -189,7 +195,7 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                                   {item.description}
                                 </p>
                               </div>
-                              
+
                               {/* Shine Effect */}
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 rounded-2xl" />
                             </Link>
@@ -213,11 +219,14 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                 >
                   <Bell className="w-4 h-4" />
                   <span className="text-xs">Thông báo</span>
-                  <Badge variant="secondary" className="w-5 h-5 text-[10px] p-0 flex items-center justify-center bg-blue-500 text-white hover:bg-blue-500">
+                  <Badge
+                    variant="secondary"
+                    className="w-5 h-5 text-[10px] p-0 flex items-center justify-center bg-blue-500 text-white hover:bg-blue-500"
+                  >
                     2
                   </Badge>
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -262,15 +271,16 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                       Chào mừng, Nhân viên {user?.name}
                     </h2>
                     <p className="text-sm text-slate-600">
-                      Hôm nay là {new Date().toLocaleDateString('vi-VN', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      Hôm nay là{" "}
+                      {new Date().toLocaleDateString("vi-VN", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-full">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
@@ -281,11 +291,9 @@ export default function SidebarStaff({ children }: StaffLayoutProps) {
                   </div>
                 </div>
               </div>
-              
+
               {/* Page Content */}
-              <div className="p-6">
-                {children ?? <Outlet />}
-              </div>
+              <div className="p-6">{children ?? <Outlet />}</div>
             </div>
           </div>
         </main>

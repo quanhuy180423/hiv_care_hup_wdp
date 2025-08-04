@@ -36,33 +36,33 @@ interface DoctorLayoutProps {
 }
 
 const sidebarNav = [
-  { 
-    name: "Hồ sơ cá nhân", 
-    icon: User, 
+  {
+    name: "Hồ sơ cá nhân",
+    icon: User,
     path: "/doctor/profile",
     color: "text-blue-600",
     bgColor: "bg-blue-50/80",
     hoverColor: "hover:bg-blue-50/60",
-    description: "Thông tin & cài đặt tài khoản"
+    description: "Thông tin & cài đặt tài khoản",
   },
-  { 
-    name: "Lịch khám bệnh", 
-    icon: CalendarClock, 
+  {
+    name: "Lịch khám bệnh",
+    icon: CalendarClock,
     path: "/doctor/appointments",
     color: "text-emerald-600",
     bgColor: "bg-emerald-50/80",
     hoverColor: "hover:bg-emerald-50/60",
     badge: "12",
-    description: "Quản lý cuộc hẹn với bệnh nhân"
+    description: "Quản lý cuộc hẹn với bệnh nhân",
   },
-  { 
-    name: "Lịch trực", 
-    icon: Calendar, 
+  {
+    name: "Lịch trực",
+    icon: Calendar,
     path: "/doctor/schedule",
     color: "text-violet-600",
     bgColor: "bg-violet-50/80",
     hoverColor: "hover:bg-violet-50/60",
-    description: "Lịch làm việc & ca trực"
+    description: "Lịch làm việc & ca trực",
   },
   {
     name: "Theo dõi điều trị",
@@ -72,7 +72,7 @@ const sidebarNav = [
     bgColor: "bg-rose-50/80",
     hoverColor: "hover:bg-rose-50/60",
     badge: "3",
-    description: "Quản lý điều trị bệnh nhân HIV"
+    description: "Quản lý điều trị bệnh nhân HIV",
   },
   {
     name: "Kết quả xét nghiệm",
@@ -82,7 +82,7 @@ const sidebarNav = [
     bgColor: "bg-amber-50/80",
     hoverColor: "hover:bg-amber-50/60",
     badge: "5",
-    description: "Xem & phân tích kết quả xét nghiệm"
+    description: "Xem & phân tích kết quả xét nghiệm",
   },
 ];
 
@@ -90,7 +90,7 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  
+
   const handleLogout = () => {
     logout()
       .then(() => {
@@ -114,37 +114,39 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
               {/* Background Pattern */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-indigo-500/8 to-violet-500/8" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.15),transparent_50%)]" />
-              
+
               <div className="relative px-6 py-4">
                 {/* Logo & Status */}
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-md opacity-30" />
-                    <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                      <img
-                        src={Assets.logoHIV}
-                        alt="HIV Care Hub"
-                        className="w-8 h-8 rounded-lg object-cover"
-                      />
+                <Link to="/">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-md opacity-30" />
+                      <div className="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                        <img
+                          src={Assets.logoHIV}
+                          alt="HIV Care Hub"
+                          className="w-8 h-8 rounded-lg object-cover"
+                        />
+                      </div>
+                      {/* Online Status */}
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm">
+                        <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
+                      </div>
                     </div>
-                    {/* Online Status */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm">
-                      <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
+
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        HIV Care Hub
+                      </h1>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Shield className="w-3 h-3 text-emerald-500" />
+                        <span className="text-xs font-semibold text-emerald-600">
+                          Bác sĩ chuyên khoa
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                      HIV Care Hub
-                    </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Shield className="w-3 h-3 text-emerald-500" />
-                      <span className="text-xs font-semibold text-emerald-600">
-                        Bác sĩ chuyên khoa
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                </Link>
 
                 {/* Quick Stats */}
                 {/* <div className="grid grid-cols-2 gap-3">
@@ -176,7 +178,7 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                     <span>Công cụ làm việc</span>
                   </div>
                 </SidebarGroupLabel>
-                
+
                 <SidebarGroupContent className="space-y-2">
                   <SidebarMenu>
                     {sidebarNav.map((item) => {
@@ -198,22 +200,26 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                               {isActive && (
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-gradient-to-b from-blue-500 via-indigo-500 to-violet-500 rounded-r-full shadow-lg" />
                               )}
-                              
+
                               {/* Icon Container */}
-                              <div className={cn(
-                                "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
-                                isActive 
-                                  ? "bg-white/80 shadow-md scale-110" 
-                                  : "bg-slate-100/60 group-hover:bg-white/80 group-hover:scale-105"
-                              )}>
-                                <item.icon className={cn(
-                                  "w-5 h-5 transition-all duration-300",
-                                  isActive 
-                                    ? item.color 
-                                    : "text-slate-500 group-hover:text-slate-700"
-                                )} />
+                              <div
+                                className={cn(
+                                  "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+                                  isActive
+                                    ? "bg-white/80 shadow-md scale-110"
+                                    : "bg-slate-100/60 group-hover:bg-white/80 group-hover:scale-105"
+                                )}
+                              >
+                                <item.icon
+                                  className={cn(
+                                    "w-5 h-5 transition-all duration-300",
+                                    isActive
+                                      ? item.color
+                                      : "text-slate-500 group-hover:text-slate-700"
+                                  )}
+                                />
                               </div>
-                              
+
                               {/* Content */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
@@ -225,7 +231,7 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                                   {item.description}
                                 </p>
                               </div>
-                              
+
                               {/* Shine Effect */}
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 rounded-2xl" />
                             </Link>
@@ -249,11 +255,14 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                 >
                   <Bell className="w-4 h-4" />
                   <span className="text-xs">Thông báo</span>
-                  <Badge variant="secondary" className="w-5 h-5 text-[10px] p-0 flex items-center justify-center bg-blue-500 text-white hover:bg-blue-500">
+                  <Badge
+                    variant="secondary"
+                    className="w-5 h-5 text-[10px] p-0 flex items-center justify-center bg-blue-500 text-white hover:bg-blue-500"
+                  >
                     3
                   </Badge>
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -298,15 +307,16 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                       Chào mừng, Bác sĩ {user?.name}
                     </h2>
                     <p className="text-sm text-slate-600">
-                      Hôm nay là {new Date().toLocaleDateString('vi-VN', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      Hôm nay là{" "}
+                      {new Date().toLocaleDateString("vi-VN", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-3 py-1 bg-emerald-100 rounded-full">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -317,11 +327,9 @@ export default function SidebarDoctor({ children }: DoctorLayoutProps) {
                   </div>
                 </div>
               </div>
-              
+
               {/* Page Content */}
-              <div className="p-4">
-                {children ?? <Outlet />}
-              </div>
+              <div className="p-4">{children ?? <Outlet />}</div>
             </div>
           </div>
         </main>

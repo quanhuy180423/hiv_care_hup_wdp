@@ -16,8 +16,7 @@ import useAuthStore from "@/store/authStore";
 import type { CustomApiError } from "@/types/api";
 import type { Appointment } from "@/types/appointment";
 import type { PatientTreatmentType as BasePatientTreatmentType } from "@/types/patientTreatment";
-import { AlertTriangle, FileX2, Loader2, Plus } from "lucide-react";
-import { RefreshCcw } from "lucide-react";
+import { AlertTriangle, FileX2, Loader2, Plus, RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -73,10 +72,8 @@ const DoctorPatientTreatments = () => {
   );
 
   // Lấy danh sách lịch hẹn của bác sĩ
-  const { data: appointmentsData } = useAppointmentsByDoctor(
-    doctorIdFromUser ?? 0,
-    { page: 1, limit: 1000 }
-  );
+  const { data: appointmentsData, refetch: refetchAppointments } =
+    useAppointmentsByDoctor(doctorIdFromUser ?? 0, { page: 1, limit: 1000 });
 
   const appointmentsList: Appointment[] = useMemo(() => {
     if (Array.isArray(appointmentsData)) {
@@ -200,6 +197,7 @@ const DoctorPatientTreatments = () => {
 
   const handleRefresh = () => {
     refetchTreatments();
+    refetchAppointments();
     toast.success("Đã làm mới danh sách hồ sơ bệnh nhân!");
   };
 
