@@ -195,9 +195,6 @@ const PaymentMethodDialog: React.FC<PaymentMethodDialogProps> = ({
                           <p className="font-semibold">
                             Chuyển khoản ngân hàng
                           </p>
-                          <p className="text-sm text-gray-600">
-                            Thanh toán qua QR Code
-                          </p>
                         </div>
                       </div>
                     </SelectItem>

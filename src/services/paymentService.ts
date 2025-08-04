@@ -81,7 +81,7 @@ export const PaymentService = {
   },
 
   getPaymentById: async (id: number): Promise<PaymentResponse> => {
-    const res = await apiClient.get<PaymentResponse>(`/payments/${id}`);
+    const res = await apiClient.get<PaymentResponse>(`/orders/${id}`);
     return res.data;
   },
 

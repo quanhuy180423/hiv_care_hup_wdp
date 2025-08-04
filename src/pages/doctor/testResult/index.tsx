@@ -15,28 +15,28 @@ import type { TestResult } from "@/services/testResultService";
 import TestResultEditForm from "./components/TestResultEditForm";
 import TestResultCreate from "./components/TestResultCreate";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  FileText, 
+import {
+  Plus,
+  FileText,
   Activity,
   ClipboardList,
   CheckCircle2,
   Clock,
-  type LucideIcon
+  type LucideIcon,
 } from "lucide-react";
 
 // Stats Card Component
-const StatsCard = ({ 
-  title, 
-  value, 
-  icon: Icon, 
-  bgColor, 
-  textColor 
-}: { 
-  title: string; 
-  value: number; 
-  icon: LucideIcon; 
-  bgColor: string; 
+const StatsCard = ({
+  title,
+  value,
+  icon: Icon,
+  bgColor,
+  textColor,
+}: {
+  title: string;
+  value: number;
+  icon: LucideIcon;
+  bgColor: string;
   textColor: string;
 }) => (
   <Card className="border-0 shadow-sm">
@@ -61,7 +61,8 @@ const TestResultPage = () => {
   const [isModalOpenDetail, setIsModalOpenDetail] = useState(false);
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
   const [defaultValues, setDefaultValues] = useState<TestResult | null>(null);
-  const [selectedTestResult, setSelectedTestResult] = useState<TestResult | null>(null);
+  const [selectedTestResult, setSelectedTestResult] =
+    useState<TestResult | null>(null);
 
   const {
     data: testResultsData,
@@ -92,12 +93,14 @@ const TestResultPage = () => {
   // Calculate stats
   const stats = {
     total: testResultsData?.data?.meta.total || 0,
-    completed: testResultsData?.data?.data.filter((item: TestResult) => 
-      item.status === "Completed"
-    ).length || 0,
-    processing: testResultsData?.data?.data.filter((item: TestResult) => 
-      item.status === "Processing"
-    ).length || 0,
+    completed:
+      testResultsData?.data?.data.filter(
+        (item: TestResult) => item.status === "Completed"
+      ).length || 0,
+    processing:
+      testResultsData?.data?.data.filter(
+        (item: TestResult) => item.status === "Processing"
+      ).length || 0,
   };
 
   return (
@@ -115,8 +118,8 @@ const TestResultPage = () => {
             </p>
           </div>
 
-          <Button 
-            onClick={() => setIsModalOpenCreate(true)} 
+          <Button
+            onClick={() => setIsModalOpenCreate(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -172,7 +175,7 @@ const TestResultPage = () => {
               totalItems={testResultsData?.data?.meta.total || 0}
               pageSize={testResultsData?.data?.meta.limit || 10}
               initialState={{
-                sorting: [{ id: "resultDate", desc: true }]
+                sorting: [{ id: "resultDate", desc: true }],
               }}
             />
           </CardContent>
@@ -216,7 +219,7 @@ const TestResultPage = () => {
         </Dialog>
 
         <Dialog open={isModalOpenEdit} onOpenChange={setIsModalOpenEdit}>
-          <DialogContent className="bg-white max-w-4xl">
+          <DialogContent className="bg-white max-w-7xl min-w-4xl border-none">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-600" />

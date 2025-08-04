@@ -73,8 +73,8 @@ export default function TreatmentSchedule() {
 
   const treatmentList = treatments?.data.data || [];
   const activeTreatmentList = activeTreatmentsData?.data?.length
-  ? [activeTreatmentsData.data[0]]
-  : [];
+    ? [activeTreatmentsData.data[0]]
+    : [];
 
   const renderTreatmentCard = (
     treatment: PatientTreatmentType | ActivePatientTreatment
@@ -209,57 +209,6 @@ export default function TreatmentSchedule() {
                 <Pill className="w-4 h-4 text-primary" />
                 Thuốc điều trị
               </h3>
-              {/* Protocol Medicines */}
-              {treatment.protocol?.medicines &&
-                treatment.protocol.medicines.length > 0 && (
-                  <div className="space-y-3">
-                    <div className="space-y-3">
-                      {treatment.protocol.medicines.map((med) => (
-                        <div
-                          key={med.id}
-                          className="flex gap-3 p-3 bg-muted/30 rounded-lg"
-                        >
-                          <div className="flex-1">
-                            <p className="font-medium flex items-center gap-2">
-                              {med.medicine?.name || "Thuốc không xác định"}
-                              <Badge
-                                variant="secondary"
-                                className="text-xs h-5"
-                              >
-                                {med.medicine?.dose || "Liều không xác định"}
-                              </Badge>
-                            </p>
-                            <div className="grid grid-cols-3 gap-2 mt-1">
-                              <div>
-                                <p className="text-xs text-muted-foreground">
-                                  Liều dùng
-                                </p>
-                                <p className="text-sm">{med.dosage}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground">
-                                  Thời gian
-                                </p>
-                                <p className="text-sm">
-                                  {med.durationValue}{" "}
-                                  {med.durationUnit?.toLowerCase()}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground">
-                                  Cách dùng
-                                </p>
-                                <p className="text-sm">
-                                  {med.notes || "Theo chỉ định"}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
               {/* Custom Medications */}
               {treatment.customMedications &&
@@ -516,8 +465,7 @@ export default function TreatmentSchedule() {
           )}
         </TabsContent>
       </Tabs>
-      <MeetingRecordListForPatient
-       />
+      <MeetingRecordListForPatient />
     </div>
   );
 }

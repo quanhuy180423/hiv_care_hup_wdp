@@ -28,7 +28,6 @@ import { Card } from "@/components/ui/card";
 import {
   User,
   Stethoscope,
-  Clock,
   FileText,
   Pill,
   TestTube,
@@ -98,7 +97,7 @@ const PaymentMethodPatientmentModal: React.FC<
                   <h3 className="font-bold text-2xl text-green-800">
                     Điều trị #{treatment.id}
                   </h3>
-                  {treatment.isCurrent && (
+                  {/* {treatment.isCurrent && (
                     <Badge
                       variant="default"
                       className="bg-green-100 text-green-800 border-green-300"
@@ -106,17 +105,17 @@ const PaymentMethodPatientmentModal: React.FC<
                       <Clock className="w-3 h-3 mr-1" />
                       Hiện tại
                     </Badge>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="flex flex-col items-end gap-3">
-                  {treatment.treatmentStatus && (
+                  {/* {treatment.treatmentStatus && (
                     <Badge className="text-lg font-semibold px-4 py-2 bg-blue-100 text-blue-800 border-blue-300">
                       {treatment.treatmentStatus
-                        ? "Đã thanh toán"
-                        : "Chưa thanh toán"}
+                        ? "Phát đồ đang được sử dụng" 
+                        : "Phát đồ chưa được sử dụng"}
                     </Badge>
-                  )}
+                  )} */}
 
                   <div className="text-right">
                     <p className="text-sm text-gray-600">
@@ -341,7 +340,9 @@ const PaymentMethodPatientmentModal: React.FC<
                                   Giá thuốc
                                 </p>
                                 <p className="text-lg font-bold text-green-800">
-                                  {formatCurrency(med.price)}
+                                  {formatCurrency(
+                                    med.price * (med.durationValue || 1)
+                                  )}
                                 </p>
                               </div>
                             )}

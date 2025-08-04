@@ -39,7 +39,6 @@ const UserPayment: React.FC = () => {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   // QR Code Modal state
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
@@ -48,11 +47,68 @@ const UserPayment: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleShowQRModalAppointment = async (appointment: Appointment) => {
+    // Tìm order của appointment này
+    const existingOrder = payment.find(
+      (p) => p.appointmentId === appointment.id && p.orderStatus === "PENDING"
+    );
+
+    if (existingOrder) {
+      // Nếu order chưa có paymentUrl, fetch lại từ API
+      if (!existingOrder.paymentUrl && existingOrder.id) {
+        try {
+          const orderDetails = await PaymentService.getPaymentById(
+            existingOrder.id
+          );
+          // Update order with fresh data including paymentUrl
+          setOrder(orderDetails);
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          setOrder(existingOrder); // fallback to existing order
+        }
+      } else {
+        setOrder(existingOrder);
+      }
+
+      setSelectedAppointment(appointment);
+      setIsQRModalOpen(true);
+    }
+  };
+
   const handleOpenPatientTreatmentModal = (
     treatment: ActivePatientTreatment
   ) => {
     setSelectedPatientTreatment(treatment);
     setIsModalOpen(true);
+  };
+
+  const handleShowQRModal = async (treatment: ActivePatientTreatment) => {
+    // Tìm order của treatment này
+    const existingOrder = payment.find(
+      (p) =>
+        p.patientTreatmentId === treatment.id && p.orderStatus === "PENDING"
+    );
+
+    if (existingOrder) {
+      // Nếu order chưa có paymentUrl, fetch lại từ API
+      if (!existingOrder.paymentUrl && existingOrder.id) {
+        try {
+          const orderDetails = await PaymentService.getPaymentById(
+            existingOrder.id
+          );
+          // Update order with fresh data including paymentUrl
+          setOrder(orderDetails);
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+          setOrder(existingOrder); // fallback to existing order
+        }
+      } else {
+        setOrder(existingOrder);
+      }
+
+      setSelectedPatientTreatment(treatment);
+      setIsQRModalOpen(true);
+    }
   };
 
   // --- Patient Treatments State & Logic ---
@@ -67,18 +123,19 @@ const UserPayment: React.FC = () => {
       Number(userId)
     );
     setPatientTreatment(res.data);
-  }, [userId]);
+  }, [userId, selectedPatientTreatment?.id]);
 
   const fetchOrders = useCallback(async () => {
     if (!userId) return;
     try {
       const res = await PaymentService.getPaymentByUserId(userId);
+      console.log("Fetched payments for user:", userId, res.data);
       setPayment(res.data);
     } catch (error) {
       console.error("Error fetching orders:", error);
       setPayment([]);
     }
-  }, [userId]);
+  }, [userId, selectedPatientTreatment?.id]);
 
   useEffect(() => {
     if (!userId) return;
@@ -103,12 +160,12 @@ const UserPayment: React.FC = () => {
 
   useEffect(() => {
     fetchActiveTreatmentsUser();
-  }, [fetchActiveTreatmentsUser]);
+    fetchOrders(); // Fetch orders when component mounts
+  }, [fetchActiveTreatmentsUser, fetchOrders]);
 
   const handlePayment = async () => {
     if (!selectedAppointment && !selectedPatientTreatment) return;
     setPayLoading(true);
-    setIsPaymentProcessing(true);
     try {
       let data: RequestCreatePayment | null = null;
 
@@ -132,14 +189,6 @@ const UserPayment: React.FC = () => {
           ],
         };
       } else if (selectedPatientTreatment) {
-        // Ensure selectedPatientTreatment has items
-        if (!selectedPatientTreatment.protocol) {
-          console.error("Patient treatment items are missing.");
-          setPayLoading(false);
-          setIsPaymentProcessing(false);
-          return;
-        }
-
         // Submit for Patient Treatment
         data = {
           userId: Number(userId),
@@ -164,7 +213,7 @@ const UserPayment: React.FC = () => {
               referenceId: med.medicineId ?? 0, // Provide a fallback value for referenceId
               name: med.medicineName || "Unknown Custom Medication",
               quantity: 1, // Default quantity to 1 as `quantity` is not defined
-              unitPrice: med.price || 0, // Ensure unitPrice is a number
+              unitPrice: (med.price ?? 0) * (med.durationValue ?? 1) || 0, // Ensure unitPrice is a number
             })) ?? []),
           ],
         };
@@ -173,15 +222,10 @@ const UserPayment: React.FC = () => {
       if (!data) {
         console.error("No valid data to submit.");
         setPayLoading(false);
-        setIsPaymentProcessing(false);
         return;
       }
-      // console.log("data to submit:", data);
       const res = await PaymentService.createPayment(data);
       if (res.data) {
-        console.log("Payment response:", res.data);
-        console.log("PaymentUrl:", res.data.paymentUrl);
-        console.log("Setting isPaymentProcessing to true");
         setOrder(res.data);
         // Close the payment method modal
         setIsModalOpen(false);
@@ -189,96 +233,68 @@ const UserPayment: React.FC = () => {
         if (paymentMethod?.method === "CASH") {
           toast.success("Thanh toán thành công, không cần quét mã QR");
           setIsQRModalOpen(false);
-          setIsPaymentProcessing(false);
         } else {
           setIsQRModalOpen(true);
         }
       }
     } catch (error) {
       console.error("Error processing payment:", error);
-      setIsPaymentProcessing(false);
     } finally {
       setPayLoading(false);
     }
   };
 
-  useEffect(() => {
-    const compareAndUpdateStatus = async () => {
-      if (!userId) return;
+  // Remove the problematic useEffect that was causing infinite re-renders
+  // The QRCodeModal now handles payment status polling internally
 
-      // Compare appointments
-      appointments.forEach((appointment) => {
-        const paymentMatch = payment.find(
-          (p) => p.appointmentId === appointment.id && p.orderStatus === "PAID"
-        );
-        if (paymentMatch) {
-          // Check if this is the selected appointment being paid
-          if (
-            selectedAppointment?.id === appointment.id &&
-            isPaymentProcessing
-          ) {
-            toast.success(
-              `Thanh toán thành công cho lịch hẹn #${appointment.id}`
-            );
-            setIsQRModalOpen(false);
-            setSelectedAppointment(null);
-            setIsPaymentProcessing(false);
-            setOrder(null);
-          }
-        }
-      });
+  // Memoized callback to prevent unnecessary re-renders in QRCodeModal
+  const handlePaymentSuccess = useCallback(() => {
+    // Handle successful payment
+    if (selectedAppointment) {
+      toast.success(
+        `Thanh toán thành công cho lịch hẹn #${selectedAppointment.id}`
+      );
+    } else if (selectedPatientTreatment) {
+      toast.success(
+        `Thanh toán thành công cho điều trị #${selectedPatientTreatment.id}`
+      );
+      // Refresh treatments list for patient treatments
+      fetchActiveTreatmentsUser();
+    }
 
-      // Compare patient treatments
-      patientTreatment.forEach((treatment) => {
-        const paymentMatch = payment.find(
-          (p) =>
-            p.patientTreatmentId === treatment.id && p.orderStatus === "PAID"
-        );
-        if (paymentMatch) {
-          console.log(`Treatment #${treatment.id} is already paid.`);
-          // Check if this is the selected treatment being paid
-          if (
-            selectedPatientTreatment?.id === treatment.id &&
-            isPaymentProcessing
-          ) {
-            toast.success(
-              `Thanh toán thành công cho điều trị #${treatment.id}`
-            );
-            setIsQRModalOpen(false);
-            setSelectedPatientTreatment(null);
-            setIsPaymentProcessing(false);
-            setOrder(null);
-            fetchActiveTreatmentsUser();
-          }
-        }
-      });
+    // Refetch orders to update the UI
+    fetchOrders();
 
-      // Only fetch orders if payment is processing (to avoid unnecessary calls)
-      if (isPaymentProcessing || payment.length === 0) {
-        setTimeout(() => {
-          fetchOrders();
-        }, 3000);
-      }
-    };
-
-    compareAndUpdateStatus();
+    // Close modal and reset state
+    setIsQRModalOpen(false);
+    setSelectedAppointment(null);
+    setSelectedPatientTreatment(null);
+    setOrder(null);
   }, [
-    userId,
-    appointments,
-    patientTreatment,
-    payment,
     selectedAppointment,
     selectedPatientTreatment,
-    isPaymentProcessing,
     fetchActiveTreatmentsUser,
     fetchOrders,
   ]);
+
+  // Memoized close callback for QRCodeModal
+  const handleQRModalClose = useCallback(() => {
+    setIsQRModalOpen(false);
+    setOrder(null);
+    setSelectedAppointment(null);
+    setSelectedPatientTreatment(null);
+  }, []);
+
   return (
     <>
       <Tabs defaultValue="appointments" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="appointments">Lịch hẹn</TabsTrigger>
-          <TabsTrigger value="patient-treatments">Điều trị</TabsTrigger>
+        <TabsList className="mb-4 w-full">
+          <TabsTrigger className="w-full" value="appointments">
+            Lịch hẹn
+          </TabsTrigger>
+          <TabsTrigger className="w-full" value="patient-treatments">
+            Điều trị
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="patient-treatments">
           <Card className="p-4">
@@ -297,8 +313,10 @@ const UserPayment: React.FC = () => {
                       onOpenModal={() =>
                         handleOpenPatientTreatmentModal(treatment)
                       }
+                      onShowQRModal={handleShowQRModal}
                       orderLoading={orderLoading}
                       treatment={treatment}
+                      payments={payment}
                     />
                   ) : null
                 )}
@@ -320,12 +338,14 @@ const UserPayment: React.FC = () => {
               <div className="text-gray-600">Không có lịch hẹn nào.</div>
             ) : (
               <div className="space-y-3 min">
-                {appointments.map((a) => (
+                {appointments.slice(0, 1).map((a) => (
                   <AppointmentCard
                     key={a.id}
                     appointment={a}
                     orderLoading={orderLoading}
                     onOpenModal={handleOpenModal}
+                    onShowQRModal={handleShowQRModalAppointment}
+                    payments={payment}
                   />
                 ))}
               </div>
@@ -340,7 +360,6 @@ const UserPayment: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           setOrder(null);
-          setIsPaymentProcessing(false);
         }}
         selectedAppointment={selectedAppointment}
         paymentMethod={paymentMethod}
@@ -355,7 +374,6 @@ const UserPayment: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           setOrder(null);
-          setIsPaymentProcessing(false);
         }}
         selectedTreatment={selectedPatientTreatment}
         paymentMethod={paymentMethod}
@@ -367,16 +385,18 @@ const UserPayment: React.FC = () => {
       {/* QR Code Modal */}
       <QRCodeModal
         isOpen={isQRModalOpen}
-        onClose={() => {
-          setIsQRModalOpen(false);
-          setOrder(null);
-          setIsPaymentProcessing(false);
-        }}
+        onClose={handleQRModalClose}
         qrCodeUrl={order?.paymentUrl || ""}
         orderCode={order?.orderCode || ""}
         amount={order?.totalAmount || 0}
         bankInfo={order?.bankInfo}
-        title="Thanh toán phí khám bệnh HIV"
+        title={
+          selectedPatientTreatment
+            ? "Thanh toán phí điều trị HIV"
+            : "Thanh toán phí khám bệnh HIV"
+        }
+        orderId={order?.id}
+        onPaymentSuccess={handlePaymentSuccess}
       />
     </>
   );
