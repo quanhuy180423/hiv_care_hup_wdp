@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import type { Appointment } from "@/types/appointment";
+import { create } from "zustand";
 
 interface AppointmentDrawerState {
   isOpen: boolean;
@@ -32,5 +32,17 @@ export const useAppointmentModalStore = create<AppointmentModalState>(
     openModal: (appointment) =>
       set({ isOpen: true, editingAppointment: appointment }),
     closeModal: () => set({ isOpen: false, editingAppointment: null }),
+  })
+);
+
+interface AppointmentStoreState {
+  isPayment: boolean;
+  setIsPayment: (isPayment: boolean) => void;
+}
+
+export const useAppointmentOrderStore = create<AppointmentStoreState>(
+  (set) => ({
+    isPayment: false,
+    setIsPayment: (isPayment: boolean) => set({ isPayment }),
   })
 );
