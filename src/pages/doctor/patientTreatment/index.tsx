@@ -73,10 +73,8 @@ const DoctorPatientTreatments = () => {
   );
 
   // Lấy danh sách lịch hẹn của bác sĩ
-  const { data: appointmentsData } = useAppointmentsByDoctor(
-    doctorIdFromUser ?? 0,
-    { page: 1, limit: 1000 }
-  );
+  const { data: appointmentsData, refetch: refetchAppointments } =
+    useAppointmentsByDoctor(doctorIdFromUser ?? 0, { page: 1, limit: 1000 });
 
   const appointmentsList: Appointment[] = useMemo(() => {
     if (Array.isArray(appointmentsData)) {
@@ -200,6 +198,7 @@ const DoctorPatientTreatments = () => {
 
   const handleRefresh = () => {
     refetchTreatments();
+    refetchAppointments();
     toast.success("Đã làm mới danh sách hồ sơ bệnh nhân!");
   };
 
