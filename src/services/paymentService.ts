@@ -80,8 +80,8 @@ export const PaymentService = {
     return res.data;
   },
 
-  getPaymentById: async (id: number): Promise<PaymentResponse> => {
-    const res = await apiClient.get<PaymentResponse>(`/orders/${id}`);
+  getPaymentById: async (id: number): Promise<{ data: PaymentResponse }> => {
+    const res = await apiClient.get<{ data: PaymentResponse }>(`/orders/${id}`);
     return res.data;
   },
 

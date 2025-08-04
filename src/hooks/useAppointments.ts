@@ -126,7 +126,10 @@ export const useChangeAppointmentStatus = () => {
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       appointmentService.changeStatusAppointment(id, { status }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
       queryClient.invalidateQueries({ queryKey: ["appointments-staff"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments-user"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments-doctor"] });
     },
   });
 };

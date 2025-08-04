@@ -1,34 +1,33 @@
-import React from "react";
-import type { Appointment } from "@/types/appointment";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type { PaymentResponse } from "@/services/paymentService";
+import type { Appointment } from "@/types/appointment";
 import {
-  CalendarDays,
-  Clock,
-  User,
-  Stethoscope,
-  CreditCard,
-  Phone,
-  Mail,
-  CheckCircle2,
-  AlertCircle,
-  FileText,
-  Monitor,
-  Building2,
-  QrCode,
-  Banknote,
-  UserCheck,
   Activity,
+  AlertCircle,
+  Banknote,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
   ClipboardList,
-  Timer,
+  CreditCard,
+  FileText,
+  Mail,
+  Monitor,
+  Phone,
+  QrCode,
   Shield,
+  Stethoscope,
+  Timer,
+  User,
+  UserCheck,
 } from "lucide-react";
-import { formatUtcDateManually } from "@/lib/utils/dates/formatDate";
-import { cn } from "@/lib/utils";
+import React from "react";
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -61,37 +60,37 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     }
   };
 
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return {
-          label: "Chờ thanh toán",
-          icon: Clock,
-          className: "bg-amber-100 text-amber-800 border-amber-300",
-        };
-      case "PAID":
-        return {
-          label: "Đã thanh toán",
-          icon: CheckCircle2,
-          className: "bg-emerald-100 text-emerald-800 border-emerald-300",
-        };
-      case "COMPLETED":
-        return {
-          label: "Hoàn thành",
-          icon: Shield,
-          className: "bg-blue-100 text-blue-800 border-blue-300",
-        };
-      default:
-        return {
-          label: status,
-          icon: AlertCircle,
-          className: "bg-gray-100 text-gray-800 border-gray-300",
-        };
-    }
-  };
+  // const getStatusConfig = (status: string) => {
+  //   switch (status) {
+  //     case "PENDING":
+  //       return {
+  //         label: "Chờ thanh toán",
+  //         icon: Clock,
+  //         className: "bg-amber-100 text-amber-800 border-amber-300",
+  //       };
+  //     case "PAID":
+  //       return {
+  //         label: "Đã thanh toán",
+  //         icon: CheckCircle2,
+  //         className: "bg-emerald-100 text-emerald-800 border-emerald-300",
+  //       };
+  //     case "COMPLETED":
+  //       return {
+  //         label: "Hoàn thành",
+  //         icon: Shield,
+  //         className: "bg-blue-100 text-blue-800 border-blue-300",
+  //       };
+  //     default:
+  //       return {
+  //         label: status,
+  //         icon: AlertCircle,
+  //         className: "bg-gray-100 text-gray-800 border-gray-300",
+  //       };
+  //   }
+  // };
 
-  const statusConfig = getStatusConfig(appointment.status);
-  const StatusIcon = statusConfig.icon;
+  // const statusConfig = getStatusConfig(appointment.status);
+  // const StatusIcon = statusConfig.icon;
 
   return (
     <Card className="overflow-hidden p-0 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -130,11 +129,16 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                 </Badge>
               </div>
             </div>
-            
-            <Badge className={cn("flex items-center gap-1.5", statusConfig.className)}>
+
+            {/* <Badge
+              className={cn(
+                "flex items-center gap-1.5",
+                statusConfig.className
+              )}
+            >
               <StatusIcon className="w-4 h-4" />
               {statusConfig.label}
-            </Badge>
+            </Badge> */}
           </div>
         </div>
       </CardHeader>
@@ -147,7 +151,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
               <CalendarDays className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-sm text-blue-600 font-medium">Thời gian khám</p>
+              <p className="text-sm text-blue-600 font-medium">
+                Thời gian khám
+              </p>
               <p className="text-lg font-bold text-blue-900">
                 {formatUtcDateManually(appointment.appointmentTime)}
               </p>
@@ -162,7 +168,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
               <div className="flex items-center gap-2 mb-3">
                 <UserCheck className="w-5 h-5 text-indigo-600" />
-                <h4 className="font-semibold text-indigo-900">Thông tin bệnh nhân</h4>
+                <h4 className="font-semibold text-indigo-900">
+                  Thông tin bệnh nhân
+                </h4>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -173,7 +181,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="w-4 h-4 text-indigo-500" />
-                  <span className="text-indigo-700">{appointment.user.email}</span>
+                  <span className="text-indigo-700">
+                    {appointment.user.email}
+                  </span>
                 </div>
                 {appointment.user.phoneNumber && (
                   <div className="flex items-center gap-2 text-sm">
@@ -192,7 +202,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
             <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-4 border border-teal-100">
               <div className="flex items-center gap-2 mb-3">
                 <Stethoscope className="w-5 h-5 text-teal-600" />
-                <h4 className="font-semibold text-teal-900">Bác sĩ phụ trách</h4>
+                <h4 className="font-semibold text-teal-900">
+                  Bác sĩ phụ trách
+                </h4>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -271,7 +283,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CreditCard className="w-5 h-5 text-slate-600" />
-              <span className="font-medium text-slate-700">Trạng thái thanh toán:</span>
+              <span className="font-medium text-slate-700">
+                Trạng thái thanh toán:
+              </span>
             </div>
             <div>
               {isPaid ? (

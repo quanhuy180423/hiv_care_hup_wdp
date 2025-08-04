@@ -1,23 +1,16 @@
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { appointmentService } from "@/services/appointmentService";
 import { patientTreatmentService } from "@/services/patientTreatmentService";
-import type { Appointment } from "@/types/appointment";
-import type { ActivePatientTreatment } from "@/types/patientTreatment";
-import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
 import {
   PaymentService,
   type PaymentMethod,
-  type RequestCreatePayment,
   type PaymentResponse,
+  type RequestCreatePayment,
 } from "@/services/paymentService";
-import { toast } from "react-hot-toast";
-import PaymentMethodDialog from "./components/PaymentMethodDialog";
-import AppointmentCard from "./components/AppointmentCard";
-import PatientTreatmentCard from "./components/PatientTreatmentCard";
-import PaymentMethodPatientmentModal from "./components/PaymentMethodPatientmentModal";
-import QRCodeModal from "./components/QRCodeModal";
+import type { Appointment } from "@/types/appointment";
+import type { ActivePatientTreatment } from "@/types/patientTreatment";
 import {
   Calendar,
   ClipboardList,
@@ -26,13 +19,22 @@ import {
   Pill,
   Stethoscope,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import AppointmentCard from "./components/AppointmentCard";
+import PatientTreatmentCard from "./components/PatientTreatmentCard";
+import PaymentMethodDialog from "./components/PaymentMethodDialog";
+import PaymentMethodPatientmentModal from "./components/PaymentMethodPatientmentModal";
+import QRCodeModal from "./components/QRCodeModal";
+import { useAppointmentOrderStore } from "@/store/appointmentStore";
 
 const UserPayment: React.FC = () => {
   const { userId, appointmentTime } = useParams<{
     userId: string;
     appointmentTime: string;
   }>();
+  const { isPayment } = useAppointmentOrderStore();
 
   // --- Appointments State & Logic ---
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -70,7 +72,7 @@ const UserPayment: React.FC = () => {
             existingOrder.id
           );
           // Update order with fresh data including paymentUrl
-          setOrder(orderDetails);
+          setOrder(orderDetails.data);
         } catch (error) {
           console.error("Error fetching order details:", error);
           setOrder(existingOrder); // fallback to existing order
@@ -106,7 +108,7 @@ const UserPayment: React.FC = () => {
             existingOrder.id
           );
           // Update order with fresh data including paymentUrl
-          setOrder(orderDetails);
+          setOrder(orderDetails.data);
         } catch (error) {
           console.error("Error fetching order details:", error);
           setOrder(existingOrder); // fallback to existing order
@@ -132,7 +134,7 @@ const UserPayment: React.FC = () => {
       Number(userId)
     );
     setPatientTreatment(res.data);
-  }, [userId, selectedPatientTreatment?.id]);
+  }, [userId, selectedPatientTreatment?.id, isPayment]);
 
   const fetchOrders = useCallback(async () => {
     if (!userId) return;

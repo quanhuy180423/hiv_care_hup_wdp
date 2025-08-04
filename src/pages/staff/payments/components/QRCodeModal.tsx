@@ -1,34 +1,34 @@
-import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { PaymentService } from "@/services/paymentService";
+import { useAppointmentOrderStore } from "@/store/appointmentStore";
 import {
-  Copy,
+  AlertCircle,
+  Building2,
+  CheckCheck,
   CheckCircle2,
   Clock,
+  Copy,
   CreditCard,
-  Shield,
-  QrCode,
-  Smartphone,
-  AlertCircle,
-  Info,
-  Building2,
   FileText,
+  Info,
   Loader2,
-  CheckCheck,
+  QrCode,
+  Shield,
+  Smartphone,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { PaymentService } from "@/services/paymentService";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { cn } from "@/lib/utils";
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -56,86 +56,49 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   amount,
   bankInfo,
   orderId,
-  onPaymentSuccess,
 }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<
     "pending" | "success" | "failed"
   >("pending");
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { setIsPayment } = useAppointmentOrderStore();
 
-  const onPaymentSuccessRef = useRef(onPaymentSuccess);
-  const onCloseRef = useRef(onClose);
+  const checkPaymentStatus = async (orderId: number) => {
+    try {
+      const response = await PaymentService.getPaymentById(orderId);
+      console.log("[QRCodeModal] Payment status response:", response);
+      const order = response.data;
+      console.log("[QRCodeModal] Order details:", order.orderStatus);
 
-  useEffect(() => {
-    onPaymentSuccessRef.current = onPaymentSuccess;
-    onCloseRef.current = onClose;
-  }, [onPaymentSuccess, onClose]);
-
-  useEffect(() => {
-    if (!isOpen || !orderId) {
-      setIsPolling(false);
-      return;
-    }
-
-    setIsPolling(true);
-
-    const checkPaymentStatus = async () => {
-      try {
-        const response = await PaymentService.getPaymentById(orderId);
-        const order = response;
-
-        if (order.orderStatus === "PAID") {
-          setPaymentStatus("success");
-          setIsPolling(false);
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
-
-          toast.success("Thanh toán thành công!");
-
-          if (onPaymentSuccessRef.current) {
-            onPaymentSuccessRef.current();
-          }
-
-          setTimeout(() => {
-            if (onCloseRef.current) {
-              onCloseRef.current();
-            }
-          }, 2000);
-        }
-      } catch (error) {
-        console.error("Error checking payment status:", error);
+      if (order.orderStatus === "PAID") {
+        console.log("[QRCodeModal] Payment successful, closing modal.");
+        setIsPolling(false);
+        setPaymentStatus("success");
+        toast.success("Thanh toán thành công!");
+        setIsPayment(true);
+        onClose?.();
       }
-    };
+    } catch (error) {
+      console.error("Error checking payment status:", error);
+    }
+  };
 
-    checkPaymentStatus();
-
-    pollingIntervalRef.current = setInterval(() => {
-      checkPaymentStatus();
-    }, 3000);
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (orderId) {
+      interval = setInterval(() => {
+        checkPaymentStatus(orderId);
+      }, 2000);
+      console.log("[QRCodeModal] Started polling for payment status.");
+    }
 
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
+      if (interval) {
+        clearInterval(interval);
       }
-      setIsPolling(false);
     };
-  }, [isOpen, orderId]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-      setIsPolling(false);
-      setPaymentStatus("pending");
-    }
-  }, [isOpen]);
+  }, [orderId]);
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
