@@ -3,7 +3,7 @@ import { endOfDay, parseDate } from "@/lib/utils/patientTreatmentUtils";
 import { translateStatus } from "@/lib/utils/status/translateStatus";
 import type { PatientTreatmentWithAppointment } from "@/pages/doctor/patientTreatment/index";
 
-import { appointmentService } from "@/services/appointmentService";
+import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 import type { AppointmentStatus } from "@/types/appointment";
 import { CheckCircle, Eye, Stethoscope, TestTube2 } from "lucide-react";
 import React, { useMemo, useState } from "react";
@@ -89,6 +89,7 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
   };
 
   const navigate = useNavigate();
+  const changeAppointmentStatus = useChangeAppointmentStatus();
 
   return (
     <>
@@ -280,10 +281,10 @@ export const PatientTreatmentTable: React.FC<PatientTreatmentTableProps> = (
                                     return;
                                   }
                                   try {
-                                    await appointmentService.changeStatusAppointment(
-                                      t.appointmentId,
-                                      { status: "COMPLETED" }
-                                    );
+                                    await changeAppointmentStatus.mutateAsync({
+                                      id: t.appointmentId,
+                                      status: "COMPLETED",
+                                    });
                                     props.onRefresh?.();
                                   } catch (err) {
                                     toast.error(
