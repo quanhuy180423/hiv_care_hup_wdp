@@ -167,7 +167,10 @@ export default function ProfilePage() {
                     </h1>
                     <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
                       <UserCircle className="w-3 h-3 mr-1" />
-                      Staff
+                      {userProfile.roleId === 1
+                        ? "Quản trị viên"
+                        : userProfile.roleId === 3
+                        ? "STAFF" : "Người dùng"}
                     </Badge>
                   </div>
 

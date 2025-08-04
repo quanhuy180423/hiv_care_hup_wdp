@@ -17,6 +17,7 @@ import type { CustomApiError } from "@/types/api";
 import type { Appointment } from "@/types/appointment";
 import type { PatientTreatmentType as BasePatientTreatmentType } from "@/types/patientTreatment";
 import { AlertTriangle, FileX2, Loader2, Plus } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -72,14 +73,14 @@ const DoctorPatientTreatments = () => {
   );
 
   // Lấy danh sách lịch hẹn của bác sĩ
-  const { data: appointmentsData } = useAppointmentsByDoctor(
-    doctorIdFromUser ?? 0,
-    { page: 1, limit: 1000 }
-  );
+  const { data: appointmentsData, refetch: refetchAppointments } =
+    useAppointmentsByDoctor(doctorIdFromUser ?? 0, { page: 1, limit: 1000 });
 
   const appointmentsList: Appointment[] = useMemo(() => {
-    if (Array.isArray(appointmentsData)) return appointmentsData;
-    return appointmentsData?.data ?? [];
+    if (Array.isArray(appointmentsData)) {
+      return appointmentsData.length > 0 ? appointmentsData : [];
+    }
+    return Array.isArray(appointmentsData?.data) ? appointmentsData.data : [];
   }, [appointmentsData]);
 
   const treatmentsData = useMemo(() => {
@@ -132,20 +133,6 @@ const DoctorPatientTreatments = () => {
       meta: treatmentsDataRaw.meta ?? { total: merged.length },
     };
   }, [treatmentsDataRaw, appointmentsList]);
-
-  // Toast error khi không load được danh sách
-  useEffect(() => {
-    if (
-      !isLoadingPatientTreatments &&
-      (!treatmentsDataRaw ||
-        typeof treatmentsDataRaw !== "object" ||
-        !("data" in treatmentsDataRaw))
-    ) {
-      toast.error(
-        "Không thể tải danh sách hồ sơ bệnh nhân. Vui lòng kiểm tra lại kết nối hoặc liên hệ quản trị viên."
-      );
-    }
-  }, [isLoadingPatientTreatments, treatmentsDataRaw]);
 
   const createMutation = useCreatePatientTreatment();
   const updateMutation = useUpdatePatientTreatment();
@@ -211,11 +198,12 @@ const DoctorPatientTreatments = () => {
 
   const handleRefresh = () => {
     refetchTreatments();
+    refetchAppointments();
     toast.success("Đã làm mới danh sách hồ sơ bệnh nhân!");
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
           Quản lý hồ sơ bệnh nhân
@@ -264,24 +252,8 @@ const DoctorPatientTreatments = () => {
           onClick={handleRefresh}
           aria-label="Làm mới danh sách"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 4v6h6M20 20v-6h-6"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M20 4a8.1 8.1 0 0 0-15.9 2M4 20a8.1 8.1 0 0 0 15.9-2"
-            />
-          </svg>
+          {/* Lucide RefreshCcw icon */}
+          <RefreshCcw className="w-4 h-4" />
           Làm mới
         </Button>
       </div>

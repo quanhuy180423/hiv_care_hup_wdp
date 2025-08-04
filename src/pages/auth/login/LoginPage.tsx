@@ -89,14 +89,20 @@ export const LoginPage = () => {
         if (res.data.user.role === "PATIENT") navigate("/");
         else if (res.data.user.role === "DOCTOR")
           navigate("/doctor/appointments");
-        else if (res.data.user.role === "ADMIN") navigate("/admin/dashboard");
+        else if (res.data.user.role === "ADMIN") navigate("/admin/doctors");
         else if (res.data.user.role === "STAFF")
           navigate("/staff/appointments");
       }
     } catch (err) {
       console.error("🌐 Login error:", err);
       // Handle 2FA requirement
-      if (typeof err === "object" && err !== null && "message" in err && typeof err.message === "string" && (err.message.includes("2FA") || err.message.includes("TOTP"))) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof err.message === "string" &&
+        (err.message.includes("2FA") || err.message.includes("TOTP"))
+      ) {
         setRequires2FA(true);
         setEmailFor2FA(data.email);
         toast.error(

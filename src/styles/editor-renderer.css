@@ -30,7 +30,7 @@
 .blog-content h2 {
     font-size: 1.5rem;
     color: #1e40af;
-    text-align: center;
+    text-align: left;
     margin-bottom: 2rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid #dbeafe;
@@ -197,6 +197,23 @@
     border-radius: 0.5rem;
     border: 1px solid #fbbf24;
     margin-top: 1.5rem;
+}
+
+/* Thêm vào editor-renderer.css hoặc global.css */
+.blog-content {
+    font-family: "Inter", sans-serif;
+    line-height: 1.75;
+    color: #1f2937;
+    font-size: 1.05rem;
+    word-break: break-word;
+    background: none;
+    box-shadow: none;
+}
+
+@media (max-width: 640px) {
+    .blog-content {
+        padding: 1rem !important;
+    }
 }
 
 /* Print styles */

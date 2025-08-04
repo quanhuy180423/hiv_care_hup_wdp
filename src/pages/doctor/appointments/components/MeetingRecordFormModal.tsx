@@ -55,6 +55,7 @@ import { formatDate } from "@/lib/utils/dates/formatDate";
 import { uploadAvatarToSupabase } from "@/lib/utils/uploadImage/uploadImage";
 import type { Appointment } from "@/types/appointment";
 import "../../../../styles/editor.css";
+import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 
 interface Props {
   open: boolean;
@@ -91,11 +92,18 @@ function generateMeetingContent(appointment?: Appointment) {
   <li>
     <strong>Thông tin người được tư vấn:</strong>
     <ul>
-      <li>Họ và tên: <u>${user?.name || ".................................................."}</u></li>
+      <li>Họ và tên: <u>${
+        user?.name || ".................................................."
+      }</u></li>
       <li>Ngày sinh: <u>....................</u></li>
       <li>Giới tính: <u>....................</u></li>
-      <li>Số điện thoại: <u>${user?.phoneNumber || ".................................................."}</u></li>
-      <li>Email (nếu có): <u>${user?.email || ".................................................."}</u></li>
+      <li>Số điện thoại: <u>${
+        user?.phoneNumber ||
+        ".................................................."
+      }</u></li>
+      <li>Email (nếu có): <u>${
+        user?.email || ".................................................."
+      }</u></li>
       <li>Lý do tư vấn:
         <ul style="list-style-type:none;">
           <li><input type="checkbox" disabled /> Nghi ngờ bị phơi nhiễm HIV</li>
@@ -121,10 +129,18 @@ function generateMeetingContent(appointment?: Appointment) {
   <li>
     <strong>Thông tin bác sĩ tư vấn:</strong>
     <ul>
-      <li>Họ và tên: <u>${doctor?.user.name ||"............................"}</u></li>
+      <li>Họ và tên: <u>${
+        doctor?.user.name || "............................"
+      }</u></li>
       <li>Đơn vị công tác: <u>..................................................</u></li>
-      <li>Chức danh: <u>${ doctor?.specialization ||"................................................."}</u></li>
-      <li>Số điện thoại liên hệ: <u>${ doctor?.user.phoneNumber || ".................................................."}</u></li>
+      <li>Chức danh: <u>${
+        doctor?.specialization ||
+        "................................................."
+      }</u></li>
+      <li>Số điện thoại liên hệ: <u>${
+        doctor?.user.phoneNumber ||
+        ".................................................."
+      }</u></li>
     </ul>
   </li>
   <li>
@@ -146,7 +162,10 @@ function generateMeetingContent(appointment?: Appointment) {
 <p><strong>Xác nhận của người được tư vấn</strong><br />
 Tôi xác nhận đã được tư vấn đầy đủ, rõ ràng, dễ hiểu về HIV/AIDS và các phương án phù hợp.</p>
 <p>Chữ ký (nếu có): <u>.................................</u></p>
-<p><strong>Ngày lập biên bản</strong>: <u>${formatDate(getNowDatetimeLocal(), "dd/MM/yyyy")}</u></p>
+<p><strong>Ngày lập biên bản</strong>: <u>${formatDate(
+    getNowDatetimeLocal(),
+    "dd/MM/yyyy"
+  )}</u></p>
 `;
 }
 
@@ -246,6 +265,7 @@ export default function MeetingRecordFormModal({
     useCreateMeetingRecord();
   const { mutate: updateMeetingRecord, isPending: isUpdating } =
     useUpdateMeetingRecord();
+  const { mutate: changeStatus } = useChangeAppointmentStatus();
 
   const isEditMode = !!initialData;
 
@@ -283,6 +303,13 @@ export default function MeetingRecordFormModal({
     }
   }, [editor, open, initialData, appointment]);
 
+  const handleCOMPLETEDAppointment = () => {
+    changeStatus({
+      id: appointmentId,
+      status: "COMPLETED",
+    });
+  };
+
   const onSubmit = (values: MeetingRecordFormValues) => {
     const finalData = {
       ...values,
@@ -296,19 +323,20 @@ export default function MeetingRecordFormModal({
         {
           onSuccess: () => {
             toast.success("Cập nhật biên bản thành công");
-            onSuccess?.();
-            onClose();
           },
         }
       );
+      onSuccess?.();
+      onClose();
     } else {
       createMeetingRecord(finalData, {
         onSuccess: () => {
           toast.success("Tạo biên bản thành công");
-          onSuccess?.();
-          onClose();
         },
       });
+      handleCOMPLETEDAppointment();
+      onSuccess?.();
+      onClose();
     }
   };
 

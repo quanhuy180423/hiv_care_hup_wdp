@@ -3,6 +3,7 @@ import {
   BookOpen,
   Calculator,
   Calendar,
+  CreditCard,
   DollarSign, // Added from second block
   FileHeart, // Added from second block
   FileText,
@@ -65,14 +66,17 @@ import DoctorSchedule from "./pages/doctor/schedule";
 import TestManagement from "./pages/admin/test";
 import ConsultationPage from "./pages/doctor/patientTreatment/pages/consultation";
 import CreateDoctorPatientTreatmentPage from "./pages/doctor/patientTreatment/pages/create";
+import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
+import GenerateTest from "./pages/doctor/patientTreatment/pages/generate-test";
 import ProfileDoctorPage from "./pages/doctor/profile";
 import TestResultPage from "./pages/doctor/testResult";
+import UserPayment from "./pages/staff/payments/UserPayment";
 import RegisterAppointment from "./pages/user/Appointment/RegisterAppointment";
 import { BlogDetailPage } from "./pages/user/knowledge/BlogDetailPage";
 import AppointmentHistory from "./pages/user/meeting/AppointmentHistory";
 import MeetingRoom from "./pages/user/meeting/Meeting";
 import TreatmentSchedule from "./pages/user/treatment-schedule";
-import DetailPage from "./pages/doctor/patientTreatment/pages/detail";
+import Transaction from "./pages/user/transaction/page";
 
 // Route definition interface
 export interface RouteConfig {
@@ -254,6 +258,17 @@ export const userRoutes: RouteConfig[] = [
     icon: Calendar,
     showInNav: false,
     allowedRoles: ["PATIENT", "DOCTOR"],
+  },
+  {
+    path: "/user/transaction",
+    component: Transaction,
+    title: "Lịch sử giao dịch",
+    description: "Xem lịch sử thanh toán và giao dịch",
+    protected: true,
+    layout: "USER_PROFILE",
+    icon: CreditCard,
+    showInNav: false,
+    allowedRoles: ["PATIENT", "ADMIN", "DOCTOR", "STAFF"],
   },
 ];
 
@@ -461,6 +476,17 @@ export const staffRoutes: RouteConfig[] = [
     showInNav: true,
     allowedRoles: ["STAFF"],
   },
+  {
+    path: "/staff/payments/:userId/:appointmentTime",
+    component: UserPayment,
+    title: "Người dùng thanh toán",
+    description: "Quản lý thanh toán của người dùng",
+    protected: true,
+    layout: "STAFF",
+    icon: FileText,
+    showInNav: true,
+    allowedRoles: ["STAFF"],
+  },
 ];
 
 // Doctor routes
@@ -524,6 +550,16 @@ export const doctorRoutes: RouteConfig[] = [
     component: ConsultationPage,
     title: "Hồ sơ bệnh án",
     description: "Hồ sơ bệnh án cho bệnh nhân",
+    protected: true,
+    layout: "DOCTOR",
+    showInNav: false,
+    allowedRoles: ["DOCTOR"],
+  },
+  {
+    path: "/doctor/patient-treatments/:id/generate-test",
+    component: GenerateTest,
+    title: "Tạo xét nghiệm",
+    description: "Tạo xét nghiệm cho bệnh nhân",
     protected: true,
     layout: "DOCTOR",
     showInNav: false,

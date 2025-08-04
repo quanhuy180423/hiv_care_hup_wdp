@@ -56,7 +56,7 @@ const TestResultDetail = ({ TestResult }: { TestResult: TestResult }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl h-[80vh] overflow-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl h-[80vh] overflow-auto hide-scrollbar">
       {/* General Result Information */}
       <Card className="lg:col-span-2">
         <CardHeader>

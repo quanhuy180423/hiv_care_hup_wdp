@@ -12,16 +12,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { 
-  Calendar, 
-  LogOut, 
-  Syringe, 
-  User, 
+import {
+  Calendar,
+  LogOut,
+  Syringe,
+  User,
   Heart,
   Bell,
   Settings,
   Activity,
-  Shield
+  Shield,
+  CreditCard,
 } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
@@ -34,15 +35,15 @@ interface SidebarUserProfileProps {
 }
 
 const sidebarNav = [
-  { 
-    id: "profile", 
-    name: "Hồ sơ cá nhân", 
-    icon: User, 
+  {
+    id: "profile",
+    name: "Hồ sơ cá nhân",
+    icon: User,
     path: "/user/profile",
     color: "text-blue-600",
     bgColor: "bg-blue-50/80",
     hoverColor: "hover:bg-blue-50/60",
-    description: "Thông tin và cài đặt tài khoản"
+    description: "Thông tin và cài đặt tài khoản",
   },
   {
     id: "appointments",
@@ -52,18 +53,27 @@ const sidebarNav = [
     color: "text-emerald-600",
     bgColor: "bg-emerald-50/80",
     hoverColor: "hover:bg-emerald-50/60",
-    badge: "2",
-    description: "Quản lý lịch hẹn với bác sĩ"
+    description: "Quản lý lịch hẹn với bác sĩ",
   },
-  { 
-    id: "treatment-schedule", 
-    name: "Hồ sơ điều trị", 
-    icon: Syringe, 
+  {
+    id: "treatment-schedule",
+    name: "Hồ sơ điều trị",
+    icon: Syringe,
     path: "/user/treatment-schedule",
     color: "text-rose-600",
     bgColor: "bg-rose-50/80",
     hoverColor: "hover:bg-rose-50/60",
-    description: "Theo dõi quá trình điều trị"
+    description: "Theo dõi quá trình điều trị",
+  },
+  {
+    id: "transaction",
+    name: "Lịch sử giao dịch",
+    icon: CreditCard,
+    path: "/user/transaction",
+    color: "text-amber-600",
+    bgColor: "bg-amber-50/80",
+    hoverColor: "hover:bg-amber-50/60",
+    description: "Xem lịch sử thanh toán và giao dịch",
   },
 ];
 
@@ -71,7 +81,7 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  
+
   const handleLogout = () => {
     logout()
       .then(() => {
@@ -95,45 +105,51 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
               {/* Background Pattern */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-indigo-500/8 to-purple-500/8" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.15),transparent_50%)]" />
-              
-              <div className="relative px-6 py-6">
+
+              <div className="relative px-6 py-4">
                 {/* Logo & User Info */}
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl blur-md opacity-30" />
-                    <div className="relative w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                      <img
-                        src={Assets.logoHIV}
-                        alt="HIV Care Hub"
-                        className="w-8 h-8 rounded-lg object-cover"
-                      />
+                <Link to="/">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl blur-md opacity-30" />
+                      <div className="relative w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                        <img
+                          src={Assets.logoHIV}
+                          alt="HIV Care Hub"
+                          className="w-8 h-8 rounded-lg object-cover"
+                        />
+                      </div>
+                      {/* Online Status */}
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm">
+                        <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
+                      </div>
                     </div>
-                    {/* Online Status */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm">
-                      <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
+
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        HIV Care Hub
+                      </h1>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Heart className="w-3 h-3 text-rose-500" />
+                        <span className="text-xs font-semibold text-rose-600">
+                          Khu vực bệnh nhân
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      HIV Care Hub
-                    </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Heart className="w-3 h-3 text-rose-500" />
-                      <span className="text-xs font-semibold text-rose-600">
-                        Khu vực bệnh nhân
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                </Link>
 
                 {/* User Stats */}
                 <div className="mt-4 p-3 bg-white/50 rounded-xl border border-indigo-200/30">
                   <div className="flex items-center gap-3">
                     <Activity className="w-4 h-4 text-indigo-600" />
                     <div className="flex-1">
-                      <p className="text-xs text-slate-600">Trạng thái sức khỏe</p>
-                      <p className="text-sm font-semibold text-emerald-600">Ổn định</p>
+                      <p className="text-xs text-slate-600">
+                        Trạng thái sức khỏe
+                      </p>
+                      <p className="text-sm font-semibold text-emerald-600">
+                        Ổn định
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -149,7 +165,7 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
                     <span>Quản lý cá nhân</span>
                   </div>
                 </SidebarGroupLabel>
-                
+
                 <SidebarGroupContent className="space-y-2">
                   <SidebarMenu>
                     {sidebarNav.map((item) => {
@@ -171,22 +187,26 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
                               {isActive && (
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500 rounded-r-full shadow-lg" />
                               )}
-                              
+
                               {/* Icon Container */}
-                              <div className={cn(
-                                "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
-                                isActive 
-                                  ? "bg-white/80 shadow-md scale-110" 
-                                  : "bg-slate-100/60 group-hover:bg-white/80 group-hover:scale-105"
-                              )}>
-                                <item.icon className={cn(
-                                  "w-5 h-5 transition-all duration-300",
-                                  isActive 
-                                    ? item.color 
-                                    : "text-slate-500 group-hover:text-slate-700"
-                                )} />
+                              <div
+                                className={cn(
+                                  "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+                                  isActive
+                                    ? "bg-white/80 shadow-md scale-110"
+                                    : "bg-slate-100/60 group-hover:bg-white/80 group-hover:scale-105"
+                                )}
+                              >
+                                <item.icon
+                                  className={cn(
+                                    "w-5 h-5 transition-all duration-300",
+                                    isActive
+                                      ? item.color
+                                      : "text-slate-500 group-hover:text-slate-700"
+                                  )}
+                                />
                               </div>
-                              
+
                               {/* Content */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
@@ -198,7 +218,7 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
                                   {item.description}
                                 </p>
                               </div>
-                              
+
                               {/* Shine Effect */}
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 rounded-2xl" />
                             </Link>
@@ -222,11 +242,14 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
                 >
                   <Bell className="w-4 h-4" />
                   <span className="text-xs">Thông báo</span>
-                  <Badge variant="secondary" className="w-5 h-5 text-[10px] p-0 flex items-center justify-center bg-indigo-500 text-white hover:bg-indigo-500">
+                  <Badge
+                    variant="secondary"
+                    className="w-5 h-5 text-[10px] p-0 flex items-center justify-center bg-indigo-500 text-white hover:bg-indigo-500"
+                  >
                     3
                   </Badge>
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -271,15 +294,16 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
                       Xin chào, {user?.name || "Bạn"}
                     </h2>
                     <p className="text-sm text-slate-600">
-                      Hôm nay là {new Date().toLocaleDateString('vi-VN', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      Hôm nay là{" "}
+                      {new Date().toLocaleDateString("vi-VN", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-3 py-1 bg-emerald-100 rounded-full">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -290,11 +314,9 @@ export default function SidebarUser({ children }: SidebarUserProfileProps) {
                   </div>
                 </div>
               </div>
-              
+
               {/* Page Content */}
-              <div className="px-4">
-                {children ?? <Outlet />}
-              </div>
+              <div className="px-4">{children ?? <Outlet />}</div>
             </div>
           </div>
         </main>

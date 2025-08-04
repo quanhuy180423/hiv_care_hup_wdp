@@ -1,10 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Menu,
-  Search,
   Settings,
   User,
   X,
@@ -120,11 +118,16 @@ export default function Header() {
                 >
                   Liên hệ
                 </Link>
-                <Link to="/knowledge" className={`font-medium transition-colors ${
+                <Link
+                  to="/knowledge"
+                  className={`font-medium transition-colors ${
                     isActive("/knowledge")
                       ? "text-purple-600"
                       : "text-gray-700 hover:text-purple-600"
-                  }`}>Blog</Link>
+                  }`}
+                >
+                  Blog
+                </Link>
                 {isAuthenticated && (
                   <Link
                     to="/services/appointment/register"
@@ -142,24 +145,6 @@ export default function Header() {
 
             {/* Right Side - Search, Notifications, User Menu */}
             <div className="flex items-center space-x-4">
-              {/* Search */}
-              <div className="hidden md:flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2">
-                <Search className="w-4 h-4 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm..."
-                  className="bg-transparent outline-none text-sm w-32 lg:w-48"
-                />
-              </div>
-
-              {/* Notifications */}
-              {isAuthenticated && (
-                <button className="relative p-2 text-gray-600 hover:text-purple-600 transition-colors">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                </button>
-              )}
-
               {/* User Menu */}
               {isAuthenticated ? (
                 <div className="relative">
