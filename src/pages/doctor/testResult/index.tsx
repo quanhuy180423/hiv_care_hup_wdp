@@ -183,7 +183,7 @@ const TestResultPage = () => {
 
         {/* Modals */}
         <Dialog open={isModalOpenCreate} onOpenChange={setIsModalOpenCreate}>
-          <DialogContent className="bg-white max-w-4xl">
+          <DialogContent className="bg-white sm:max-w-4xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                 <Plus className="w-5 h-5 text-blue-600" />
@@ -198,7 +198,7 @@ const TestResultPage = () => {
         </Dialog>
 
         <Dialog open={isModalOpenDetail} onOpenChange={setIsModalOpenDetail}>
-          <DialogContent className="bg-white max-w-4xl">
+          <DialogContent className="bg-white sm:max-w-4xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />

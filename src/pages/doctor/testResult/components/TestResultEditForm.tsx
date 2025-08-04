@@ -77,7 +77,7 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
   };
 
   return (
-    <div className="space-y-6  mx-auto max-h-[80vh] overflow-y-auto">
+    <div className="space-y-6  mx-auto max-h-[80vh] overflow-y-auto hide-scrollbar">
       {/* Test Information (Read-only) */}
       {defaultValues.test && (
         <Card className=" ">
@@ -121,13 +121,7 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
 
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Định lượng</div>
-                <Badge
-                  variant={
-                    defaultValues.test.isQuantitative ? "default" : "secondary"
-                  }
-                >
                   {defaultValues.test.isQuantitative ? "Có" : "Không"}
-                </Badge>
               </div>
 
               <div className="space-y-2">
@@ -267,8 +261,6 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
                 </p>
               </div>
             </div>
-
-            <Separator />
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3">

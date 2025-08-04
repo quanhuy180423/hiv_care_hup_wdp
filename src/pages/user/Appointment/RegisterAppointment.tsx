@@ -72,7 +72,7 @@ import { formatDate } from "@/lib/utils/dates/formatDate";
 import { getAvatarUrl } from "@/lib/utils/uploadImage/uploadImage";
 import type { DoctorScheduleByDate } from "@/types/doctor";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Navigation, Pagination } from "swiper/modules";
 
 const appointmentSchema = z
   .object({
@@ -602,7 +602,7 @@ const RegisterAppointment = () => {
           ) : (
             <div className="relative">
               <Swiper
-                modules={[Navigation, Pagination, Autoplay]}
+                modules={[Navigation, Pagination]}
                 spaceBetween={20}
                 slidesPerView={1}
                 breakpoints={{
@@ -624,11 +624,6 @@ const RegisterAppointment = () => {
                   },
                 }}
                 loop={(availableDoctors || []).length > 4}
-                autoplay={{
-                  delay: 3000,
-                  disableOnInteraction: false,
-                  pauseOnMouseEnter: true,
-                }}
                 pagination={{
                   clickable: true,
                   dynamicBullets: true,
@@ -918,7 +913,10 @@ const RegisterAppointment = () => {
                   <div>
                     <p className="text-sm text-gray-500">Chi phí dự kiến</p>
                     <p className="font-bold text-emerald-600 text-lg">
-                      {formatCurrency(selectedService?.price || 0)}
+                      {selectedService?.price !== null ||
+                      selectedService?.price === 0
+                        ? "Miễn phí"
+                        : formatCurrency(selectedService?.price || 0)}
                     </p>
                   </div>
                 </div>

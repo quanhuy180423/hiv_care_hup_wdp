@@ -14,8 +14,9 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils/numbers/formatCurrency";
 import type { Appointment } from "@/types/appointment";
 import type { PaymentMethod } from "@/services/paymentService";
@@ -23,12 +24,19 @@ import {
   User,
   Stethoscope,
   Calendar,
-  Clock,
-  DollarSign,
-  CreditCard,
-  CheckCircle,
-  FileText,
+  Building2,
+  Phone,
+  Mail,
+  Receipt,
+  Wallet,
+  QrCode,
+  Shield,
+  UserCheck,
+  Activity,
+  ClipboardList,
+  Info,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PaymentMethodDialogProps {
   isOpen: boolean;
@@ -51,201 +59,257 @@ const PaymentMethodDialog: React.FC<PaymentMethodDialogProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="min-w-4xl max-h-[95vh] bg-white p-0 overflow-y-auto">
-        <DialogHeader className="bg-gradient-to-r from-green-50 to-blue-50 p-6 border-b border-green-200">
-          <DialogTitle className="flex items-center gap-3 text-2xl font-bold text-green-800">
-            <CreditCard className="w-7 h-7 text-green-600" />
-            Thông tin thanh toán lịch hẹn
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] p-0 overflow-hidden bg-white">
+        {/* Header */}
+        <DialogHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4">
+          <DialogTitle className="flex items-center gap-3 text-xl">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2">
+              <Receipt className="w-5 h-5" />
+            </div>
+            <span>Xác nhận thanh toán - Phiếu khám #{selectedAppointment?.id}</span>
           </DialogTitle>
         </DialogHeader>
 
         {selectedAppointment && (
-          <div className="p-6 space-y-6">
-            {/* Service Information Card */}
-            <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-l-blue-500">
-              <div className="flex items-center gap-3 mb-4">
-                <FileText className="w-6 h-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-blue-800">
-                  Thông tin dịch vụ
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Stethoscope className="w-5 h-5 text-blue-600" />
-                      <span className="font-semibold text-blue-800">
-                        Dịch vụ khám
+          <div className="overflow-y-auto max-h-[calc(90vh-180px)]">
+            <div className="p-6 space-y-5">
+              {/* Patient & Doctor Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Patient Card */}
+                <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="w-5 h-5 text-indigo-600" />
+                      <h3 className="font-semibold text-indigo-900">Thông tin bệnh nhân</h3>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-indigo-500" />
+                      <span className="font-medium text-indigo-800">
+                        {selectedAppointment.user.name}
                       </span>
                     </div>
-                    <p className="text-lg font-bold text-blue-900">
-                      {selectedAppointment.service.name}
-                    </p>
-                  </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="w-4 h-4 text-indigo-500" />
+                      <span className="text-indigo-700">{selectedAppointment.user.email}</span>
+                    </div>
+                    {selectedAppointment.user.phoneNumber && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="w-4 h-4 text-indigo-500" />
+                        <span className="text-indigo-700">
+                          {selectedAppointment.user.phoneNumber}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-                  <div className="bg-white rounded-lg p-4 border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <DollarSign className="w-5 h-5 text-green-600" />
-                      <span className="font-semibold text-green-800">
-                        Chi phí dịch vụ
+                {/* Doctor Card */}
+                <Card className="border-0 shadow-md bg-gradient-to-br from-teal-50 to-cyan-50">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Stethoscope className="w-5 h-5 text-teal-600" />
+                      <h3 className="font-semibold text-teal-900">Bác sĩ phụ trách</h3>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-teal-500" />
+                      <span className="font-medium text-teal-800">
+                        {selectedAppointment.doctor.user.name}
                       </span>
                     </div>
-                    <p className="text-2xl font-bold text-green-700">
-                      {formatCurrency(selectedAppointment.service.price)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 border border-purple-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="w-5 h-5 text-purple-600" />
-                      <span className="font-semibold text-purple-800">
-                        Thông tin bệnh nhân
+                    <div className="flex items-center gap-2 text-sm">
+                      <Shield className="w-4 h-4 text-teal-500" />
+                      <span className="text-teal-700">
+                        {selectedAppointment.doctor.specialization}
                       </span>
                     </div>
-                    <p className="font-bold text-purple-900">
-                      {selectedAppointment.user.name}
-                    </p>
-                    <p className="text-sm text-purple-700">
-                      {selectedAppointment.user.email}
-                    </p>
-                  </div>
+                    {selectedAppointment.doctor.user.phoneNumber && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="w-4 h-4 text-teal-500" />
+                        <span className="text-teal-700">
+                          {selectedAppointment.doctor.user.phoneNumber}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
 
-                  <div className="bg-white rounded-lg p-4 border border-orange-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Stethoscope className="w-5 h-5 text-orange-600" />
-                      <span className="font-semibold text-orange-800">
-                        Bác sĩ phụ trách
-                      </span>
+              {/* Service Details */}
+              <Card className="border-0 shadow-md bg-gradient-to-r from-emerald-50 to-green-50">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="w-5 h-5 text-emerald-600" />
+                      <h3 className="font-semibold text-emerald-900">Chi tiết dịch vụ</h3>
                     </div>
-                    <p className="font-bold text-orange-900">
-                      {selectedAppointment.doctor.user.name}
-                    </p>
-                    <p className="text-sm text-orange-700">
-                      Chuyên khoa: {selectedAppointment.doctor.specialization}
-                    </p>
+                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                      {selectedAppointment.type === "ONLINE" ? "Khám trực tuyến" : "Khám trực tiếp"}
+                    </Badge>
                   </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Appointment Details */}
-            <Card className="p-6 bg-orange-50 border-l-4 border-l-orange-500">
-              <div className="flex items-center gap-3 mb-4">
-                <Calendar className="w-6 h-6 text-orange-600" />
-                <h3 className="text-xl font-bold text-orange-800">
-                  Chi tiết lịch hẹn
-                </h3>
-              </div>
-
-              <div className="bg-white rounded-lg p-4 border border-orange-200">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-orange-600" />
-                  <span className="font-semibold text-orange-800">
-                    Thời gian khám:
-                  </span>
-                </div>
-                <p className="text-lg font-bold text-orange-900 mt-2">
-                  {new Date(selectedAppointment.appointmentTime).toLocaleString(
-                    "vi-VN",
-                    {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }
-                  )}
-                </p>
-              </div>
-            </Card>
-
-            <Separator className="my-6" />
-
-            {/* Payment Method Selection */}
-            <Card className="p-6 bg-green-50 border-l-4 border-l-green-500">
-              <div className="flex items-center gap-3 mb-4">
-                <CreditCard className="w-6 h-6 text-green-600" />
-                <h3 className="text-xl font-bold text-green-800">
-                  Phương thức thanh toán
-                </h3>
-              </div>
-
-              <div className="bg-white rounded-lg p-4 border border-green-200">
-                <Select
-                  value={paymentMethod?.method || undefined}
-                  onValueChange={(value) =>
-                    setPaymentMethod({ method: value } as PaymentMethod)
-                  }
-                >
-                  <SelectTrigger className="h-12 text-lg border-2 border-green-300 focus:border-green-500">
-                    <SelectValue
-                      placeholder="Chọn phương thức thanh toán"
-                      className="text-gray-700"
-                    />
-                  </SelectTrigger>
-                  <SelectContent className="min-w-full">
-                    <SelectItem value="BANK_TRANSFER" className="text-lg p-4">
-                      <div className="flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-blue-600" />
-                        <div>
-                          <p className="font-semibold">
-                            Chuyển khoản ngân hàng
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <p className="font-semibold text-emerald-800 text-lg">
+                          {selectedAppointment.service.name}
+                        </p>
+                        {selectedAppointment.service.description && (
+                          <p className="text-sm text-emerald-700">
+                            {selectedAppointment.service.description}
                           </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-emerald-600">Phí dịch vụ</p>
+                        <p className="text-2xl font-bold text-emerald-800">
+                          {formatCurrency(selectedAppointment.service.price)}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <Separator className="bg-emerald-200" />
+                    
+                    <div className="flex items-center gap-2 bg-emerald-100 rounded-lg p-3">
+                      <Calendar className="w-4 h-4 text-emerald-600" />
+                      <span className="text-sm font-medium text-emerald-800">
+                        Thời gian khám:{" "}
+                        {new Date(selectedAppointment.appointmentTime).toLocaleString(
+                          "vi-VN",
+                          {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment Method Selection */}
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Wallet className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">Phương thức thanh toán</h3>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <Select
+                    value={paymentMethod?.method || undefined}
+                    onValueChange={(value) =>
+                      setPaymentMethod({ method: value } as PaymentMethod)
+                    }
+                  >
+                    <SelectTrigger className={cn(
+                      "h-14 border-2 transition-colors p-6",
+                      paymentMethod?.method 
+                        ? "border-blue-400 bg-blue-50" 
+                        : "border-gray-300"
+                    )}>
+                      <SelectValue
+                        placeholder="Chọn phương thức thanh toán"
+                        className="text-gray-700"
+                      />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="BANK_TRANSFER" className="cursor-pointer">
+                        <div className="flex items-center gap-3 py-2">
+                          <div className="bg-blue-100 rounded-lg p-2">
+                            <Building2 className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold">Chuyển khoản ngân hàng</p>
+                            <p className="text-xs text-gray-600">Quét mã QR để thanh toán</p>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {paymentMethod?.method && (
+                    <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-blue-100 rounded-full p-1.5 mt-0.5">
+                          <Info className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="font-medium text-blue-900">
+                            Hướng dẫn thanh toán chuyển khoản:
+                          </p>
+                          <ul className="text-sm text-blue-800 space-y-1">
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600">•</span>
+                              <span>Hệ thống sẽ tạo mã QR cho bệnh nhân</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600">•</span>
+                              <span>Bệnh nhân quét mã và chuyển khoản theo nội dung</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600">•</span>
+                              <span>Thanh toán sẽ được xác nhận tự động</span>
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {paymentMethod?.method && (
-                <div className="mt-4 p-4 bg-green-100 rounded-lg border border-green-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="font-semibold text-green-800">
-                      Đã chọn: Chuyển khoản ngân hàng
-                    </span>
-                  </div>
-                  <p className="text-sm text-green-700 mt-1">
-                    Hệ thống sẽ tạo mã QR để bệnh nhân thanh toán
-                  </p>
-                </div>
-              )}
-            </Card>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
 
-        <DialogFooter className="bg-gray-50 p-6 border-t border-gray-200">
+        {/* Footer */}
+        <DialogFooter className="bg-gray-50 px-6 py-4 border-t">
           <div className="flex items-center justify-between w-full">
-            <div className="text-left">
-              <p className="text-sm text-gray-600">Tổng thanh toán</p>
-              <p className="text-2xl font-bold text-green-700">
-                {selectedAppointment &&
-                  formatCurrency(selectedAppointment.service.price)}
+            <div>
+              <p className="text-sm text-gray-600">Tổng cần thanh toán</p>
+              <p className="text-2xl font-bold text-blue-800">
+                {selectedAppointment && formatCurrency(selectedAppointment.service.price)}
               </p>
             </div>
 
-            <Button
-              onClick={onConfirm}
-              disabled={isLoading || !paymentMethod?.method}
-              className="bg-green-600  hover:bg-green-700 font-semibold px-8 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg text-lg"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin text-black rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                  Đang xử lý...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-black">
-                  <CheckCircle className="w-5 h-5" />
-                  Xác nhận và tạo QR thanh toán
-                </div>
-              )}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="px-6 cursor-pointer"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={onConfirm}
+                disabled={isLoading || !paymentMethod?.method}
+                className={cn(
+                  "px-6 font-semibold shadow-md transition-all duration-200 text-white cursor-pointer",
+                  "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700",
+                  "disabled:from-gray-400 disabled:to-gray-500"
+                )}
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    Đang xử lý...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <QrCode className="w-4 h-4" />
+                    Tạo mã QR thanh toán
+                  </div>
+                )}
+              </Button>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>

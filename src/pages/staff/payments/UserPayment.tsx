@@ -18,6 +18,15 @@ import AppointmentCard from "./components/AppointmentCard";
 import PatientTreatmentCard from "./components/PatientTreatmentCard";
 import PaymentMethodPatientmentModal from "./components/PaymentMethodPatientmentModal";
 import QRCodeModal from "./components/QRCodeModal";
+import {
+  Calendar,
+  ClipboardList,
+  FileText,
+  Heart,
+  Pill,
+  Stethoscope,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const UserPayment: React.FC = () => {
   const { userId, appointmentTime } = useParams<{
@@ -288,69 +297,154 @@ const UserPayment: React.FC = () => {
   return (
     <>
       <Tabs defaultValue="appointments" className="w-full">
-        <TabsList className="mb-4 w-full">
-          <TabsTrigger className="w-full" value="appointments">
-            Lịch hẹn
+        <TabsList className="w-full bg-gradient-to-r from-blue-100 to-indigo-100 p-1 rounded-lg">
+          <TabsTrigger
+            value="appointments"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span className="font-medium">Lịch hẹn khám</span>
+            </div>
           </TabsTrigger>
-          <TabsTrigger className="w-full" value="patient-treatments">
-            Điều trị
+          <TabsTrigger
+            value="patient-treatments"
+            className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Pill className="w-4 h-4" />
+              <span className="font-medium">Phác đồ điều trị</span>
+            </div>
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="patient-treatments">
-          <Card className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <div className="font-semibold text-lg text-primary">
-                Danh sách điều trị cần thanh toán
+
+        {/* Appointments Tab */}
+        <TabsContent value="appointments" className="mt-6">
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 rounded-lg p-2">
+                  <Stethoscope className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Danh sách lịch hẹn cần thanh toán
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Quản lý thanh toán cho các lịch hẹn khám bệnh
+                  </p>
+                </div>
               </div>
+              <Badge variant="outline" className="text-sm">
+                <Calendar className="w-3 h-3 mr-1" />
+                {appointments.length} lịch hẹn
+              </Badge>
             </div>
-            {patientTreatment.length > 0 ? (
-              <div className="space-y-3">
-                {patientTreatment.map((treatment) =>
-                  treatment?.customMedications ||
-                  treatment?.testResults?.length > 0 ? (
-                    <PatientTreatmentCard
-                      key={treatment.id}
-                      onOpenModal={() =>
-                        handleOpenPatientTreatmentModal(treatment)
-                      }
-                      onShowQRModal={handleShowQRModal}
+
+            {/* Appointments List */}
+            {appointments.length === 0 ? (
+              <Card className="p-8 text-center bg-gray-50 border-dashed">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-gray-100 rounded-full p-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700">
+                      Không có lịch hẹn
+                    </h4>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Chưa có lịch hẹn nào cần xử lý thanh toán
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {appointments.map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    className="transform transition-all duration-200 hover:scale-[1.01]"
+                  >
+                    <AppointmentCard
+                      appointment={appointment}
                       orderLoading={orderLoading}
-                      treatment={treatment}
+                      onOpenModal={handleOpenModal}
+                      onShowQRModal={handleShowQRModalAppointment}
                       payments={payment}
                     />
-                  ) : null
-                )}
-              </div>
-            ) : (
-              <div className="text-gray-600">
-                Không có điều trị nào cần thanh toán.
-              </div>
-            )}
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="appointments">
-          <Card className="p-4">
-            <div className="font-semibold text-lg text-primary mb-2">
-              Lịch hẹn
-            </div>
-            {appointments.length === 0 ? (
-              <div className="text-gray-600">Không có lịch hẹn nào.</div>
-            ) : (
-              <div className="space-y-3 min">
-                {appointments.slice(0, 1).map((a) => (
-                  <AppointmentCard
-                    key={a.id}
-                    appointment={a}
-                    orderLoading={orderLoading}
-                    onOpenModal={handleOpenModal}
-                    onShowQRModal={handleShowQRModalAppointment}
-                    payments={payment}
-                  />
+                  </div>
                 ))}
               </div>
             )}
-          </Card>
+          </div>
+        </TabsContent>
+
+        {/* Patient Treatments Tab */}
+        <TabsContent value="patient-treatments" className="mt-6">
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-purple-100 rounded-lg p-2">
+                  <Heart className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Phác đồ điều trị cần thanh toán
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Quản lý thanh toán cho thuốc và xét nghiệm
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-sm">
+                <ClipboardList className="w-3 h-3 mr-1" />
+                {patientTreatment.length} phác đồ
+              </Badge>
+            </div>
+
+            {/* Treatments List */}
+            {patientTreatment.length === 0 ? (
+              <Card className="p-8 text-center bg-gray-50 border-dashed">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-gray-100 rounded-full p-4">
+                    <FileText className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700">
+                      Không có phác đồ điều trị
+                    </h4>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Chưa có phác đồ điều trị nào cần xử lý thanh toán
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {patientTreatment.map((treatment) =>
+                  treatment?.customMedications ||
+                  treatment?.testResults?.length > 0 ? (
+                    <div
+                      key={treatment.id}
+                      className="transform transition-all duration-200 hover:scale-[1.01]"
+                    >
+                      <PatientTreatmentCard
+                        treatment={treatment}
+                        onOpenModal={() =>
+                          handleOpenPatientTreatmentModal(treatment)
+                        }
+                        onShowQRModal={handleShowQRModal}
+                        orderLoading={orderLoading}
+                        payments={payment}
+                      />
+                    </div>
+                  ) : null
+                )}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 
