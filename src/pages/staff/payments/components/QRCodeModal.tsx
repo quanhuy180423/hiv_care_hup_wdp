@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Copy, CheckCircle, Clock, CreditCard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { PaymentService } from "@/services/paymentService";
+import { toast } from "react-hot-toast";
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -25,6 +27,9 @@ interface QRCodeModalProps {
     amount: string;
     content: string;
   };
+  // New props for polling
+  orderId?: number;
+  onPaymentSuccess?: () => void;
 }
 
 const QRCodeModal: React.FC<QRCodeModalProps> = ({
@@ -35,8 +40,93 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   amount,
   title = "Thanh toán phí khám bệnh",
   bankInfo,
+  orderId,
+  onPaymentSuccess,
 }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use refs to store stable references to callback functions
+  const onPaymentSuccessRef = useRef(onPaymentSuccess);
+  const onCloseRef = useRef(onClose);
+
+  // Update refs when props change
+  useEffect(() => {
+    onPaymentSuccessRef.current = onPaymentSuccess;
+    onCloseRef.current = onClose;
+  }, [onPaymentSuccess, onClose]);
+
+  // Start polling when modal opens and orderId exists
+  useEffect(() => {
+    if (!isOpen || !orderId) {
+      setIsPolling(false);
+      return;
+    }
+
+    setIsPolling(true);
+
+    // Polling function to check payment status
+    const checkPaymentStatus = async () => {
+      try {
+        const response = await PaymentService.getPaymentById(orderId);
+        const order = response; // response is already the PaymentResponse object
+
+        if (order.orderStatus === "PAID") {
+          // Payment successful
+          setIsPolling(false);
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+
+          toast.success("Thanh toán thành công!");
+
+          // Call success callback using ref
+          if (onPaymentSuccessRef.current) {
+            onPaymentSuccessRef.current();
+          }
+
+          // Close modal after short delay using ref
+          setTimeout(() => {
+            if (onCloseRef.current) {
+              onCloseRef.current();
+            }
+          }, 2000);
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+      }
+    };
+
+    // Initial check
+    checkPaymentStatus();
+
+    // Set up polling interval (check every 3 seconds)
+    pollingIntervalRef.current = setInterval(() => {
+      checkPaymentStatus();
+    }, 3000);
+
+    // Cleanup function
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      setIsPolling(false);
+    };
+  }, [isOpen, orderId]); // Remove onPaymentSuccess and onClose from dependencies
+
+  // Clear polling when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      setIsPolling(false);
+    }
+  }, [isOpen]);
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -59,7 +149,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white p-0 overflow-hidden">
+      <DialogContent className="max-w-5xl min-w-3xl max-h-4/5 bg-white p-0 overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
           <DialogHeader>
@@ -254,10 +344,16 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
           <div className="text-center">
             <Badge
               variant="outline"
-              className="bg-yellow-50 text-yellow-800 border-yellow-300 px-4 py-2"
+              className={`px-4 py-2 ${
+                isPolling
+                  ? "bg-blue-50 text-blue-800 border-blue-300 animate-pulse"
+                  : "bg-yellow-50 text-yellow-800 border-yellow-300"
+              }`}
             >
               <Clock className="w-4 h-4 mr-2" />
-              Đang chờ thanh toán - Hệ thống sẽ tự động cập nhật
+              {isPolling
+                ? "Đang kiểm tra thanh toán... (tự động cập nhật mỗi 3 giây)"
+                : "Đang chờ thanh toán - Hệ thống sẽ tự động cập nhật"}
             </Badge>
           </div>
 

@@ -16,16 +16,16 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
-import { 
-  TestTube, 
-  Edit3, 
-  Save, 
-  X, 
+import {
+  TestTube,
+  Edit3,
+  Save,
+  X,
   DollarSign,
   Hash,
   Activity,
   FileText,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { translateInterpretation } from "@/types/testResult";
 
@@ -77,10 +77,10 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto max-h-[80vh] overflow-y-auto">
+    <div className="space-y-6  mx-auto max-h-[80vh] overflow-y-auto">
       {/* Test Information (Read-only) */}
       {defaultValues.test && (
-        <Card>
+        <Card className=" ">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TestTube className="h-5 w-5" />
@@ -90,45 +90,65 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Tên xét nghiệm</div>
-                <p className="font-medium">{defaultValues.test.name || "N/A"}</p>
+                <div className="text-sm text-muted-foreground">
+                  Tên xét nghiệm
+                </div>
+                <p className="font-medium">
+                  {defaultValues.test.name || "N/A"}
+                </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Mô tả</div>
-                <p className="font-medium">{defaultValues.test.description || "N/A"}</p>
+                <p className="font-medium">
+                  {defaultValues.test.description || "N/A"}
+                </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Phương pháp</div>
-                <p className="font-medium">{defaultValues.test.method || "N/A"}</p>
+                <p className="font-medium">
+                  {defaultValues.test.method || "N/A"}
+                </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Danh mục</div>
-                <Badge variant="outline">{defaultValues.test.category || "N/A"}</Badge>
+                <Badge variant="outline">
+                  {defaultValues.test.category || "N/A"}
+                </Badge>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Định lượng</div>
-                <Badge variant={defaultValues.test.isQuantitative ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    defaultValues.test.isQuantitative ? "default" : "secondary"
+                  }
+                >
                   {defaultValues.test.isQuantitative ? "Có" : "Không"}
                 </Badge>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Hash className="h-4 w-4" />
                   <span>Đơn vị xét nghiệm</span>
                 </div>
-                <p className="font-medium">{defaultValues.test.unit || "N/A"}</p>
+                <p className="font-medium">
+                  {defaultValues.test.unit || "N/A"}
+                </p>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Giá trị ngưỡng (Test)</div>
-                <p className="font-medium">{defaultValues.test.cutOffValue || "N/A"}</p>
+                <div className="text-sm text-muted-foreground">
+                  Giá trị ngưỡng (Test)
+                </div>
+                <p className="font-medium">
+                  {defaultValues.test.cutOffValue || "N/A"}
+                </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <DollarSign className="h-4 w-4" />
@@ -161,8 +181,12 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div className="space-y-1">
-                  <span className="text-muted-foreground">Giá trị kết quả kiểm tra:</span>
-                  <p className="font-medium">{defaultValues.rawResultValue || "Chưa có"}</p>
+                  <span className="text-muted-foreground">
+                    Giá trị kết quả kiểm tra:
+                  </span>
+                  <p className="font-medium">
+                    {defaultValues.rawResultValue || "Chưa có"}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-muted-foreground">Đơn vị:</span>
@@ -170,11 +194,18 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
                 </div>
                 <div className="space-y-1">
                   <span className="text-muted-foreground">Diễn giải:</span>
-                  <p className="font-medium">{translateInterpretation(defaultValues.interpretation) || "Chưa có"}</p>
+                  <p className="font-medium">
+                    {translateInterpretation(defaultValues.interpretation) ||
+                      "Chưa có"}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-muted-foreground">Trạng thái:</span>
-                  <Badge variant="outline">{defaultValues.status == "Processing" ? "Đang xử lý" : "Hoàn thành"}</Badge>
+                  <Badge variant="outline">
+                    {defaultValues.status == "Processing"
+                      ? "Đang xử lý"
+                      : "Hoàn thành"}
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -184,7 +215,10 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
             {/* Form Fields */}
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="rawResultValue" className="flex items-center gap-2">
+                <Label
+                  htmlFor="rawResultValue"
+                  className="flex items-center gap-2"
+                >
                   <Activity className="h-4 w-4" />
                   Giá trị kết quả kiểm tra *
                 </Label>
@@ -193,7 +227,11 @@ const TestResultEditForm: React.FC<TestResultEditFormProps> = ({
                   type="number"
                   step="0.01"
                   placeholder="Ví dụ: 0.8"
-                  className={errors.rawResultValue ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  className={
+                    errors.rawResultValue
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  }
                   {...register("rawResultValue")}
                 />
                 {errors.rawResultValue && (
