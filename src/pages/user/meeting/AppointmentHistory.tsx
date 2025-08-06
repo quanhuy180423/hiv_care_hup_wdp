@@ -30,6 +30,7 @@ import {
   Building2,
   Calendar as CalendarLucide,
   Shield,
+  Coins,
 } from "lucide-react";
 import {
   Popover,
@@ -109,9 +110,15 @@ const AppointmentHistory = () => {
             <XCircle className="h-3 w-3" /> Đã hủy
           </Badge>
         );
+      case "PAID":
+        return (
+          <Badge className="gap-1 bg-blue-100 text-blue-700 border-blue-200gap">
+            <Coins className="h-3 w-3" /> Đã thanh toán
+          </Badge>
+        );
       default:
         return (
-          <Badge className="gap-1 bg-blue-100 text-blue-700 border-blue-200">
+          <Badge className="-1 bg-yellow-100 text-yellow-700 border-yellow-200">
             <Clock className="h-3 w-3" /> Đang chờ
           </Badge>
         );

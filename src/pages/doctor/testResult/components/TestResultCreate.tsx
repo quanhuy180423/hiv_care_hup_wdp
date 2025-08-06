@@ -35,6 +35,7 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils/dates/formatDate";
 
 export interface TestResultCreateProps {
   onClose?: () => void;
@@ -396,7 +397,10 @@ const TestResultCreate = (props: TestResultCreateProps) => {
                         Ngày khám:
                       </span>
                       <span className="font-semibold">
-                        {selectedTreatment.startDate || "Chưa có thông tin"}
+                        {formatDate(
+                          selectedTreatment.startDate,
+                          "dd/MM/yyyy"
+                        ) || "Chưa có thông tin"}
                       </span>
                     </div>
                   </div>
@@ -692,7 +696,11 @@ const TestResultCreate = (props: TestResultCreateProps) => {
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-4 pt-6">
-          <Button variant="outline" onClick={props.onClose} className="px-6 cursor-pointer">
+          <Button
+            variant="outline"
+            onClick={props.onClose}
+            className="px-6 cursor-pointer"
+          >
             Hủy
           </Button>
           <Button

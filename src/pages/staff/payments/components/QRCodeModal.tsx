@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { useChangeAppointmentStatus } from "@/hooks/useAppointments";
 import { cn } from "@/lib/utils";
 import { PaymentService } from "@/services/paymentService";
 import { useAppointmentOrderStore } from "@/store/appointmentStore";
@@ -45,6 +46,7 @@ interface QRCodeModalProps {
     content: string;
   };
   orderId?: number;
+  appointmentId: number;
   onPaymentSuccess?: () => void;
 }
 
@@ -56,13 +58,22 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   amount,
   bankInfo,
   orderId,
+  appointmentId,
 }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const { mutate: changeStatus } = useChangeAppointmentStatus();
   const [paymentStatus, setPaymentStatus] = useState<
     "pending" | "success" | "failed"
   >("pending");
   const { setIsPayment } = useAppointmentOrderStore();
+
+  const handleCompleteAppointment = () => {
+    changeStatus({
+      id: appointmentId,
+      status: "COMPLETED",
+    });
+  };
 
   const checkPaymentStatus = async (orderId: number) => {
     try {
@@ -73,6 +84,9 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
       if (order.orderStatus === "PAID") {
         console.log("[QRCodeModal] Payment successful, closing modal.");
+        if (order?.patientTreatmentId) {
+          handleCompleteAppointment();
+        }
         setIsPolling(false);
         setPaymentStatus("success");
         toast.success("Thanh toán thành công!");
