@@ -155,7 +155,7 @@ const UserPayment: React.FC = () => {
         const params = {
           page: 1,
           limit: 100,
-          status: "PENDING",
+          // status: "PENDING",
           dateFrom: appointmentTime,
           dateTo: appointmentTime,
         };
@@ -316,7 +316,7 @@ const UserPayment: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               <Pill className="w-4 h-4" />
-              <span className="font-medium">Hồ sơ điều trị</span>
+              <span className="font-medium">Phác đồ điều trị</span>
             </div>
           </TabsTrigger>
         </TabsList>
@@ -340,7 +340,8 @@ const UserPayment: React.FC = () => {
                 </div>
               </div>
               <Badge variant="outline" className="text-sm">
-                <Calendar className="w-3 h-3 mr-1" />1 lịch hẹn
+                <Calendar className="w-3 h-3 mr-1" />
+                {appointments.slice(0, 1).length} lịch hẹn
               </Badge>
             </div>
 
@@ -393,7 +394,7 @@ const UserPayment: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Hồ sơ điều trị cần thanh toán
+                    Phác đồ điều trị cần thanh toán
                   </h3>
                   <p className="text-sm text-gray-600">
                     Quản lý thanh toán cho thuốc và xét nghiệm
@@ -402,7 +403,7 @@ const UserPayment: React.FC = () => {
               </div>
               <Badge variant="outline" className="text-sm">
                 <ClipboardList className="w-3 h-3 mr-1" />
-                {patientTreatment.length} hồ sơ
+                {patientTreatment.length} phác đồ
               </Badge>
             </div>
 
@@ -493,6 +494,7 @@ const UserPayment: React.FC = () => {
         }
         orderId={order?.id}
         onPaymentSuccess={handlePaymentSuccess}
+        appointmentId={appointments[0]?.id || 0}
       />
     </>
   );
