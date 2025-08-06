@@ -11,6 +11,11 @@ export type {
   UpdateProfileRequest,
 } from "./authService";
 
+// Export dashboard services
+export { dashboardUserService } from "./dashboardUserService";
+export { dashboardAppointmentService } from "./dashboardAppointmentService";
+export { dashboardPaymentService } from "./dashboardPaymentService";
+
 // Export user service
 
 // Re-export auth service as default for backward compatibility

@@ -1,6 +1,7 @@
 
 import { useDashboardUserRoleStats } from "@/hooks/useDashboardUsers";
 import { useDashboardAppointmentStats } from "@/hooks/useDashboardAppointments";
+import { QuickPaymentStats } from "@/components/dashboard/QuickPaymentStats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -16,7 +17,7 @@ const DashboardPage = () => {
     return (
       <div className="p-6">
         <div className="text-red-500">
-          Error loading user data: {userError.message}
+          Lỗi khi tải dữ liệu người dùng: {userError.message}
         </div>
       </div>
     );
@@ -26,7 +27,7 @@ const DashboardPage = () => {
     return (
       <div className="p-6">
         <div className="text-red-500">
-          Error loading appointment data: {appointmentError.message}
+          Lỗi khi tải dữ liệu cuộc hẹn: {appointmentError.message}
         </div>
       </div>
     );
@@ -90,7 +91,11 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-full overflow-x-hidden">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Bảng Điều Khiển</h1>
+        <p className="text-gray-600 mt-1">Tổng quan về hệ thống quản lý chăm sóc HIV</p>
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <Badge variant="outline" className="text-sm">
@@ -98,65 +103,65 @@ const DashboardPage = () => {
         </Badge>
       </div>
 
-      {/* Total Users Overview */}
+      {/* Tổng quan người dùng */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Users Overview */}
+        {/* Tổng quan người dùng */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Users Overview
+              Tổng Quan Người Dùng
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-center py-4">
               {roleStats?.totalUsers || 0}
               <div className="text-sm font-normal text-gray-600 mt-1">
-                Total Registered Users
+                Tổng số người dùng đã đăng ký
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Appointments Overview */}
+        {/* Tổng quan cuộc hẹn */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5" />
-              Appointments Overview
+              Tổng Quan Cuộc Hẹn
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-center py-4">
               {appointmentStats?.totalAppointments || 0}
               <div className="text-sm font-normal text-gray-600 mt-1">
-                Total Appointments
+                Tổng số cuộc hẹn
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Appointment Statistics */}
+      {/* Thống kê cuộc hẹn */}
       {appointmentStats && (
         <div>
-          <h2 className="text-xl font-semibold mb-4">Appointments Statistics</h2>
+          <h2 className="text-xl font-semibold mb-4">Thống Kê Cuộc Hẹn</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="border-2 border-blue-200">
               <CardHeader className="bg-blue-50 pb-2">
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium">Today</span>
+                    <span className="text-sm font-medium">Hôm Nay</span>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-blue-600">
-                  {appointmentStats.todayAppointments}
+                  {appointmentStats?.todayAppointments || 0}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
-                  appointments today
+                  cuộc hẹn hôm nay
                 </div>
               </CardContent>
             </Card>
@@ -166,16 +171,16 @@ const DashboardPage = () => {
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="h-5 w-5 text-green-600" />
-                    <span className="text-sm font-medium">This Week</span>
+                    <span className="text-sm font-medium">Tuần Này</span>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-green-600">
-                  {appointmentStats.thisWeekAppointments}
+                  {appointmentStats?.thisWeekAppointments || 0}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
-                  appointments this week
+                  cuộc hẹn tuần này
                 </div>
               </CardContent>
             </Card>
@@ -185,16 +190,16 @@ const DashboardPage = () => {
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm font-medium">This Month</span>
+                    <span className="text-sm font-medium">Tháng Này</span>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-purple-600">
-                  {appointmentStats.thisMonthAppointments}
+                  {appointmentStats?.thisMonthAppointments || 0}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
-                  appointments this month
+                  cuộc hẹn tháng này
                 </div>
               </CardContent>
             </Card>
@@ -204,16 +209,16 @@ const DashboardPage = () => {
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-orange-600" />
-                    <span className="text-sm font-medium">Paid</span>
+                    <span className="text-sm font-medium">Đã Thanh Toán</span>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-orange-600">
-                  {appointmentStats.appointmentsByStatus.PAID || 0}
+                  {appointmentStats?.appointmentsByStatus?.PAID || 0}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
-                  paid appointments
+                  cuộc hẹn đã thanh toán
                 </div>
               </CardContent>
             </Card>
@@ -221,15 +226,15 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* Appointments by Date (Last 7 days) */}
+      {/* Cuộc hẹn theo ngày (7 ngày qua) */}
       {appointmentStats?.appointmentsByDate && (
         <Card>
           <CardHeader>
-            <CardTitle>Appointments by Date (Last 7 Days)</CardTitle>
+            <CardTitle>Cuộc Hẹn Theo Ngày (7 Ngày Qua)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {appointmentStats.appointmentsByDate.map((dayData) => {
+              {appointmentStats?.appointmentsByDate?.map((dayData) => {
                 const date = new Date(dayData.date);
                 const isToday = dayData.date === new Date().toISOString().split('T')[0];
                 
@@ -247,7 +252,7 @@ const DashboardPage = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={dayData.count > 0 ? "default" : "secondary"}>
-                        {dayData.count} appointments
+                        {dayData.count} cuộc hẹn
                       </Badge>
                     </div>
                   </div>
@@ -258,9 +263,9 @@ const DashboardPage = () => {
         </Card>
       )}
 
-      {/* Role Statistics */}
+      {/* Thống kê vai trò */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Users by Role</h2>
+        <h2 className="text-xl font-semibold mb-4">Người Dùng Theo Vai Trò</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {roleStats?.roleStats && Object.entries(roleStats.roleStats).map(([roleName, count]) => {
             const config = getRoleConfig(roleName);
@@ -281,7 +286,7 @@ const DashboardPage = () => {
                     {count}
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
-                    {count === 1 ? 'user' : 'users'}
+                    {count === 1 ? 'người dùng' : 'người dùng'}
                   </div>
                 </CardContent>
               </Card>
@@ -290,18 +295,18 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Additional Stats */}
+      {/* Thống kê bổ sung */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Role Distribution */}
+        {/* Phân bố vai trò */}
         {roleStats?.roleStats && (
           <Card>
             <CardHeader>
-              <CardTitle>Role Distribution</CardTitle>
+              <CardTitle>Phân Bố Vai Trò</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {Object.entries(roleStats.roleStats).map(([roleName, count]) => {
-                  const percentage = ((count / roleStats.totalUsers) * 100).toFixed(1);
+                {roleStats?.roleStats && Object.entries(roleStats.roleStats).map(([roleName, count]) => {
+                  const percentage = ((count / (roleStats?.totalUsers || 1)) * 100).toFixed(1);
                   const config = getRoleConfig(roleName);
                   
                   return (
@@ -322,16 +327,16 @@ const DashboardPage = () => {
           </Card>
         )}
 
-        {/* Appointment Status Distribution */}
+        {/* Phân bố trạng thái cuộc hẹn */}
         {appointmentStats?.appointmentsByStatus && (
           <Card>
             <CardHeader>
-              <CardTitle>Appointment Status Distribution</CardTitle>
+              <CardTitle>Phân Bố Trạng Thái Cuộc Hẹn</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {Object.entries(appointmentStats.appointmentsByStatus).map(([status, count]) => {
-                  const percentage = ((count / appointmentStats.totalAppointments) * 100).toFixed(1);
+                {appointmentStats?.appointmentsByStatus && Object.entries(appointmentStats.appointmentsByStatus).map(([status, count]) => {
+                  const percentage = ((count / (appointmentStats?.totalAppointments || 1)) * 100).toFixed(1);
                   const statusConfig = getStatusConfig(status);
                   
                   return (
@@ -351,6 +356,12 @@ const DashboardPage = () => {
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* Thống kê doanh thu */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Thống Kê Doanh Thu</h2>
+        <QuickPaymentStats />
       </div>
     </div>
   );

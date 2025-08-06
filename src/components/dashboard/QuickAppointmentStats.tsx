@@ -4,8 +4,11 @@ import { Badge } from "@/components/ui/badge";
 export const QuickAppointmentStats = () => {
   const { data, isLoading, error } = useDashboardAppointmentStats();
 
-  if (isLoading) return <div>Loading appointments...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+
+
+  
+  if (isLoading) return <div>Đang tải dữ liệu cuộc hẹn...</div>;
+  if (error) return <div>Lỗi: {error.message}</div>;
 
   // Function to get status badge variant and color
   const getStatusBadgeProps = (status: string) => {
@@ -25,31 +28,31 @@ export const QuickAppointmentStats = () => {
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow-sm space-y-4">
-      <h3 className="font-semibold text-lg">Appointment Statistics</h3>
+      <h3 className="font-semibold text-lg">Thống Kê Cuộc Hẹn</h3>
       
-      {/* Overview Stats */}
+      {/* Thống kê tổng quan */}
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center p-3 bg-gray-50 rounded-lg">
           <div className="text-2xl font-bold text-gray-800">{data?.totalAppointments || 0}</div>
-          <div className="text-sm text-gray-600">Total</div>
+          <div className="text-sm text-gray-600">Tổng Cộng</div>
         </div>
         <div className="text-center p-3 bg-blue-50 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">{data?.todayAppointments || 0}</div>
-          <div className="text-sm text-gray-600">Today</div>
+          <div className="text-sm text-gray-600">Hôm Nay</div>
         </div>
         <div className="text-center p-3 bg-green-50 rounded-lg">
           <div className="text-2xl font-bold text-green-600">{data?.thisWeekAppointments || 0}</div>
-          <div className="text-sm text-gray-600">This Week</div>
+          <div className="text-sm text-gray-600">Tuần Này</div>
         </div>
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">{data?.thisMonthAppointments || 0}</div>
-          <div className="text-sm text-gray-600">This Month</div>
+          <div className="text-sm text-gray-600">Tháng Này</div>
         </div>
       </div>
 
-      {/* Status Breakdown */}
+      {/* Phân tích theo trạng thái */}
       <div>
-        <h4 className="font-medium mb-3">By Status:</h4>
+        <h4 className="font-medium mb-3">Theo Trạng Thái:</h4>
         <div className="grid grid-cols-2 gap-2">
           {data?.appointmentsByStatus && Object.entries(data.appointmentsByStatus).map(([status, count]) => {
             const badgeProps = getStatusBadgeProps(status);
@@ -65,9 +68,9 @@ export const QuickAppointmentStats = () => {
         </div>
       </div>
 
-      {/* Type Breakdown */}
+      {/* Phân tích theo loại */}
       <div>
-        <h4 className="font-medium mb-3">By Type:</h4>
+        <h4 className="font-medium mb-3">Theo Loại:</h4>
         <div className="flex gap-2">
           {data?.appointmentsByType && Object.entries(data.appointmentsByType).map(([type, count]) => (
             <div key={type} className="flex-1 text-center p-2 bg-gray-50 rounded">
@@ -78,9 +81,9 @@ export const QuickAppointmentStats = () => {
         </div>
       </div>
 
-      {/* Last 7 Days */}
+      {/* 7 ngày qua */}
       <div>
-        <h4 className="font-medium mb-3">Last 7 Days:</h4>
+        <h4 className="font-medium mb-3">7 Ngày Qua:</h4>
         <div className="space-y-1">
           {data?.appointmentsByDate?.map((dayData) => {
             const isToday = dayData.date === new Date().toISOString().split('T')[0];
@@ -92,7 +95,7 @@ export const QuickAppointmentStats = () => {
                     month: 'short', 
                     day: 'numeric' 
                   })}
-                  {isToday && <span className="ml-1 text-blue-600 font-medium">(Today)</span>}
+                  {isToday && <span className="ml-1 text-blue-600 font-medium">(Hôm nay)</span>}
                 </span>
                 <Badge variant={dayData.count > 0 ? "default" : "secondary"}>
                   {dayData.count}
